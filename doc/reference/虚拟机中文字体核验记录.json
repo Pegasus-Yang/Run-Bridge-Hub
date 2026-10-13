@@ -1,0 +1,152 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-13T08:18:43.526045+08:00",
+  "vm": "pegasus@192.168.20.129",
+  "installation": {
+    "recorded_at": "2026-10-13T00:09:40.476813+00:00",
+    "package": "fonts-noto-cjk",
+    "version": "1:20240730+repack1-1build1",
+    "source": "https://archive.ubuntu.com/ubuntu/pool/main/f/fonts-noto-cjk/fonts-noto-cjk_20240730%2Brepack1-1build1_all.deb",
+    "package_sha256": "be378a571b8f49b4b9146f7d13b31990950d35ee3e0bf1999f554c3ed5670dc0",
+    "scope": "pegasus 用户字体目录",
+    "directory": "/home/pegasus/.local/share/fonts/noto-cjk",
+    "font_files": [
+      {
+        "name": "NotoSansCJK-Bold.ttc",
+        "bytes": 20050760,
+        "sha256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb"
+      },
+      {
+        "name": "NotoSansCJK-Regular.ttc",
+        "bytes": 19484784,
+        "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a"
+      },
+      {
+        "name": "NotoSerifCJK-Bold.ttc",
+        "bytes": 27397052,
+        "sha256": "1505ee3b9c0890fae6302ee0e9c6fd74d690f4a55a6ace1d9944f3f6352d622d"
+      },
+      {
+        "name": "NotoSerifCJK-Regular.ttc",
+        "bytes": 26411360,
+        "sha256": "5d9c31a059600193c9d7968a998bde886ccdc77e934006ad243b41794c496a7d"
+      }
+    ],
+    "chinese_font_families": [
+      "Noto Sans CJK HK",
+      "Noto Sans CJK JP",
+      "Noto Sans CJK KR",
+      "Noto Sans CJK SC",
+      "Noto Sans CJK TC",
+      "Noto Sans Mono CJK HK",
+      "Noto Sans Mono CJK JP",
+      "Noto Sans Mono CJK KR",
+      "Noto Sans Mono CJK SC",
+      "Noto Sans Mono CJK TC",
+      "Noto Serif CJK HK",
+      "Noto Serif CJK JP",
+      "Noto Serif CJK KR",
+      "Noto Serif CJK SC",
+      "Noto Serif CJK TC"
+    ],
+    "simplified_chinese_match": "NotoSansCJK-Regular.ttc: \"Noto Sans CJK SC\" \"Regular\"",
+    "fontconfig_file": "/home/pegasus/.config/fontconfig/conf.d/70-fonts-noto-cjk.conf",
+    "traditional_chinese_match": "NotoSansCJK-Regular.ttc: \"Noto Sans CJK TC\" \"Regular\""
+  },
+  "browser_before": {
+    "simplified": [
+      {
+        "familyName": "DejaVu Sans",
+        "postScriptName": "DejaVuSans",
+        "isCustomFont": false,
+        "glyphCount": 18
+      }
+    ],
+    "traditional": [
+      {
+        "familyName": "DejaVu Sans",
+        "postScriptName": "DejaVuSans",
+        "isCustomFont": false,
+        "glyphCount": 18
+      }
+    ],
+    "mixed": [
+      {
+        "familyName": "DejaVu Sans",
+        "postScriptName": "DejaVuSans",
+        "isCustomFont": false,
+        "glyphCount": 30
+      }
+    ]
+  },
+  "browser_after": {
+    "simplified": [
+      {
+        "familyName": "Noto Sans CJK SC",
+        "postScriptName": "NotoSansCJKsc-Regular",
+        "isCustomFont": false,
+        "glyphCount": 18
+      }
+    ],
+    "traditional": [
+      {
+        "familyName": "Noto Sans CJK TC",
+        "postScriptName": "NotoSansCJKtc-Regular",
+        "isCustomFont": false,
+        "glyphCount": 18
+      }
+    ],
+    "mixed": [
+      {
+        "familyName": "Noto Sans CJK SC",
+        "postScriptName": "NotoSansCJKsc-Regular",
+        "isCustomFont": false,
+        "glyphCount": 30
+      }
+    ]
+  },
+  "restart": {
+    "profile_preserved": true,
+    "page_origin_preserved": true,
+    "login_cookie_unchanged": true,
+    "local_storage_unchanged": true,
+    "new_owner_pid": 596943,
+    "new_browser_pid": 596945,
+    "new_node_pid": 597081
+  },
+  "hub_stream": {
+    "status": "PASS",
+    "recorded_at": "2026-10-13T08:16:45.732781+08:00",
+    "business_text": "中文字体正常显示：你好，世界！",
+    "actual_business_fonts": [
+      {
+        "familyName": "Noto Sans CJK JP",
+        "postScriptName": "NotoSansCJKjp-Regular",
+        "isCustomFont": false,
+        "glyphCount": 15
+      }
+    ],
+    "hub_stream_png": {
+      "bytes": 17075,
+      "size": [
+        900,
+        497
+      ],
+      "target_matched": true
+    },
+    "session_cleanup": "COMPLETE",
+    "node_online": true,
+    "connection_generation": 4,
+    "active_streams": 0
+  },
+  "retained_services": {
+    "test_duplicate_removed": true,
+    "remaining_pages": 1,
+    "inspection": {
+      "node_pid": 597081,
+      "node_alive": true,
+      "browser_alive": true,
+      "workers": []
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "checked_at": "2026-10-11T17:46:20.570130+08:00",
+  "scope": "文档静态一致性，不是客户端、原生协议代理或被测业务端到端验证",
+  "result": "PASS",
+  "markdown_files": 12,
+  "json_files_including_this_report": 5,
+  "local_links_checked": 67,
+  "unique_external_urls": 62,
+  "source_pinned_links_checked": 17,
+  "repository_commits_checked": 12,
+  "source_file_hashes_checked": 34,
+  "unavailable_source_paths_retained": 2,
+  "code_fence_pairs": 8,
+  "mermaid_diagrams": {
+    "count": 4,
+    "status": "围栏完整；未做图形渲染验证"
+  },
+  "json_examples": {
+    "count": 3,
+    "status": "历史方案示例，语法和关联字段一致；未执行"
+  },
+  "javascript_examples": [
+    {
+      "syntax": "PASS",
+      "execution": "NOT_RUN"
+    }
+  ],
+  "middleware_supplement": {
+    "status": "已补充官方文档依据和自研边界；未部署或运行中间件"
+  },
+  "independent_node_contract": {
+    "status": "已补充职责拆分、凭据、查询、原生执行与运行语义；未实现或运行验证"
+  },
+  "errors": [],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 6069,
+      "sha256": "baa5f6838431edb1371a25b6c2c0b963e0f47bb9a007f583ca56dee07580380f"
+    },
+    {
+      "path": "doc/README.md",
+      "bytes": 2251,
+      "sha256": "3f22157f3d453b9fc267d581f3c05685d29d90dbd688253a49c43d35dc711cbe"
+    },
+    {
+      "path": "doc/design/可行性与方案取舍.md",
+      "bytes": 8440,
+      "sha256": "e02b0fd47fb61b8eb7e9c5da4fd00c0bf2fdd0b425d8f3e43b6b9166deb54c0c"
+    },
+    {
+      "path": "doc/design/安全机制与授权边界.md",
+      "bytes": 10860,
+      "sha256": "959069701227d13a6bd075449279d3a2a9af240c6d65cf851350b45fc2c17e10"
+    },
+    {
+      "path": "doc/design/平台与执行节点架构.md",
+      "bytes": 11721,
+      "sha256": "7eb2fdb515bf820186074f68681a0e5fa33bd6bfa6ee151b364ff0d721d79eb7"
+    },
+    {
+      "path": "doc/design/接口Web与App执行方案.md",
+      "bytes": 13276,
+      "sha256": "6189fdf3076e3e60d393469ed9d5d4df7689ec40d8ac7f19afe80d72197eb1dd"
+    },
+    {
+      "path": "doc/design/最小原型与验证计划.md",
+      "bytes": 10170,
+      "sha256": "644f97ab3563c331af4f3f9b80de30c9ca8fdae06a65e225f240c5d42f372c0a"
+    },
+    {
+      "path": "doc/design/独立节点服务与对外契约.md",
+      "bytes": 15201,
+      "sha256": "ee9a5b6f10e763f6248a519ddbdebdcb685294c3e85d86770abf2930c5dc702a"
+    },
+    {
+      "path": "doc/design/类似产品与开源选型.md",
+      "bytes": 11409,
+      "sha256": "29885f026555294c94f3effa293750b6aad1a2b7b0dc51a2978195e69df3d0bf"
+    },
+    {
+      "path": "doc/design/自研边界与中间件选择.md",
+      "bytes": 10566,
+      "sha256": "fce634d90d47b2ba6b2aed2c4e348c3f585b365c6cb074ece4fe55225b0f9b42"
+    },
+    {
+      "path": "doc/reference/公开依据与研究边界.md",
+      "bytes": 11927,
+      "sha256": "f1437b81e0c7672506e26a8ebaeb3a5dda25789b5432ed008bd6b80824dd1258"
+    },
+    {
+      "path": "doc/reference/源码核验记录.json",
+      "bytes": 20084,
+      "sha256": "5f7b11c39e28b8cc95ab347c70acab04fa89ab0da7490d3aebdb20907f066e83"
+    },
+    {
+      "path": "examples/README.md",
+      "bytes": 1813,
+      "sha256": "beb117763665006504bd789de3d20f9fd07f0081a33969313f6072db59c82a07"
+    },
+    {
+      "path": "examples/执行命令示例.json",
+      "bytes": 845,
+      "sha256": "c4d8495863eaf35c742231fef62e699d3dfcf85acb0422c20110f3f2d8d7b0e7"
+    },
+    {
+      "path": "examples/执行结果示例.json",
+      "bytes": 905,
+      "sha256": "c617112650e33ac1e4a07fe14079b8df8542662187e2f89e05f7153a17e3c58d"
+    },
+    {
+      "path": "examples/节点能力示例.json",
+      "bytes": 1157,
+      "sha256": "a743504b5fb45ef96cb761eff851cf1f4fe8e7059bf2d66ec1a9da4af7183649"
+    }
+  ]
+}

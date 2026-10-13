@@ -1,0 +1,283 @@
+{
+  "version": "0.4.0",
+  "checked_at": "2026-10-13T01:46:24.855020+08:00",
+  "status": "PASS",
+  "checks": [
+    {
+      "project": "runbridge-hub",
+      "local_links_checked": 247,
+      "new_snippets_parsed": 5,
+      "historical_files_preserved": 27,
+      "source_hashes_current": true,
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "f88c4ae6fa70bfca3b8e01ad81e1775368b8ad4ded7c505bf114f4098471493c"
+        },
+        {
+          "path": "doc/README.md",
+          "sha256": "4b1343bf376e3e2c881cd31c46f36821bce7daaeb4a94d0a8102402a3564ba09"
+        },
+        {
+          "path": "doc/design/Browscreen可选扩展与浏览器画面流方案.md",
+          "sha256": "22f2a6f4c9da416f61956a51ff212a002d86d2418d4a49c80a3471a44e79edcc"
+        },
+        {
+          "path": "doc/design/管理网关与存储选型.md",
+          "sha256": "9d724ac2a356ea78967e5bd3ba93b125145567b604d0a90c574b66b3d4d292a2"
+        },
+        {
+          "path": "doc/design/节点接入与原生执行契约.md",
+          "sha256": "912a4801a06a261d9e5ecb52e59fb3157756342e97b19f1ff6748d06b65b08cc"
+        },
+        {
+          "path": "doc/design/客户端与执行工具接入.md",
+          "sha256": "c159d3463822ecc273039520f283dae38aaeae5cf661d3d79d4a76c8b79f1907"
+        },
+        {
+          "path": "doc/design/最小实现与验证计划.md",
+          "sha256": "624ce323de7c7712276f9540b475e8eede44b8f8f0caaab95216b56f529fab40"
+        },
+        {
+          "path": "doc/design/节点服务范围与架构.md",
+          "sha256": "11694f006a52d43af4ce598cbc375234254891e00f57ca3a642a7737aa4a60ed"
+        },
+        {
+          "path": "doc/design/Python3.14技术栈可行性.md",
+          "sha256": "5f7ff4264d7084d6e718cf42ea27907a33579d601dfc04aeaf75a98567d76e64"
+        },
+        {
+          "path": "doc/user-guide/快速开始.md",
+          "sha256": "d6fc9d2d2154ce91e65e1a22ab23e17f170358fd6241007ac9bf2864c8bdbd95"
+        },
+        {
+          "path": "doc/user-guide/Playwright快速开始.md",
+          "sha256": "c9f8ef9f7936cb82086031ca66f892f1fde120c38e7bf8ff7c5697f868a9c613"
+        },
+        {
+          "path": "doc/user-guide/浏览器画面流接入.md",
+          "sha256": "b890c87b2747982a2639ec8792cb02ccb657acca3df6b69b85ee165df6ffe5dd"
+        },
+        {
+          "path": "doc/user-guide/Chrome复用快速开始.md",
+          "sha256": "615111bcc4718dce5e99dc2a3753e86d4d9c9a9e0b872c64cc62feac18cb9655"
+        },
+        {
+          "path": "doc/project/虚拟机Node跨机器验收记录.md",
+          "sha256": "20d4fcd2df6cd4e8c7e6028937996668982b3935aed94b0fafe4fd2e551a3caa"
+        },
+        {
+          "path": "doc/project/范围调整记录.md",
+          "sha256": "da94ea39ad622c2f11d93868784e2bc54d222e59000b7cc85509878a84ec4d0a"
+        },
+        {
+          "path": "doc/project/方案总览.md",
+          "sha256": "438331b62996d4348d1342ad59ad5a9de273238b8a500d952580623267475528"
+        },
+        {
+          "path": "doc/project/R0与R1验收记录.md",
+          "sha256": "facbff40a462a5ead3535af50b16cba70fe7b04f435b9e3acf68df51b5afd247"
+        },
+        {
+          "path": "doc/project/浏览器画面流验收记录.md",
+          "sha256": "51f868b7232063413886b7bedb668a156d409996eac8783d9990082f948c2d3d"
+        },
+        {
+          "path": "doc/project/Playwright阶段验收记录.md",
+          "sha256": "3f2bb525fa6a2166ea75909d701f4d0cbc4f368207afd808e096bfab78d5c832"
+        },
+        {
+          "path": "doc/project/R4Chrome复用验收记录.md",
+          "sha256": "d93dbd3b4997b9824aafdcc4ee24a42a0cf1ff8f6384cec4ce3f71f88612dd53"
+        },
+        {
+          "path": "doc/project/项目概况.md",
+          "sha256": "caf9d4b1870f575464eab4e02c26aeedc339d1645eb8daf7d62e79a87ae8be3f"
+        },
+        {
+          "path": "doc/architecture/浏览器画面采集与分发.md",
+          "sha256": "ff232a53339d7ebee40d9ac13be7aa250f5e5068b5310aee4d6c94c5a6c77dc3"
+        },
+        {
+          "path": "doc/architecture/R0与R1实现.md",
+          "sha256": "b9a8f7a752f9b8ae47f9675696e010479c583d91b89715f9c95527065606e27d"
+        },
+        {
+          "path": "doc/architecture/Chrome复用与授权清理.md",
+          "sha256": "42db65f6a6519ccc252e4daa08c8757723d0c836f1826d4eebbac8941b42e40e"
+        },
+        {
+          "path": "doc/architecture/Playwright执行与会话管理.md",
+          "sha256": "af4caaf5ff720ff6550a24b58e9a21f2a866bbb692786d3dcfb7d5373250a283"
+        },
+        {
+          "path": "doc/deployment/安装与运行.md",
+          "sha256": "c05bfec6bc269e3ff6ec10075587dea68adfdcdabad8adc443c7940bdaf7fcc7"
+        },
+        {
+          "path": "doc/deployment/Playwright运行与排障.md",
+          "sha256": "06b6ba3ecfdd5b93b3cad80051ad359283bb08c1eb2043265293b69cf735a683"
+        },
+        {
+          "path": "doc/reference/R1接口与控制协议.md",
+          "sha256": "cabe9c9d5a973e98eed6d2417758a25bcf6a8f99e959014352f495ae046110c1"
+        },
+        {
+          "path": "doc/reference/浏览器画面流接口.md",
+          "sha256": "5b2e99d854fd2a66118b6a0e2dd7ad1f7515a7e477c4966c9702d696361e6c86"
+        },
+        {
+          "path": "doc/reference/会话接口与原生连接.md",
+          "sha256": "969b608db6b1e9b67169fba47223ecf7b728a1a53aa14fed2dec9d0d7b2a0505"
+        },
+        {
+          "path": "doc/reference/公开依据与研究边界.md",
+          "sha256": "2036be616c6b6d2b10b46d75c535c6b94002a736b08e56222a2137094ee1531b"
+        },
+        {
+          "path": "doc/reference/examples/README.md",
+          "sha256": "3f9f880f14b09eae03a85fefa33b5c2b4378ca4aa2849f472684bf5ae8734daa"
+        }
+      ]
+    },
+    {
+      "project": "runbridge-node",
+      "local_links_checked": 248,
+      "new_snippets_parsed": 5,
+      "historical_files_preserved": 27,
+      "source_hashes_current": true,
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "7dbd887cc27cb68111ab3224028e0da20fdc0254a512821f26b2616c4e47a66d"
+        },
+        {
+          "path": "doc/README.md",
+          "sha256": "2fd5d7a44502362815feaed45b0cf75fffeddd217bffbe9d1a0344d83f5cd319"
+        },
+        {
+          "path": "doc/design/Browscreen可选扩展与浏览器画面流方案.md",
+          "sha256": "22f2a6f4c9da416f61956a51ff212a002d86d2418d4a49c80a3471a44e79edcc"
+        },
+        {
+          "path": "doc/design/管理网关与存储选型.md",
+          "sha256": "9d724ac2a356ea78967e5bd3ba93b125145567b604d0a90c574b66b3d4d292a2"
+        },
+        {
+          "path": "doc/design/节点接入与原生执行契约.md",
+          "sha256": "912a4801a06a261d9e5ecb52e59fb3157756342e97b19f1ff6748d06b65b08cc"
+        },
+        {
+          "path": "doc/design/客户端与执行工具接入.md",
+          "sha256": "c159d3463822ecc273039520f283dae38aaeae5cf661d3d79d4a76c8b79f1907"
+        },
+        {
+          "path": "doc/design/最小实现与验证计划.md",
+          "sha256": "624ce323de7c7712276f9540b475e8eede44b8f8f0caaab95216b56f529fab40"
+        },
+        {
+          "path": "doc/design/节点服务范围与架构.md",
+          "sha256": "11694f006a52d43af4ce598cbc375234254891e00f57ca3a642a7737aa4a60ed"
+        },
+        {
+          "path": "doc/design/Python3.14技术栈可行性.md",
+          "sha256": "5f7ff4264d7084d6e718cf42ea27907a33579d601dfc04aeaf75a98567d76e64"
+        },
+        {
+          "path": "doc/user-guide/快速开始.md",
+          "sha256": "d6fc9d2d2154ce91e65e1a22ab23e17f170358fd6241007ac9bf2864c8bdbd95"
+        },
+        {
+          "path": "doc/user-guide/Playwright快速开始.md",
+          "sha256": "ae3d89e1b346ddb15d5bfdee2843575b71b92db5c93bed7fba3648ca3be3395c"
+        },
+        {
+          "path": "doc/user-guide/浏览器画面流接入.md",
+          "sha256": "b890c87b2747982a2639ec8792cb02ccb657acca3df6b69b85ee165df6ffe5dd"
+        },
+        {
+          "path": "doc/user-guide/Chrome复用快速开始.md",
+          "sha256": "615111bcc4718dce5e99dc2a3753e86d4d9c9a9e0b872c64cc62feac18cb9655"
+        },
+        {
+          "path": "doc/project/虚拟机Node跨机器验收记录.md",
+          "sha256": "20d4fcd2df6cd4e8c7e6028937996668982b3935aed94b0fafe4fd2e551a3caa"
+        },
+        {
+          "path": "doc/project/范围调整记录.md",
+          "sha256": "da94ea39ad622c2f11d93868784e2bc54d222e59000b7cc85509878a84ec4d0a"
+        },
+        {
+          "path": "doc/project/方案总览.md",
+          "sha256": "438331b62996d4348d1342ad59ad5a9de273238b8a500d952580623267475528"
+        },
+        {
+          "path": "doc/project/R0与R1验收记录.md",
+          "sha256": "facbff40a462a5ead3535af50b16cba70fe7b04f435b9e3acf68df51b5afd247"
+        },
+        {
+          "path": "doc/project/浏览器画面流验收记录.md",
+          "sha256": "51f868b7232063413886b7bedb668a156d409996eac8783d9990082f948c2d3d"
+        },
+        {
+          "path": "doc/project/Playwright阶段验收记录.md",
+          "sha256": "3f2bb525fa6a2166ea75909d701f4d0cbc4f368207afd808e096bfab78d5c832"
+        },
+        {
+          "path": "doc/project/R4Chrome复用验收记录.md",
+          "sha256": "d93dbd3b4997b9824aafdcc4ee24a42a0cf1ff8f6384cec4ce3f71f88612dd53"
+        },
+        {
+          "path": "doc/project/项目概况.md",
+          "sha256": "466f5d9a2cfc2be3025b497ad8d892ebafb48c99b75994b689a7ff429ef6f76d"
+        },
+        {
+          "path": "doc/architecture/浏览器画面采集与分发.md",
+          "sha256": "ff232a53339d7ebee40d9ac13be7aa250f5e5068b5310aee4d6c94c5a6c77dc3"
+        },
+        {
+          "path": "doc/architecture/R0与R1实现.md",
+          "sha256": "b9a8f7a752f9b8ae47f9675696e010479c583d91b89715f9c95527065606e27d"
+        },
+        {
+          "path": "doc/architecture/Chrome复用与授权清理.md",
+          "sha256": "42db65f6a6519ccc252e4daa08c8757723d0c836f1826d4eebbac8941b42e40e"
+        },
+        {
+          "path": "doc/architecture/Playwright执行与会话管理.md",
+          "sha256": "af4caaf5ff720ff6550a24b58e9a21f2a866bbb692786d3dcfb7d5373250a283"
+        },
+        {
+          "path": "doc/deployment/安装与运行.md",
+          "sha256": "c05bfec6bc269e3ff6ec10075587dea68adfdcdabad8adc443c7940bdaf7fcc7"
+        },
+        {
+          "path": "doc/deployment/Playwright运行与排障.md",
+          "sha256": "06b6ba3ecfdd5b93b3cad80051ad359283bb08c1eb2043265293b69cf735a683"
+        },
+        {
+          "path": "doc/reference/R1接口与控制协议.md",
+          "sha256": "cabe9c9d5a973e98eed6d2417758a25bcf6a8f99e959014352f495ae046110c1"
+        },
+        {
+          "path": "doc/reference/浏览器画面流接口.md",
+          "sha256": "5b2e99d854fd2a66118b6a0e2dd7ad1f7515a7e477c4966c9702d696361e6c86"
+        },
+        {
+          "path": "doc/reference/会话接口与原生连接.md",
+          "sha256": "969b608db6b1e9b67169fba47223ecf7b728a1a53aa14fed2dec9d0d7b2a0505"
+        },
+        {
+          "path": "doc/reference/公开依据与研究边界.md",
+          "sha256": "2036be616c6b6d2b10b46d75c535c6b94002a736b08e56222a2137094ee1531b"
+        },
+        {
+          "path": "doc/reference/examples/README.md",
+          "sha256": "3f9f880f14b09eae03a85fefa33b5c2b4378ca4aa2849f472684bf5ae8734daa"
+        }
+      ]
+    }
+  ],
+  "new_common_documents_match": true,
+  "scope": "静态文档、来源摘要和历史字节检查；实际运行证据见对应运行核验 JSON"
+}

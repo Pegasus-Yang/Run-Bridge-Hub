@@ -1,0 +1,43 @@
+{
+  "evidence_level": "DESIGN_EXAMPLE_NOT_EXECUTED",
+  "protocol_version": "proposal-v1",
+  "tenant_id": "tenant_example_01",
+  "node_id": "node_example_01",
+  "platform": "darwin",
+  "snapshot_generation": 1,
+  "capabilities": [
+    {
+      "type": "http",
+      "readiness": "READY",
+      "target_service_refs": ["service_example_internal"],
+      "credential_refs": ["credential_example_test_account"]
+    },
+    {
+      "type": "web.managed",
+      "readiness": "AVAILABLE_TO_PREPARE",
+      "browser_engine": "chromium",
+      "slots": 1
+    },
+    {
+      "type": "web.existing_extension",
+      "resource_id": "browser_session_example_01",
+      "candidate_available": true,
+      "readiness": "NEEDS_USER_APPROVAL",
+      "authorized_tabs": [],
+      "business_login_status": "NOT_CHECKED"
+    },
+    {
+      "type": "app.android",
+      "resource_id": "device_example_01",
+      "readiness": "NEEDS_DEVICE_AUTHORIZATION",
+      "slots": 1
+    }
+  ],
+  "local_policy": {
+    "arbitrary_host_code": false,
+    "raw_secret_export": false,
+    "desktop_capture": false,
+    "user_stop_available": true
+  },
+  "fresh_probe_required_before_run": true
+}

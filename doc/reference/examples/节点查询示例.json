@@ -1,0 +1,39 @@
+{
+  "evidence_level": "DOCUMENTATION_EXAMPLE_NOT_EXECUTED",
+  "response": {
+    "protocol_version": 1,
+    "node_id": "node_example_01",
+    "name": "示例节点",
+    "connection_status": "ONLINE",
+    "connection_generation": 7,
+    "heartbeat_count": 2,
+    "last_seen_at": "2026-10-11T00:00:30Z",
+    "capabilities_observed_at": "2026-10-11T00:00:00Z",
+    "observation_age_ms": 30000,
+    "capabilities_stale": false,
+    "capabilities": {
+      "host": {},
+      "backends": [
+        {
+          "name": "playwright",
+          "installed": null,
+          "runtime_version": null,
+          "version_status": "NOT_PROBED",
+          "declared_protocols": [
+            "playwright"
+          ],
+          "coverage_status": "NOT_IMPLEMENTED"
+        }
+      ],
+      "resources": [
+        {
+          "resource_id": "resource_example_browser_01",
+          "backend": "playwright",
+          "kind": "MANAGED_BROWSER",
+          "readiness": "NEEDS_PROBE",
+          "occupancy": "UNKNOWN"
+        }
+      ]
+    }
+  }
+}

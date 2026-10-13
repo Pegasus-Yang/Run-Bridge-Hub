@@ -1,0 +1,45 @@
+{
+  "checked_at": "2026-10-11T09:58:17.846608+00:00",
+  "packages": [
+    {
+      "name": "playwright",
+      "version": "1.64.0",
+      "engines": {
+        "node": ">=20"
+      },
+      "license": "Apache-2.0",
+      "registry_url": "https://registry.npmjs.org/playwright/latest",
+      "repository": {
+        "url": "git+https://github.com/microsoft/playwright.git",
+        "type": "git"
+      },
+      "evidence_level": "REGISTRY_METADATA_ONLY_NOT_INSTALLED"
+    },
+    {
+      "name": "appium",
+      "version": "3.8.0",
+      "engines": {
+        "npm": ">=10",
+        "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
+      },
+      "license": "Apache-2.0",
+      "registry_url": "https://registry.npmjs.org/appium/latest",
+      "repository": {
+        "url": "git+https://github.com/appium/appium.git",
+        "type": "git",
+        "directory": "packages/appium"
+      },
+      "evidence_level": "REGISTRY_METADATA_ONLY_NOT_INSTALLED"
+    }
+  ],
+  "matched_playwright_candidate": {
+    "npm_version": "1.63.0",
+    "python_version": "1.63.0",
+    "node_engines": {
+      "node": ">=20"
+    },
+    "registry_url": "https://registry.npmjs.org/playwright/1.63.0",
+    "evidence_level": "MATCHING_RELEASE_METADATA_ONLY_NOT_INSTALLED",
+    "note": "npm latest 与 PyPI latest 当前不同；本候选仅确认双方 1.63.0 发布存在，未运行兼容验证"
+  }
+}

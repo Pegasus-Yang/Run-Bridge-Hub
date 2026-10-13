@@ -1,0 +1,129 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-13T01:39:05.239254+08:00",
+  "version": "0.4.0",
+  "hub": {
+    "platform": "macOS arm64",
+    "python": "3.14.7",
+    "url": "http://192.168.20.1:49762",
+    "runtime_root": "/private/tmp/runbridge-vm-test-20261013-011904"
+  },
+  "node": {
+    "ssh": "pegasus@192.168.20.129",
+    "platform": "Ubuntu 26.04.1 LTS aarch64",
+    "python": "3.14.4",
+    "runtime_root": "/home/pegasus/runbridge-visual-test-20261012-171400",
+    "browser": "Chromium 153.0.8010.12 via borrowed CDP",
+    "uv": "0.13.0",
+    "installation": {
+      "python": "3.14.4",
+      "version": "0.4.0",
+      "browscreen": "0.3.1",
+      "source_files_matched": 15,
+      "wheel_sha256": "c4257d9355258d91ccb8cd40fb4e1de95bdca45f6e726fb1d1a46e5fce5b800e",
+      "chinese_font_families": [],
+      "node_log_secret_absent": true,
+      "node_log_unhandled_error_absent": true
+    }
+  },
+  "transport": "虚拟机直接访问本机网桥 TCP，无 SSH 端口转发",
+  "normal_operation": {
+    "node_capabilities": {
+      "host": {
+        "hostname": "pegasus",
+        "platform": "Linux",
+        "machine": "aarch64",
+        "python_version": "3.14.4",
+        "client_version": "0.4.0"
+      },
+      "backends": [
+        {
+          "name": "chrome-cdp",
+          "installed": true,
+          "runtime_version": "153.0.8010.12",
+          "version_status": "DETECTED",
+          "declared_protocols": [
+            "cdp",
+            "runbridge-visual-v1"
+          ],
+          "coverage_status": "SUPPORTED"
+        }
+      ],
+      "resources": [
+        {
+          "resource_id": "vm-chrome",
+          "backend": "chrome-cdp",
+          "kind": "BORROWED_CHROME_CDP",
+          "readiness": "READY",
+          "occupancy": "FREE",
+          "authorization_scope": "BROWSER_INSTANCE"
+        }
+      ]
+    },
+    "visual": {
+      "viewport": [
+        900,
+        497
+      ],
+      "frame_ids": [
+        2,
+        3
+      ],
+      "png_bytes": 10713,
+      "color_change_to_matching_decode_seconds": 0.26,
+      "two_subscribers": true,
+      "correct_original_target": true
+    },
+    "consumer_disconnect_keeps_execution": true,
+    "normal_release": {
+      "cleanup": "COMPLETE",
+      "original_login_preserved": true,
+      "business_result_verified_on_vm": true,
+      "capture_process_exited": true,
+      "borrowed_browser_alive": true
+    },
+    "auth": {
+      "unauthorized_query": 401,
+      "foreign_session": 403,
+      "foreign_stream": 403,
+      "foreign_discovery_filtered": true
+    },
+    "ready_session_does_not_capture": true,
+    "recorded_at": "2026-10-13T01:28:15.345365+08:00",
+    "status": "PASS",
+    "hub_url": "http://192.168.20.1:49762",
+    "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059"
+  },
+  "forced_disconnect": {
+    "status": "PASS",
+    "checked_at": "2026-10-13T01:31:06.605511+08:00",
+    "old_sdk_disconnected": true,
+    "old_session_cleanup": "UNKNOWN",
+    "old_session_outcome": "OUTCOME_UNKNOWN",
+    "worker_cleanup_independently_verified": [
+      {
+        "process_exited": true,
+        "directory_removed": true,
+        "ports_closed": true
+      }
+    ],
+    "original_browser_and_login_preserved": true,
+    "connection_generations": [
+      1,
+      2
+    ],
+    "new_session_ready_and_released": true
+  },
+  "retained_services": {
+    "hub": true,
+    "node": true,
+    "test_browser": true,
+    "active_execution_sessions": 0,
+    "capture_workers": 0
+  },
+  "limits": [
+    "虚拟机没有中文字库，浏览器原画面中的中文显示为方框；DOM UTF-8 输入和结果已独立核验",
+    "本轮仅验证借用 CDP 模式；受管理模式画面仍不支持",
+    "没有验证公网 TLS/代理、Windows、锁屏、长期容量"
+  ]
+}

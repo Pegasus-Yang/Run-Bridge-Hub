@@ -1,0 +1,53 @@
+{
+  "version": "0.4.0",
+  "checked_at": "2026-10-13T01:46:24.855020+08:00",
+  "status": "PASS",
+  "build_checks": [
+    {
+      "project": "runbridge-hub",
+      "version": "0.4.0",
+      "source_files_matched": 16,
+      "wheel_source_metadata_cli_matched": true,
+      "sdist_source_tests_docs_lock_matched": true,
+      "private_runtime_excluded": true,
+      "artifacts": [
+        {
+          "path": "dist/runbridge_hub-0.4.0-py3-none-any.whl",
+          "bytes": 36331,
+          "sha256": "e60377456a5dbb86409c7ea7ccf10621f9b573c5e950aba2088b7de4bbeb6c25"
+        },
+        {
+          "path": "dist/runbridge_hub-0.4.0.tar.gz",
+          "bytes": 218926,
+          "sha256": "94fcdf20fc7a1e684f28edc3b3223f6789580ec841975e0c73156ac6e0835d0b"
+        }
+      ]
+    },
+    {
+      "project": "runbridge-node",
+      "version": "0.4.0",
+      "source_files_matched": 15,
+      "wheel_source_metadata_cli_matched": true,
+      "sdist_source_tests_docs_lock_matched": true,
+      "private_runtime_excluded": true,
+      "artifacts": [
+        {
+          "path": "dist/runbridge_node-0.4.0-py3-none-any.whl",
+          "bytes": 38953,
+          "sha256": "c4257d9355258d91ccb8cd40fb4e1de95bdca45f6e726fb1d1a46e5fce5b800e"
+        },
+        {
+          "path": "dist/runbridge_node-0.4.0.tar.gz",
+          "bytes": 238162,
+          "sha256": "07563fe516f5148caf0d3115734ea5b8f14a8e135531c72167bf11f6f20ab7b3"
+        }
+      ]
+    }
+  ],
+  "independent_visual_contracts_match": true,
+  "historical_build_records_unchanged": true,
+  "install_checks_reference": "画面流运行核验记录.json",
+  "vm_install_checks_reference": "虚拟机跨机器运行核验记录.json",
+  "extra_dependency": "browscreen==0.3.1",
+  "note": "构建摘要和文档摘要按已有约定排除于 sdist，避免摘要递归。"
+}

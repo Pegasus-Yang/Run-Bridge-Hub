@@ -1,0 +1,29 @@
+{
+  "evidence_level": "DESIGN_EXAMPLE_NOT_EXECUTED",
+  "protocol_version": "proposal-v1",
+  "tenant_id": "tenant_example_01",
+  "node_id": "node_example_01",
+  "run_id": "run_example_01",
+  "attempt_id": "attempt_example_01",
+  "command_id": "command_example_17",
+  "sequence": 17,
+  "resource_id": "browser_session_example_01",
+  "lease": {
+    "lease_id": "lease_example_01",
+    "generation": 3
+  },
+  "authorization_scope_id": "scope_example_selected_tab",
+  "timeout_ms": 10000,
+  "tool": "web.click",
+  "arguments": {
+    "tab_handle": "tab_example_01",
+    "observation_id": "observation_example_16",
+    "element_ref": "element_example_submit",
+    "wait_for": {
+      "type": "visible_business_message",
+      "text": "提交成功"
+    }
+  },
+  "effect_class": "MAY_MUTATE_BUSINESS_STATE",
+  "retry_policy": "RECONCILE_BEFORE_RETRY"
+}

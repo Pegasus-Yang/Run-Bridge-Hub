@@ -1,0 +1,703 @@
+{
+  "version": "0.4.0",
+  "checked_at": "2026-10-13T01:09:33.867031+08:00",
+  "status": "PASS",
+  "scope": "本机首期 Chrome CDP 画面功能验收；容量和远程部署另行验证",
+  "environment": {
+    "platform": "macOS arm64",
+    "python": "3.14.7",
+    "chrome": "154.0.8037.99",
+    "playwright": "1.63.0",
+    "browscreen": "0.3.1",
+    "pillow": "12.3.0",
+    "fastapi": "0.143.0",
+    "uvicorn": "0.54.0",
+    "websockets": "17.2"
+  },
+  "full_regression": {
+    "hub": {
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0
+    },
+    "node": {
+      "passed": 39,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 103.84
+    },
+    "hub_warning": "已有 Starlette/httpx TestClient 弃用提示"
+  },
+  "source_checks": [
+    {
+      "project": "runbridge-hub",
+      "control_protocol_unchanged": true,
+      "files": [
+        {
+          "path": "src/runbridge_hub/__init__.py",
+          "sha256": "002e641e52e709ec53945889a3bf42c64babb94cea3bc1f2585d2f8c72b142dc"
+        },
+        {
+          "path": "src/runbridge_hub/api.py",
+          "sha256": "9206f4553f9eadfb79a1bc61736fcc2890bb9bc6280797e73220c89ebd8d1be6"
+        },
+        {
+          "path": "src/runbridge_hub/app.py",
+          "sha256": "72b72c7c80ac8aed4bb33251f241a0798dcb03da6bb0376ea62a19c25f8886c7"
+        },
+        {
+          "path": "src/runbridge_hub/cli.py",
+          "sha256": "216ef13f4e1e59ee5095dc8e8029493d7004c411d782006f4f4e1a7347f6fc7e"
+        },
+        {
+          "path": "src/runbridge_hub/gateway.py",
+          "sha256": "211c5d37f99b81f82df27d30c3a94c86f0f2f2f6c01a67d207c741f26c857d2f"
+        },
+        {
+          "path": "src/runbridge_hub/native.py",
+          "sha256": "01b941ce15d16f680eaa4450a0f65e178bd43034a3f5c0aefba65433960c9efd"
+        },
+        {
+          "path": "src/runbridge_hub/protocol.py",
+          "sha256": "cace64f0c8b862a770339d665eed7cc5a463b933960bd3ae16e12a739337dea7"
+        },
+        {
+          "path": "src/runbridge_hub/security.py",
+          "sha256": "578d0e61a2c4fc75e6bfad39bffb9ac1b6440db0d13946e23f340176d1629f85"
+        },
+        {
+          "path": "src/runbridge_hub/service.py",
+          "sha256": "0b3b87ceefaf0948139f9a03469d4a879ce8ff80a06d7db642434a11d3cdedf4"
+        },
+        {
+          "path": "src/runbridge_hub/sessions.py",
+          "sha256": "bf94946541a1fe30b38543f3c7c1b06d82d7534bcd36ed22448f10456e2b0d2e"
+        },
+        {
+          "path": "src/runbridge_hub/settings.py",
+          "sha256": "0ca6c2450140a8fba4f2e669aa2e3d56de21cc38619ad42d74e23f10b2cee467"
+        },
+        {
+          "path": "src/runbridge_hub/store.py",
+          "sha256": "b3ca82ec57d4bb8ccecff068f3124a7cd8ad221e6fac8cd4297334418383c154"
+        },
+        {
+          "path": "src/runbridge_hub/visual.py",
+          "sha256": "0aceec1c1eb2d4a18a6eaeb0310a60476470b725b27ef02abc51a52346ab8fc4"
+        },
+        {
+          "path": "src/runbridge_hub/visual_api.py",
+          "sha256": "5d6205bba7f37d24b0372e1687a16eeca9837ffc6448913af3f59f916e894477"
+        },
+        {
+          "path": "src/runbridge_hub/visual_protocol.py",
+          "sha256": "f495c69f456d6e9ad5a085ef745c5272f86d0567efa7460ca23617b2192f691b"
+        },
+        {
+          "path": "src/runbridge_hub/visual_wire.py",
+          "sha256": "6911d3927cc4380f7aab952e49d7bda4d20b6e3b39623bf28387f85ef5f6acbb"
+        }
+      ]
+    },
+    {
+      "project": "runbridge-node",
+      "control_protocol_unchanged": true,
+      "files": [
+        {
+          "path": "src/runbridge_node/__init__.py",
+          "sha256": "a50bb248bfecb45a5d062f05cc3f3d0e864883c8cb252193eea4b722398838af"
+        },
+        {
+          "path": "src/runbridge_node/capabilities.py",
+          "sha256": "43760008af1e4f66674f2f18c31e826abc97afcb4376eb73eea8619902bdc71d"
+        },
+        {
+          "path": "src/runbridge_node/chrome.py",
+          "sha256": "51952d0e6a57eaa20bc946ea2c986c22d189817141ba332ca6a2e5b3feec2129"
+        },
+        {
+          "path": "src/runbridge_node/cli.py",
+          "sha256": "8694e359c204de379d99c521e2b42f78e3b27c2b4812976c218e8135d2ba75eb"
+        },
+        {
+          "path": "src/runbridge_node/client.py",
+          "sha256": "3c1fa8a9679fc8939cdcd9de6faae3598e3121c1befafa46a78fd5608f2712c6"
+        },
+        {
+          "path": "src/runbridge_node/config.py",
+          "sha256": "1eb60378851bd2a6a4eddacf3014be0429ccc1e3c950185fb611172cab5cc21e"
+        },
+        {
+          "path": "src/runbridge_node/executor.py",
+          "sha256": "729520e3823e5d0de92a2ccce43d2d9d023687e6282a848d913ed721dad2a8a5"
+        },
+        {
+          "path": "src/runbridge_node/playwright_runtime/server.mjs",
+          "sha256": "9c583212e1acb54934d2bcacd158ee7eb15acbc41121660c33861b8e395a5b3b"
+        },
+        {
+          "path": "src/runbridge_node/protocol.py",
+          "sha256": "cace64f0c8b862a770339d665eed7cc5a463b933960bd3ae16e12a739337dea7"
+        },
+        {
+          "path": "src/runbridge_node/runtime.py",
+          "sha256": "6771ede42dd19a721a063365fc37e9504eb5eb7d2486db5d67d70e3f8fe6b7e3"
+        },
+        {
+          "path": "src/runbridge_node/visual.py",
+          "sha256": "294f7e563bd61d5c60335fbcb156c0e60bc0278d2e194fbf91540e248a75f2e0"
+        },
+        {
+          "path": "src/runbridge_node/visual_capture.py",
+          "sha256": "0d935fdda3ba8e376a80635b9c8a601ed9da987d835fd1f8b16e61822136285d"
+        },
+        {
+          "path": "src/runbridge_node/visual_protocol.py",
+          "sha256": "c37d128dca34f182e7415ee611945fdc39da303a5c80c779a6c755ff2baeab5c"
+        },
+        {
+          "path": "src/runbridge_node/visual_wire.py",
+          "sha256": "f612af0107e6e1c14badd5a2d2ed515a5c290fb2a247931fd72fb290b95854c7"
+        },
+        {
+          "path": "src/runbridge_node/visual_worker.py",
+          "sha256": "c78c943e6c7a260f767e80beb13cbb8fe2022af6e50a87467c39de660ea88d0a"
+        }
+      ]
+    }
+  ],
+  "runtime_evidence": [
+    {
+      "test": "chrome_existing_login_and_detach",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:58:38.236565+00:00",
+      "details": {
+        "chrome_version": "154.0.8037.99",
+        "original_page_reused": true,
+        "business_login_preserved": true,
+        "cookie_and_local_storage_unchanged": true,
+        "native_page_actions_and_screenshot": true,
+        "browser_exit_commands_rejected": true,
+        "sdk_and_api_release_disconnect_only": true,
+        "old_objects_invalid": true,
+        "browser_survives": true
+      }
+    },
+    {
+      "test": "chrome_authorization_scope",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:58:42.499073+00:00",
+      "details": {
+        "scope": "BROWSER_INSTANCE",
+        "outside_resource_rejected": true,
+        "different_grant_rejected": true,
+        "endpoint_injection_rejected": true,
+        "wrong_protocol_and_sdk_rejected": true,
+        "idle_session_cleanup_complete": true
+      }
+    },
+    {
+      "test": "chrome_foreign_instance_targets",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:58:47.313363+00:00",
+      "details": {
+        "different_real_browser_target_rejected": true,
+        "different_browser_not_visible": true,
+        "both_browser_processes_survive": true
+      }
+    },
+    {
+      "test": "chrome_documented_examples",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:58:52.911392+00:00",
+      "details": {
+        "standalone_example_executed": true,
+        "guide_code_executed": true,
+        "original_page_reused": true,
+        "screenshot_verified": true
+      }
+    },
+    {
+      "test": "chrome_disconnect_lease",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:58:59.379490+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_grant-expiry",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:07.106853+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_revoke",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:12.524537+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_node-stop",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:17.655054+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_node-kill",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:22.119137+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "UNKNOWN",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_hub-restart",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:27.959549+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "UNKNOWN",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "actual_cli_lifecycle",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:32.654215+00:00",
+      "details": {
+        "python_version": "3.14.7",
+        "client_version": "0.4.0",
+        "initial_generation": 1,
+        "reconnected_generation": 2,
+        "initial_heartbeats_observed": 2,
+        "registration_idempotent": true,
+        "wrong_identity_rejected": true,
+        "automatic_reconnect": true,
+        "revocation_survives_restart": true,
+        "offline_snapshot_marked_stale": true,
+        "secrets_absent_from_logs": true
+      }
+    },
+    {
+      "test": "duplicate_identity_replacement",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:34.515117+00:00",
+      "details": {
+        "old_process_stopped": true,
+        "replacement_online": true,
+        "generation_increased": true
+      }
+    },
+    {
+      "test": "invalid_node_identity",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:35.878412+00:00",
+      "details": {
+        "process_rejected": true,
+        "credential_not_printed": true
+      }
+    },
+    {
+      "test": "owned_browser_cleanup",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:36.814352+00:00",
+      "details": {
+        "runtime_version": "1.63.0",
+        "node_version": "v25.6.1",
+        "browser_process_exited": true
+      }
+    },
+    {
+      "test": "official_sdk_native_playwright",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:41.709538+00:00",
+      "details": {
+        "browser_version": "153.0.8010.12",
+        "screenshot_bytes": 1449334,
+        "screenshot_sha256": "83699477e49fe46f34e3545bdf9dc5d0f6fdce2b599eb955838d074b3a4fae59",
+        "upload_bytes": 262144,
+        "download_bytes": 262144,
+        "download_sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "events": [
+          "dialog",
+          "popup",
+          "download"
+        ],
+        "native_route_callback": true,
+        "native_timeout_error": true,
+        "node_local_http_navigation": true,
+        "cleanup": "COMPLETE",
+        "native_trace_zip": true,
+        "resource_conflict_rejected": true,
+        "heartbeat_continues_during_execution": true,
+        "secrets_absent_from_logs": true
+      }
+    },
+    {
+      "test": "session_isolation_revoke_expiry",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:46.582344+00:00",
+      "details": {
+        "wrong_token_rejected": true,
+        "other_grant_rejected": true,
+        "revoked_connection_closed": true,
+        "revoked_resource_cleaned": true,
+        "unattached_session_lease_cleaned": true
+      }
+    },
+    {
+      "test": "active_sdk_restart",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:52.657805+00:00",
+      "details": {
+        "old_session_state": "INTERRUPTED",
+        "execution_outcome": "OUTCOME_UNKNOWN",
+        "new_connection_generation": 2,
+        "old_objects_invalid": true,
+        "new_session_ready_and_cleaned": true,
+        "abrupt_restart_unclaimed_session_interrupted": true
+      }
+    },
+    {
+      "test": "independent_example",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:56.874591+00:00",
+      "details": {
+        "official_sdk_connected": true,
+        "page_title": "RunBridge",
+        "screenshot_created_on_caller": true,
+        "resource_cleaned": true,
+        "documentation_python_block_executed": true
+      }
+    },
+    {
+      "test": "helper_crash_cleanup",
+      "status": "PASS",
+      "checked_at": "2026-10-12T16:59:57.627623+00:00",
+      "details": {
+        "helper_crashed": true,
+        "detached_owned_browser_reclaimed": true
+      }
+    },
+    {
+      "test": "browscreen_real_data_stream",
+      "status": "PASS",
+      "checked_at": "2026-10-12T17:00:01.994397+00:00",
+      "details": {
+        "viewport": [
+          756,
+          469
+        ],
+        "decoded_frame_ids": [
+          1,
+          2,
+          3
+        ],
+        "pixel_colors": [
+          [
+            23,
+            117,
+            211
+          ],
+          [
+            211,
+            73,
+            19
+          ]
+        ],
+        "first_matching_frame_seconds": 0.484,
+        "three_matching_frames_seconds": 1.092,
+        "original_target_confirmed": true,
+        "login_and_business_operation": true
+      }
+    },
+    {
+      "test": "browscreen_multi_target",
+      "status": "PASS",
+      "checked_at": "2026-10-12T17:00:09.915554+00:00",
+      "details": {
+        "initial_page_count": 2,
+        "automatic_selection": false,
+        "closed_target_not_replaced": true,
+        "two_target_pixel_checks": true,
+        "new_stream_on_switch": true
+      }
+    }
+  ],
+  "wheel_install_checks": {
+    "base": {
+      "version": "0.4.0",
+      "browscreen": false,
+      "fastapi": false,
+      "pillow": false,
+      "visual_probe": false
+    },
+    "extra": {
+      "version": "0.4.0",
+      "browscreen": true,
+      "fastapi": true,
+      "pillow": true,
+      "visual_probe": true
+    }
+  },
+  "import_failure_check": {
+    "status": "PASS",
+    "scenario": "已发现兼容版本的元数据，但库导入失败时禁用扩展",
+    "visual_probe": false
+  },
+  "installed_wheel_tests": {
+    "base": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": [
+        {
+          "test": "chrome_existing_login_and_detach",
+          "status": "PASS",
+          "checked_at": "2026-10-12T16:32:56.965633+00:00",
+          "details": {
+            "chrome_version": "154.0.8037.99",
+            "original_page_reused": true,
+            "business_login_preserved": true,
+            "cookie_and_local_storage_unchanged": true,
+            "native_page_actions_and_screenshot": true,
+            "browser_exit_commands_rejected": true,
+            "sdk_and_api_release_disconnect_only": true,
+            "old_objects_invalid": true,
+            "browser_survives": true
+          }
+        }
+      ]
+    },
+    "extra": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": [
+        {
+          "test": "browscreen_real_data_stream",
+          "status": "PASS",
+          "checked_at": "2026-10-12T17:05:40.144608+00:00",
+          "details": {
+            "viewport": [
+              756,
+              469
+            ],
+            "decoded_frame_ids": [
+              1,
+              2,
+              3
+            ],
+            "pixel_colors": [
+              [
+                23,
+                117,
+                211
+              ],
+              [
+                211,
+                73,
+                19
+              ]
+            ],
+            "first_matching_frame_seconds": 0.484,
+            "three_matching_frames_seconds": 1.096,
+            "original_target_confirmed": true,
+            "login_and_business_operation": true
+          }
+        }
+      ],
+      "scenarios": [
+        "real_data_stream_and_execution",
+        "worker_parent_eof_cleanup",
+        "repeated_capture_error_after_recovery"
+      ]
+    }
+  },
+  "compatibility": {
+    "old_packages": "实施前 0.3.0 快照构建的 wheel，在独立虚拟环境安装，无 src",
+    "new_node_old_hub": {
+      "passed": 1,
+      "evidence": [
+        {
+          "test": "chrome_existing_login_and_detach",
+          "status": "PASS",
+          "checked_at": "2026-10-12T16:26:17.545401+00:00",
+          "details": {
+            "chrome_version": "154.0.8037.99",
+            "original_page_reused": true,
+            "business_login_preserved": true,
+            "cookie_and_local_storage_unchanged": true,
+            "native_page_actions_and_screenshot": true,
+            "browser_exit_commands_rejected": true,
+            "sdk_and_api_release_disconnect_only": true,
+            "old_objects_invalid": true,
+            "browser_survives": true
+          }
+        }
+      ]
+    },
+    "old_node_new_hub": {
+      "passed": 1,
+      "evidence": [
+        {
+          "test": "chrome_existing_login_and_detach",
+          "status": "PASS",
+          "checked_at": "2026-10-12T16:28:20.865260+00:00",
+          "details": {
+            "chrome_version": "154.0.8037.99",
+            "original_page_reused": true,
+            "business_login_preserved": true,
+            "cookie_and_local_storage_unchanged": true,
+            "native_page_actions_and_screenshot": true,
+            "browser_exit_commands_rejected": true,
+            "sdk_and_api_release_disconnect_only": true,
+            "old_objects_invalid": true,
+            "browser_survives": true
+          }
+        }
+      ]
+    }
+  },
+  "measurement": {
+    "checked_at": "2026-10-13T01:03:19.702242+08:00",
+    "status": "PASS",
+    "scope": "单个真实页面场景，首个解包帧时的服务进程快照；不含 Chrome/SDK，不是容量或峰值承诺",
+    "png_bytes": [
+      11520,
+      11408,
+      11408
+    ],
+    "service_process_snapshot": [
+      {
+        "role": "hub",
+        "cpu_lifetime_percent": 3.1,
+        "rss_kib": 64096
+      },
+      {
+        "role": "node",
+        "cpu_lifetime_percent": 4.6,
+        "rss_kib": 57200
+      },
+      {
+        "role": "capture_worker",
+        "cpu_lifetime_percent": 43.2,
+        "rss_kib": 67664
+      }
+    ],
+    "page_color_request_to_matching_decode_seconds": 0.233,
+    "receipt_intervals_seconds": [
+      0.303,
+      0.302
+    ]
+  },
+  "measured_page_evidence": [
+    {
+      "test": "browscreen_real_data_stream",
+      "status": "PASS",
+      "checked_at": "2026-10-12T17:03:18.289153+00:00",
+      "details": {
+        "viewport": [
+          756,
+          469
+        ],
+        "decoded_frame_ids": [
+          1,
+          2,
+          3
+        ],
+        "pixel_colors": [
+          [
+            23,
+            117,
+            211
+          ],
+          [
+            211,
+            73,
+            19
+          ]
+        ],
+        "first_matching_frame_seconds": 0.501,
+        "three_matching_frames_seconds": 1.042,
+        "original_target_confirmed": true,
+        "login_and_business_operation": true
+      }
+    }
+  ],
+  "managed_observer_probe": {
+    "checked_at": "2026-10-12T15:49:03.382368+00:00",
+    "playwright_version": "1.63.0",
+    "observer_context_count": 0,
+    "observer_page_count": 0,
+    "execution_survives_observer_close": true,
+    "cleanup": "COMPLETE"
+  },
+  "resolved_regressions": [
+    {
+      "problem": "画面清理等待延迟原生中断",
+      "fix": "原生连接与画面连接并行限时关闭",
+      "checks": [
+        "slow_visual_cleanup_does_not_delay_native_disconnect",
+        "chrome_node_kill"
+      ]
+    },
+    {
+      "problem": "Chrome 测试冷启动超过原 10 秒等待",
+      "observed_marker_seconds": 11.446,
+      "fix": "仅测试启动等待增至 20 秒；仍核验进程退出和真实端点"
+    },
+    {
+      "problem": "恢复后相同采集错误被去重",
+      "fix": "成功出图恢复源状态基线，后续错误继续通知并清空待发图",
+      "checks": [
+        "repeated_capture_error_after_recovery_removes_frame_again"
+      ]
+    }
+  ],
+  "not_validated": [
+    "受管理 Chromium 画面适配",
+    "生产远程 TLS/代理",
+    "其他 Linux 组合及 Windows",
+    "锁屏",
+    "真实慢网络",
+    "100 用户/10 并发",
+    "长期资源峰值与稳态容量"
+  ],
+  "cross_machine_validation_reference": "虚拟机跨机器运行核验记录.json"
+}

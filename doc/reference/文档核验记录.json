@@ -1,0 +1,204 @@
+{
+  "checked_at": "2026-10-11T23:47:28.797264+08:00",
+  "project": "runbridge-hub",
+  "scope": "Current documentation links/JSON, runtime-source/build hashes and unchanged historical archive; not a capacity test",
+  "result": "PASS",
+  "local_links_checked": 146,
+  "historical_files_preserved_and_hashed": 17,
+  "product_code_files": [
+    "src/runbridge_hub/store.py",
+    "src/runbridge_hub/service.py",
+    "src/runbridge_hub/sessions.py",
+    "src/runbridge_hub/gateway.py",
+    "src/runbridge_hub/protocol.py",
+    "src/runbridge_hub/security.py",
+    "src/runbridge_hub/__init__.py",
+    "src/runbridge_hub/native.py",
+    "src/runbridge_hub/api.py",
+    "src/runbridge_hub/cli.py",
+    "src/runbridge_hub/settings.py",
+    "src/runbridge_hub/app.py"
+  ],
+  "runtime_validation": "PASS_R0_R1_R2_SESSIONS_R3_MANAGED_CHROMIUM",
+  "tests": 36,
+  "wheel_representative_checks": 2,
+  "capacity_validation": "NOT_RUN",
+  "errors": [],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2123,
+      "sha256": "58f190b98196c78349a7104f7517c0cc2e6b9898fa78a9f114d724f60f78ef08"
+    },
+    {
+      "path": "doc/README.md",
+      "bytes": 3492,
+      "sha256": "5b5a2c120b6b4f67b22cace26e0d88997e46ccaa3d2bc9cccd2dcb5007bf8f6c"
+    },
+    {
+      "path": "doc/architecture/Playwright执行与会话管理.md",
+      "bytes": 7984,
+      "sha256": "961b4bddc3d69e5dd9dc605094cce45419fbb83ba419c38696a0f9f28ae25410"
+    },
+    {
+      "path": "doc/architecture/R0与R1实现.md",
+      "bytes": 4952,
+      "sha256": "b9a8f7a752f9b8ae47f9675696e010479c583d91b89715f9c95527065606e27d"
+    },
+    {
+      "path": "doc/deployment/Playwright运行与排障.md",
+      "bytes": 4296,
+      "sha256": "02946a6bf14aedc2620faee0f997ee142162f2e44308b20b86b7c2e3125c7e80"
+    },
+    {
+      "path": "doc/deployment/安装与运行.md",
+      "bytes": 3826,
+      "sha256": "fa4948ab2f1b5982691e2c5faf08644b35b9d671a997415f22d9ed0912b39fcd"
+    },
+    {
+      "path": "doc/design/Python3.14技术栈可行性.md",
+      "bytes": 7774,
+      "sha256": "0dc5455152aabd3fe009022ff7fcc188c2f62f33791c7c9dfb99658bc909bc5e"
+    },
+    {
+      "path": "doc/design/客户端与执行工具接入.md",
+      "bytes": 7013,
+      "sha256": "735562be3a9e80972d563d9f12ae3db3e3f020bc3dbe3195c4908134e06edae9"
+    },
+    {
+      "path": "doc/design/最小实现与验证计划.md",
+      "bytes": 11073,
+      "sha256": "9a5eca03b6717bfa95d63ad15c7588b78eaa85ba0ca2651dd55753ddfd407f61"
+    },
+    {
+      "path": "doc/design/管理网关与存储选型.md",
+      "bytes": 8525,
+      "sha256": "9d724ac2a356ea78967e5bd3ba93b125145567b604d0a90c574b66b3d4d292a2"
+    },
+    {
+      "path": "doc/design/节点接入与原生执行契约.md",
+      "bytes": 8298,
+      "sha256": "ee9737f32f5410c6826fb98fbb8208af2f4e8928a2dd4e9f8f5f5f1bcf0b868e"
+    },
+    {
+      "path": "doc/design/节点服务范围与架构.md",
+      "bytes": 6759,
+      "sha256": "06c22998d723ad0a43df0b3033670e804c44a682a357160de7d4521330734a7a"
+    },
+    {
+      "path": "doc/project/Playwright阶段验收记录.md",
+      "bytes": 3051,
+      "sha256": "3f2bb525fa6a2166ea75909d701f4d0cbc4f368207afd808e096bfab78d5c832"
+    },
+    {
+      "path": "doc/project/R0与R1验收记录.md",
+      "bytes": 2174,
+      "sha256": "facbff40a462a5ead3535af50b16cba70fe7b04f435b9e3acf68df51b5afd247"
+    },
+    {
+      "path": "doc/project/历史归档核验记录.json",
+      "bytes": 3254,
+      "sha256": "d37d858407e452d2a5e230f86071167d4bb94da991ec91a8cbfc28870fd377b2"
+    },
+    {
+      "path": "doc/project/方案总览.md",
+      "bytes": 5563,
+      "sha256": "438331b62996d4348d1342ad59ad5a9de273238b8a500d952580623267475528"
+    },
+    {
+      "path": "doc/project/范围调整记录.md",
+      "bytes": 4439,
+      "sha256": "2b17d8c0dbc1926bb8f2eddb999627f7a24987e6823bf28aa21dc984c01cd0ce"
+    },
+    {
+      "path": "doc/project/项目概况.md",
+      "bytes": 3264,
+      "sha256": "10d4d55503da292dcf7646bced62dc50f58736fed58e751357f8c6d836349f5b"
+    },
+    {
+      "path": "doc/reference/Playwright运行核验记录.json",
+      "bytes": 15586,
+      "sha256": "4ab460e530b57e6bc940d0c89ccf0457282b1d07f250abc4957125f961d89317"
+    },
+    {
+      "path": "doc/reference/Python依赖核验记录.json",
+      "bytes": 23174,
+      "sha256": "8befa1ee83ce3fa6182e875781d0e9b05dd6da2c2234b2aa21641673b8029088"
+    },
+    {
+      "path": "doc/reference/R0与R1运行核验记录.json",
+      "bytes": 9862,
+      "sha256": "b957b858da45f6323acb6bde1d2e4f52af36d7c0d4a03dac029d386ef78543a3"
+    },
+    {
+      "path": "doc/reference/R1接口与控制协议.md",
+      "bytes": 4327,
+      "sha256": "4cdeb71b5999f90e29338b1978def5826eedd507319812b410daed9f554a6237"
+    },
+    {
+      "path": "doc/reference/examples/Playwright节点配置.json",
+      "bytes": 157,
+      "sha256": "fbf8d57cbf4c841a451b9ec11c43849def5d80e7fd5b8593421ad36d725b9b1b"
+    },
+    {
+      "path": "doc/reference/examples/README.md",
+      "bytes": 1550,
+      "sha256": "3f9f880f14b09eae03a85fefa33b5c2b4378ca4aa2849f472684bf5ae8734daa"
+    },
+    {
+      "path": "doc/reference/examples/会话状态示例.json",
+      "bytes": 544,
+      "sha256": "bc46c6fe9c1bb3aefc1aec7719441d40a1618532942ecbcbec48cbadbca373cc"
+    },
+    {
+      "path": "doc/reference/examples/节点查询示例.json",
+      "bytes": 1030,
+      "sha256": "6580f223f1f09a45efa5e9084f018c92c3410f567aeca7535d1df7cf22eb516e"
+    },
+    {
+      "path": "doc/reference/examples/连接错误示例.json",
+      "bytes": 583,
+      "sha256": "24b69dac8209a2e593d0af368f673e8bfecbc73a336b3505b20e426cb1358793"
+    },
+    {
+      "path": "doc/reference/会话接口与原生连接.md",
+      "bytes": 6937,
+      "sha256": "ac2ebf8b0378cdfbdde1a30db14ebf4b68b69be7ef2bc4d8a92aaa71707f958a"
+    },
+    {
+      "path": "doc/reference/公开依据与研究边界.md",
+      "bytes": 7687,
+      "sha256": "0b35d51439565dcdd96339076860b0e8c5aaac88722449ecaf5e79a2389fc707"
+    },
+    {
+      "path": "doc/reference/执行工具源码核验记录.json",
+      "bytes": 10663,
+      "sha256": "ea4e5f7e96e7d5e601efd857a4530716c2f8974c45cb3ea2dac376af91e570b8"
+    },
+    {
+      "path": "doc/reference/执行运行时准备记录.json",
+      "bytes": 1160,
+      "sha256": "0badd8b1a05bb7a34a6c4bae687997af776a9241f6f3b11c3bf2ee82020e76dd"
+    },
+    {
+      "path": "doc/reference/执行运行时核验记录.json",
+      "bytes": 1369,
+      "sha256": "61ffb5da7b8d1c5fbcefee9d7c0e0f561fddb0fdcc8e690e2ba79fa1b4d1a699"
+    },
+    {
+      "path": "doc/reference/构建产物核验记录.json",
+      "bytes": 3893,
+      "sha256": "411cd715939c6ec15f761e3878122b4e2f691a39a956383b212eb19577d052d2"
+    },
+    {
+      "path": "doc/user-guide/Playwright快速开始.md",
+      "bytes": 8708,
+      "sha256": "81582e9994c64ccaa9d25a179838fa36cb9e8979337c658a2689cbcf5d863e55"
+    },
+    {
+      "path": "doc/user-guide/快速开始.md",
+      "bytes": 3571,
+      "sha256": "d6fc9d2d2154ce91e65e1a22ab23e17f170358fd6241007ac9bf2864c8bdbd95"
+    }
+  ]
+}

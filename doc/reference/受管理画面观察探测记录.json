@@ -1,0 +1,8 @@
+{
+  "checked_at": "2026-10-12T15:49:03.382368+00:00",
+  "playwright_version": "1.63.0",
+  "observer_context_count": 0,
+  "observer_page_count": 0,
+  "execution_survives_observer_close": true,
+  "cleanup": "COMPLETE"
+}

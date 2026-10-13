@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RunBridge 画面订阅示例</title>
+<style>
+body{max-width:1000px;margin:32px auto;padding:0 20px;font:16px/1.7 system-ui,sans-serif;color:#172b4d;background:#f5f7fa}
+h1{font-size:24px}label{display:block;margin:12px 0}input{box-sizing:border-box;width:100%;padding:10px;font:inherit}
+button{margin:8px 12px 12px 0;padding:8px 20px;font:inherit;cursor:pointer}canvas{max-width:100%;background:white;border:1px solid #d0d7de}
+pre{white-space:pre-wrap;overflow-wrap:anywhere}small{color:#526681}
+</style>
+<h1>RunBridge 画面订阅示例</h1>
+<p>先保持一个执行会话处于 ACTIVE，再粘贴查询返回的画面连接地址。此页只订阅，不申请或激活执行会话。</p>
+<label>完整 WS/WSS 画面地址<input id="stream-url" type="url" placeholder="ws://Hub地址/v1/sessions/会话ID/visual/stream" autocomplete="off"></label>
+<label>创建会话的访问令牌<input id="access-token" type="password" autocomplete="off"></label>
+<button id="connect">连接画面</button><button id="disconnect">断开订阅</button>
+<small>令牌仅用于本次首消息认证，不保存到 URL 或浏览器存储。多个页面时，用 HTTP 目标选择接口选定采集页。</small>
+<pre id="status">尚未连接</pre>
+<canvas id="frame" hidden></canvas>
+<script>
+const urlInput = document.querySelector('#stream-url');
+const tokenInput = document.querySelector('#access-token');
+const status = document.querySelector('#status');
+const canvas = document.querySelector('#frame');
+const context = canvas.getContext('2d');
+const maxPng = 4 * 1024 * 1024;
+let socket = null;
+let visual = null;
+let pending = null;
+let drawing = false;
+let generation = 0;
+let expectedSession = null;
+let lastStream = null;
+let lastFrame = 0;
+
+function clearFrame() {
+  canvas.hidden = true;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  pending = null;
+}
+
+function disconnect() {
+  generation += 1;
+  if (socket) socket.close();
+  socket = null;
+  visual = null;
+  clearFrame();
+}
+
+async function drawLatest() {
+  if (drawing) return;
+  drawing = true;
+  try {
+    while (pending) {
+      const packet = pending;
+      pending = null;
+      const epoch = generation;
+      if (packet.byteLength < 5 || packet.byteLength > 4 + 4096 + maxPng) throw Error('画面长度无效');
+      const headerLength = new DataView(packet).getUint32(0, false);
+      if (headerLength < 1 || headerLength > 4096 || 4 + headerLength >= packet.byteLength) throw Error('元数据长度无效');
+      const metadata = JSON.parse(new TextDecoder('utf-8', {fatal:true}).decode(new Uint8Array(packet, 4, headerLength)));
+      if (metadata.visual_protocol_version !== 1 || metadata.content_type !== 'image/png' || metadata.session_id !== expectedSession) throw Error('会话或画面合同不匹配');
+      if (!visual || visual.state !== 'LIVE' || metadata.stream_id !== visual.stream_id || metadata.target_id !== visual.target_id) continue;
+      if (metadata.stream_id !== lastStream) { lastStream = metadata.stream_id; lastFrame = 0; }
+      if (!Number.isSafeInteger(metadata.frame_id) || metadata.frame_id <= lastFrame) throw Error('画面帧号倒退');
+      const bytes = packet.slice(4 + headerLength);
+      if (bytes.byteLength > maxPng) throw Error('图片超过上限');
+      const bitmap = await createImageBitmap(new Blob([bytes], {type:'image/png'}));
+      try {
+        if (epoch !== generation || !visual || visual.state !== 'LIVE' || metadata.stream_id !== visual.stream_id || metadata.target_id !== visual.target_id) continue;
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        context.drawImage(bitmap, 0, 0);
+        canvas.hidden = false;
+        lastFrame = metadata.frame_id;
+      } finally { bitmap.close(); }
+    }
+  } catch {
+    disconnect();
+    status.textContent = '画面解码失败，请重新查询会话和入口';
+  } finally { drawing = false; }
+}
+
+document.querySelector('#connect').addEventListener('click', () => {
+  disconnect();
+  let uri;
+  try {
+    uri = new URL(urlInput.value.trim());
+    const match = uri.pathname.match(/\/v1\/sessions\/([^/]+)\/visual\/stream$/);
+    if (!['ws:', 'wss:'].includes(uri.protocol) || uri.username || uri.password || uri.search || uri.hash || !match || !tokenInput.value) throw Error();
+    expectedSession = match[1];
+  } catch { status.textContent = '请填写查询得到的 WS/WSS 地址和有效访问令牌'; return; }
+  let token = tokenInput.value;
+  const current = new WebSocket(uri.toString());
+  socket = current;
+  current.binaryType = 'arraybuffer';
+  status.textContent = '正在连接并认证';
+  current.onopen = () => {
+    if (socket !== current) return;
+    current.send(JSON.stringify({type:'auth', access_token:token}));
+    token = '';
+    tokenInput.value = '';
+  };
+  current.onmessage = event => {
+    if (socket !== current) return;
+    if (typeof event.data === 'string') {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type !== 'state') throw Error();
+        visual = message.visual;
+        status.textContent = JSON.stringify({state:visual.state, reason_code:visual.reason_code, targets:visual.targets, selection:visual.selection, frame_age_ms:visual.frame_age_ms}, null, 2);
+        if (visual.state !== 'LIVE') clearFrame();
+      } catch { disconnect(); status.textContent = '画面状态无效'; }
+    } else { pending = event.data; void drawLatest(); }
+  };
+  current.onerror = () => { if (socket === current) status.textContent = '连接异常，请检查网络、许可和会话'; };
+  current.onclose = event => {
+    token = '';
+    if (socket !== current) return;
+    disconnect();
+    status.textContent = `订阅已关闭（${event.code}），请重新查询会话状态`;
+  };
+});
+document.querySelector('#disconnect').addEventListener('click', () => { disconnect(); status.textContent = '已断开订阅'; });
+addEventListener('pagehide', disconnect);
+</script>
+</html>

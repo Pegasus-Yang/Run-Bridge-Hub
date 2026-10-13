@@ -1,0 +1,5 @@
+{
+  "resource_id": "chrome",
+  "authorization_scope": "BROWSER_INSTANCE",
+  "cdp_endpoint": "ws://127.0.0.1:9222/devtools/browser/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+}

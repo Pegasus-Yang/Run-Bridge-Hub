@@ -1,0 +1,25 @@
+{
+  "evidence_level": "DESIGN_EXAMPLE_NOT_EXECUTED",
+  "protocol_version": "proposal-v1",
+  "tenant_id": "tenant_example_01",
+  "node_id": "node_example_01",
+  "run_id": "run_example_01",
+  "attempt_id": "attempt_example_01",
+  "command_id": "command_example_17",
+  "resource_id": "browser_session_example_01",
+  "lease_generation": 3,
+  "node_result": {
+    "delivery_status": "ACCEPTED",
+    "execution_status": "COMPLETED_WITH_UNCONFIRMED_EFFECT",
+    "action_dispatched": true,
+    "wait_result": "TIMEOUT",
+    "external_effect_status": "OUTCOME_UNKNOWN",
+    "new_observation_available": false,
+    "reason": "点击已发出，但缺少后续页面或接口证据，不能确认业务是否提交成功"
+  },
+  "platform_assessment": {
+    "test_verdict": "INCONCLUSIVE",
+    "next_step": "查询命令记录和业务结果；未确认前不重放提交",
+    "cleanup_status": "NOT_STARTED"
+  }
+}

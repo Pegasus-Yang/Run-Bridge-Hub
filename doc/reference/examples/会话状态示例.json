@@ -1,0 +1,16 @@
+{
+  "evidence_level": "DESIGN_EXAMPLE_NOT_EXECUTED",
+  "management_protocol": "proposal-v1",
+  "session_id": "session_example_01",
+  "node_id": "node_example_01",
+  "resource_id": "resource_example_browser_01",
+  "access_grant_id": "grant_example_01",
+  "connection_generation": 7,
+  "state": "PREPARING",
+  "backend": "playwright",
+  "resource_ownership": "CREATED_FOR_SESSION",
+  "native_endpoint": null,
+  "native_runtime_version": null,
+  "preparation_result": "WAITING_FOR_RUNTIME_PROBE",
+  "cleanup_policy": "RELEASE_CREATED_RESOURCES"
+}

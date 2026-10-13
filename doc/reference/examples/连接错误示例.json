@@ -1,0 +1,16 @@
+{
+  "evidence_level": "DESIGN_EXAMPLE_NOT_EXECUTED",
+  "management_protocol": "proposal-v1",
+  "session_id": "session_example_01",
+  "node_id": "node_example_01",
+  "resource_id": "resource_example_browser_01",
+  "connection_generation": 7,
+  "error_layer": "NODE_GATEWAY_TRANSPORT",
+  "code": "NATIVE_CONNECTION_LOST",
+  "message": "原生执行连接中断，不能据此判断最后一次操作是否已完成",
+  "operation_result": "UNKNOWN",
+  "native_error": null,
+  "automatic_replay": false,
+  "resource_state": "RECONCILIATION_REQUIRED",
+  "cleanup_state": "UNCONFIRMED"
+}

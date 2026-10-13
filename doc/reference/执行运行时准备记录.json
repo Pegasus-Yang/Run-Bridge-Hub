@@ -1,0 +1,37 @@
+{
+  "checked_at": "2026-10-11T21:03:37.273008+08:00",
+  "scope": "R0 后续执行工具版本候选准备；不属于本次安装的基础依赖，不代表执行已验证",
+  "nodejs_installed": "v25.6.1",
+  "packages": {
+    "playwright_python": {
+      "version": "1.63.0",
+      "source": "https://pypi.org/pypi/playwright/1.63.0/json",
+      "requires_python": ">=3.10",
+      "engines": null
+    },
+    "playwright_node": {
+      "version": "1.63.0",
+      "source": "https://registry.npmjs.org/playwright/1.63.0",
+      "requires_python": null,
+      "engines": {
+        "node": ">=20"
+      }
+    },
+    "appium": {
+      "version": "3.8.0",
+      "source": "https://registry.npmjs.org/appium/3.8.0",
+      "requires_python": null,
+      "engines": {
+        "npm": ">=10",
+        "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
+      }
+    }
+  },
+  "playwright_pair": "MATCHED_METADATA_NOT_INSTALLED",
+  "appium_execution": "NOT_INSTALLED_OR_RUN",
+  "browser_or_device_validation": "NOT_RUN",
+  "nodejs_path": "/opt/homebrew/bin/node",
+  "npm_path": "/opt/homebrew/bin/npm",
+  "npm_installed": "11.9.0",
+  "local_runtime_meets_selected_metadata": true
+}

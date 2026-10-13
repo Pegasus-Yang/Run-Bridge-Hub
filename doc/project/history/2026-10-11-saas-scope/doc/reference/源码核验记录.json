@@ -1,0 +1,458 @@
+{
+  "research_date": "2026-10-11",
+  "timezone": "Asia/Shanghai",
+  "evidence_level": "LIVE_OFFICIAL_SOURCE_READ_ONLY",
+  "scope": "固定提交文件读取与根许可证核验；不是发行版本查询、依赖许可审计或运行验证",
+  "repositories": [
+    {
+      "repository": "microsoft/playwright",
+      "branch": "main",
+      "checked_at": "2026-10-11T08:49:29.063278+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/microsoft/playwright/blob/d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c/LICENSE",
+          "bytes": 11601,
+          "sha256": "45873d00a0dd243596deb4aa23b2493b3d1f0671921bf2538ea431d7380220eb",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Apache License",
+            "                           Version 2.0, January 2004",
+            "                        http://www.apache.org/licenses/"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "packages/extension/README.md",
+          "url": "https://github.com/microsoft/playwright/blob/d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c/packages/extension/README.md",
+          "bytes": 3450,
+          "sha256": "c5f705a9640f456c0081074f4e8ede08ee7a84f1df321f54eeda989a7dc646a1",
+          "fetch_status": "retrieved"
+        },
+        {
+          "path": "packages/playwright-core/package.json",
+          "url": "https://github.com/microsoft/playwright/blob/d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c/packages/playwright-core/package.json",
+          "bytes": 881,
+          "sha256": "c2b0f59be9314bd55c747cdf695b8b227d3ea0a3c7af0ab9dcdbcd65e84a6f38",
+          "fetch_status": "retrieved",
+          "package_version": "1.65.0-next",
+          "license": "Apache-2.0"
+        },
+        {
+          "path": "packages/playwright-core/src/tools/mcp/cdpRelayV2.ts",
+          "url": "https://github.com/microsoft/playwright/blob/d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c/packages/playwright-core/src/tools/mcp/cdpRelayV2.ts",
+          "bytes": 4595,
+          "sha256": "db32c68ffe422bfef9e477f23d062c79c79150ca9c5b3503618d26a7524e1556",
+          "fetch_status": "retrieved"
+        }
+      ],
+      "commit": "d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c",
+      "commit_date": "2026-10-09T18:01:12Z",
+      "commit_url": "https://github.com/microsoft/playwright/commit/d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c"
+    },
+    {
+      "repository": "microsoft/playwright-mcp",
+      "branch": "main",
+      "checked_at": "2026-10-11T08:49:29.063935+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/microsoft/playwright-mcp/blob/b8b4183e099f136cbec0388a6088d4aa2f6b9685/LICENSE",
+          "bytes": 11552,
+          "sha256": "9a7110fc2d2f964038e5dc49128f908f29f47a574c961cba16085914e879cbda",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Apache License",
+            "                           Version 2.0, January 2004",
+            "                        http://www.apache.org/licenses/"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/microsoft/playwright-mcp/blob/b8b4183e099f136cbec0388a6088d4aa2f6b9685/README.md",
+          "bytes": 66837,
+          "sha256": "b33aa71a13d655e96e6b736d0c9de1e5ddea52f205916ca20b876387ff830e87",
+          "fetch_status": "retrieved"
+        },
+        {
+          "path": "package.json",
+          "url": "https://github.com/microsoft/playwright-mcp/blob/b8b4183e099f136cbec0388a6088d4aa2f6b9685/package.json",
+          "bytes": 1539,
+          "sha256": "624f0ba4d387028bbc734520142fbebb7075a88da8b623f4760adf76aa212f8b",
+          "fetch_status": "retrieved",
+          "package_version": "0.0.83",
+          "license": "Apache-2.0"
+        }
+      ],
+      "commit": "b8b4183e099f136cbec0388a6088d4aa2f6b9685",
+      "commit_date": "2026-10-08T17:51:55Z",
+      "commit_url": "https://github.com/microsoft/playwright-mcp/commit/b8b4183e099f136cbec0388a6088d4aa2f6b9685"
+    },
+    {
+      "repository": "ChromeDevTools/chrome-devtools-mcp",
+      "branch": "main",
+      "checked_at": "2026-10-11T08:49:29.064135+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/f08dbe152502d66e75fa07fb2588dc0feb42bc20/LICENSE",
+          "bytes": 11357,
+          "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Apache License",
+            "                           Version 2.0, January 2004",
+            "                        http://www.apache.org/licenses/"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/f08dbe152502d66e75fa07fb2588dc0feb42bc20/README.md",
+          "bytes": 6445,
+          "sha256": "059a0349daaef6bda98eae6d9384ed349ac94b8033b18be817c317a01b472024",
+          "fetch_status": "retrieved"
+        },
+        {
+          "path": "package.json",
+          "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/f08dbe152502d66e75fa07fb2588dc0feb42bc20/package.json",
+          "bytes": 4728,
+          "sha256": "fa37ec32d51c179aeb618b08429cd90925f05c1b6bc9487935804f976ab755ad",
+          "fetch_status": "retrieved",
+          "package_version": "1.10.1",
+          "license": "Apache-2.0"
+        },
+        {
+          "path": "docs/advanced-usage.md",
+          "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/f08dbe152502d66e75fa07fb2588dc0feb42bc20/docs/advanced-usage.md",
+          "fetch_status": "retrieved",
+          "bytes": 7008,
+          "sha256": "aaca605b97d28abf8202f5577e494489591e8c24e4a58a8113ddbab364547623"
+        },
+        {
+          "path": "docs/configuration.md",
+          "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/f08dbe152502d66e75fa07fb2588dc0feb42bc20/docs/configuration.md",
+          "fetch_status": "retrieved",
+          "bytes": 15079,
+          "sha256": "86fce282bd4c668d31b6562b4e742a9e1331db658acea05c958d461d3e25e18f"
+        }
+      ],
+      "commit": "f08dbe152502d66e75fa07fb2588dc0feb42bc20",
+      "commit_date": "2026-10-09T13:44:14Z",
+      "commit_url": "https://github.com/ChromeDevTools/chrome-devtools-mcp/commit/f08dbe152502d66e75fa07fb2588dc0feb42bc20"
+    },
+    {
+      "repository": "appium/appium",
+      "branch": "master",
+      "checked_at": "2026-10-11T08:49:29.064314+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/appium/appium/blob/14110e50b0bf3414c778e039acb7058a3c649e2e/LICENSE",
+          "bytes": 11387,
+          "sha256": "5cb791a45cafc4bdaef57f3ba49fb7691a98c756e8148467f9e241295728490f",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Apache License",
+            "                           Version 2.0, January 2004",
+            "                        http://www.apache.org/licenses/"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "packages/appium/package.json",
+          "url": "https://github.com/appium/appium/blob/14110e50b0bf3414c778e039acb7058a3c649e2e/packages/appium/package.json",
+          "bytes": 3016,
+          "sha256": "192997d548803f35f088efad1825cbf7e1d87808bdce4f5f49e63b7b49b2db35",
+          "fetch_status": "retrieved",
+          "package_version": "3.8.0",
+          "license": "Apache-2.0"
+        }
+      ],
+      "commit": "14110e50b0bf3414c778e039acb7058a3c649e2e",
+      "commit_date": "2026-10-10T15:54:47Z",
+      "commit_url": "https://github.com/appium/appium/commit/14110e50b0bf3414c778e039acb7058a3c649e2e"
+    },
+    {
+      "repository": "appium/appium-uiautomator2-driver",
+      "branch": "master",
+      "checked_at": "2026-10-11T08:49:29.064532+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/appium/appium-uiautomator2-driver/blob/7a54db007aa8a44f5df21cd0b52afc13c0d277ae/LICENSE",
+          "bytes": 11384,
+          "sha256": "43178a7d73663d609f172ad78b0755ccc14f14c2b49e506b2a160b52821caa19",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Apache License",
+            "                           Version 2.0, January 2004",
+            "                        http://www.apache.org/licenses/"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/appium/appium-uiautomator2-driver/blob/7a54db007aa8a44f5df21cd0b52afc13c0d277ae/README.md",
+          "bytes": 169859,
+          "sha256": "8c4cf2fa96d6ec12b71102aa6f6ae0110ceb502e41f2328b6a2c009c85a33816",
+          "fetch_status": "retrieved"
+        },
+        {
+          "path": "package.json",
+          "url": "https://github.com/appium/appium-uiautomator2-driver/blob/7a54db007aa8a44f5df21cd0b52afc13c0d277ae/package.json",
+          "bytes": 3758,
+          "sha256": "eabaaacedc5a38d48e1741ae8468831271f4dce8384f473d8f816b658d04dc20",
+          "fetch_status": "retrieved",
+          "package_version": "8.7.0",
+          "license": "Apache-2.0"
+        }
+      ],
+      "commit": "7a54db007aa8a44f5df21cd0b52afc13c0d277ae",
+      "commit_date": "2026-09-14T06:23:31Z",
+      "commit_url": "https://github.com/appium/appium-uiautomator2-driver/commit/7a54db007aa8a44f5df21cd0b52afc13c0d277ae"
+    },
+    {
+      "repository": "appium/appium-xcuitest-driver",
+      "branch": "master",
+      "checked_at": "2026-10-11T08:49:29.064797+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/LICENSE",
+          "bytes": 10282,
+          "sha256": "ae9194687e7f3b7d85e8eeb5c973e22d52c4653b1e4332fa0e5c6e82b038ab29",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Apache License",
+            "Version 2.0, January 2004",
+            "http://www.apache.org/licenses/"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/README.md",
+          "bytes": 1398,
+          "sha256": "008edc3ee53fd5b39486a3edcd1f9861accd5f00f914ec3ee3bfac20c1cd4a5d",
+          "fetch_status": "retrieved"
+        },
+        {
+          "path": "package.json",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/package.json",
+          "bytes": 6019,
+          "sha256": "eefb036a8008be8e5b743947428a08a6c53d4d27b791cf3b6721b614d7b88bc7",
+          "fetch_status": "retrieved",
+          "package_version": "12.17.1",
+          "license": "Apache-2.0"
+        },
+        {
+          "path": "docs/installation.md",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/docs/installation.md",
+          "fetch_status": "unavailable",
+          "error": "HTTP Error 404: Not Found"
+        },
+        {
+          "path": "docs/getting-started/requirements.md",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/docs/getting-started/requirements.md",
+          "fetch_status": "unavailable",
+          "error": "HTTP Error 404: Not Found"
+        },
+        {
+          "path": "docs/getting-started/system-requirements.md",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/docs/getting-started/system-requirements.md",
+          "fetch_status": "retrieved",
+          "bytes": 11016,
+          "sha256": "b5ce9844e089e97a892cdb3b8edf4cb411ad4a3edb94ea5f6b26dc98213126bd"
+        },
+        {
+          "path": "docs/getting-started/device-setup.md",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/docs/getting-started/device-setup.md",
+          "fetch_status": "retrieved",
+          "bytes": 3333,
+          "sha256": "3ff1a1543ffb5f87f02503f67d3b0735a893a1bbbd801ade3fdecce415fa991e"
+        },
+        {
+          "path": "docs/guides/non-macos-hosts.md",
+          "url": "https://github.com/appium/appium-xcuitest-driver/blob/0f8bb762975eca613f673f6ac9f32e536b2c325d/docs/guides/non-macos-hosts.md",
+          "fetch_status": "retrieved",
+          "bytes": 2422,
+          "sha256": "150031c91946fbea4bff24f966e15b005ce8e8dbe65b65f699c30226952220b4"
+        }
+      ],
+      "commit": "0f8bb762975eca613f673f6ac9f32e536b2c325d",
+      "commit_date": "2026-10-10T20:45:04Z",
+      "commit_url": "https://github.com/appium/appium-xcuitest-driver/commit/0f8bb762975eca613f673f6ac9f32e536b2c325d"
+    },
+    {
+      "repository": "browser-use/browser-use",
+      "branch": "main",
+      "checked_at": "2026-10-11T08:49:30.962306+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/browser-use/browser-use/blob/c75e8476e26d18b7617643bc2ae082fae8eae431/LICENSE",
+          "bytes": 1069,
+          "sha256": "135c57671b0ee957669b05a0ca00cc06f645496d351e2e732832c6e276da9a5e",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "MIT License",
+            "",
+            "Copyright (c) 2024 Gregor Zunic"
+          ],
+          "identified_root_license": "MIT"
+        },
+        {
+          "path": "pyproject.toml",
+          "url": "https://github.com/browser-use/browser-use/blob/c75e8476e26d18b7617643bc2ae082fae8eae431/pyproject.toml",
+          "bytes": 7655,
+          "sha256": "5a61c6cc0b66c5e51972c7deeabefe00cf9a8127d7408bdbf3e573bdaf582f87",
+          "fetch_status": "retrieved",
+          "package_version": "0.13.11"
+        },
+        {
+          "path": "browser_use/agent/service.py",
+          "url": "https://github.com/browser-use/browser-use/blob/c75e8476e26d18b7617643bc2ae082fae8eae431/browser_use/agent/service.py",
+          "fetch_status": "retrieved",
+          "bytes": 164119,
+          "sha256": "10f7c14458ed7089c49f34a06ad7b3ce12212a589d9d000c5cf4d9cc7ddd8479"
+        }
+      ],
+      "commit": "c75e8476e26d18b7617643bc2ae082fae8eae431",
+      "commit_date": "2026-10-07T16:39:05Z",
+      "commit_url": "https://github.com/browser-use/browser-use/commit/c75e8476e26d18b7617643bc2ae082fae8eae431"
+    },
+    {
+      "repository": "web-infra-dev/midscene",
+      "branch": "main",
+      "checked_at": "2026-10-11T08:49:31.667159+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/web-infra-dev/midscene/blob/7019b40fe7e337eaa97eef79305ab7f8923ffca6/LICENSE",
+          "bytes": 1100,
+          "sha256": "9d26ef3ec511840e10eeaaf1e1b211e196c838823baf6bf9033761f27ab349ce",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "MIT License",
+            "",
+            "Copyright (c) 2024-present Bytedance, Inc. and its affiliates."
+          ],
+          "identified_root_license": "MIT"
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/web-infra-dev/midscene/blob/7019b40fe7e337eaa97eef79305ab7f8923ffca6/README.md",
+          "bytes": 11893,
+          "sha256": "235dec37f2c74e994f4c07bd8f051ba423ae3ddfa2589bacfadc2b18ecf5654c",
+          "fetch_status": "retrieved"
+        }
+      ],
+      "commit": "7019b40fe7e337eaa97eef79305ab7f8923ffca6",
+      "commit_date": "2026-10-10T07:16:23Z",
+      "commit_url": "https://github.com/web-infra-dev/midscene/commit/7019b40fe7e337eaa97eef79305ab7f8923ffca6"
+    },
+    {
+      "repository": "Skyvern-AI/skyvern",
+      "branch": "main",
+      "checked_at": "2026-10-11T08:49:31.742068+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/Skyvern-AI/skyvern/blob/f5f3f28a9ce0021a1db24286928a7bff6582a1eb/LICENSE",
+          "bytes": 34523,
+          "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "GNU AFFERO GENERAL PUBLIC LICENSE",
+            "                       Version 3, 19 November 2007",
+            ""
+          ],
+          "identified_root_license": "AGPL-3.0"
+        }
+      ],
+      "commit": "f5f3f28a9ce0021a1db24286928a7bff6582a1eb",
+      "commit_date": "2026-10-09T21:21:45Z",
+      "commit_url": "https://github.com/Skyvern-AI/skyvern/commit/f5f3f28a9ce0021a1db24286928a7bff6582a1eb"
+    },
+    {
+      "repository": "fatedier/frp",
+      "branch": "dev",
+      "checked_at": "2026-10-11T08:49:31.755075+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/fatedier/frp/blob/2542d11a6201c0f2bbe3b1d93031fc1e83201056/LICENSE",
+          "bytes": 11358,
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Apache License",
+            "                           Version 2.0, January 2004",
+            "                        http://www.apache.org/licenses/"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/fatedier/frp/blob/2542d11a6201c0f2bbe3b1d93031fc1e83201056/README.md",
+          "bytes": 45016,
+          "sha256": "2cde03ad6d6cbd40a0dfa44975d4834db13d98ece97e30e1e7077a432320e03a",
+          "fetch_status": "retrieved"
+        }
+      ],
+      "commit": "2542d11a6201c0f2bbe3b1d93031fc1e83201056",
+      "commit_date": "2026-10-10T11:58:05Z",
+      "commit_url": "https://github.com/fatedier/frp/commit/2542d11a6201c0f2bbe3b1d93031fc1e83201056"
+    },
+    {
+      "repository": "DeviceFarmer/stf",
+      "branch": "master",
+      "checked_at": "2026-10-11T08:49:32.572008+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/DeviceFarmer/stf/blob/be79c0c9546ceb2da761c9ff2ada29d68c1f5f23/LICENSE",
+          "bytes": 626,
+          "sha256": "9e482bb32334d2ca0f787a3124e7159bea48290b0cdd388df4623f90632beabc",
+          "fetch_status": "retrieved",
+          "license_prefix": [
+            "Copyright © 2013 CyberAgent, Inc.",
+            "Copyright © 2016 The OpenSTF Project",
+            "Copyright © 2019 Orange SA"
+          ],
+          "identified_root_license": "Apache-2.0"
+        },
+        {
+          "path": "README.md",
+          "url": "https://github.com/DeviceFarmer/stf/blob/be79c0c9546ceb2da761c9ff2ada29d68c1f5f23/README.md",
+          "bytes": 37900,
+          "sha256": "8dcd94c7acf951f1b20d248c264374debf597063972998f9ccaa1ebc16f29020",
+          "fetch_status": "retrieved"
+        }
+      ],
+      "commit": "be79c0c9546ceb2da761c9ff2ada29d68c1f5f23",
+      "commit_date": "2026-10-02T16:14:15Z",
+      "commit_url": "https://github.com/DeviceFarmer/stf/commit/be79c0c9546ceb2da761c9ff2ada29d68c1f5f23"
+    },
+    {
+      "repository": "SeleniumHQ/selenium",
+      "branch": "trunk",
+      "commit": "1151eadf5f34ff6b34537fb8ff918667ac406e31",
+      "commit_date": "2026-10-10T19:14:55Z",
+      "commit_url": "https://github.com/SeleniumHQ/selenium/commit/1151eadf5f34ff6b34537fb8ff918667ac406e31",
+      "checked_at": "2026-10-11T08:51:13.701628+00:00",
+      "files": [
+        {
+          "path": "LICENSE",
+          "url": "https://github.com/SeleniumHQ/selenium/blob/1151eadf5f34ff6b34537fb8ff918667ac406e31/LICENSE",
+          "fetch_status": "retrieved",
+          "bytes": 11365,
+          "sha256": "307012b4481479a56605420e81db14686a0274d246d06d224c363ee09297d330",
+          "identified_root_license": "Apache-2.0"
+        }
+      ]
+    }
+  ]
+}

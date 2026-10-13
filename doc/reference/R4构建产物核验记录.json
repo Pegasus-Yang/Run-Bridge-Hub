@@ -1,0 +1,146 @@
+{
+  "version": "0.3.0",
+  "checked_at": "2026-10-12T09:04:58.027185+08:00",
+  "status": "PASS",
+  "build_checks": [
+    {
+      "project": "runbridge-hub",
+      "version": "0.3.0",
+      "source_files_matched": 12,
+      "wheel_source_metadata_cli_matched": true,
+      "sdist_guides_runtime_record_examples_matched": true,
+      "private_runtime_and_browser_cache_excluded": true,
+      "artifacts": [
+        {
+          "path": "dist/runbridge_hub-0.3.0-py3-none-any.whl",
+          "bytes": 25818,
+          "sha256": "6729896cfaecb1606e5687eab648d52c1f670af95d44e6c0b5ff12af48279535"
+        },
+        {
+          "path": "dist/runbridge_hub-0.3.0.tar.gz",
+          "bytes": 165049,
+          "sha256": "81729e2623d218d46d58361d3de8466dc2c76b78c12eb69f8f9badbfe84762dd"
+        }
+      ]
+    },
+    {
+      "project": "runbridge-node",
+      "version": "0.3.0",
+      "source_files_matched": 12,
+      "wheel_source_metadata_cli_matched": true,
+      "sdist_guides_runtime_record_examples_matched": true,
+      "private_runtime_and_browser_cache_excluded": true,
+      "artifacts": [
+        {
+          "path": "dist/runbridge_node-0.3.0-py3-none-any.whl",
+          "bytes": 27431,
+          "sha256": "9ee0eb91ff20ed6b4d4569888761ab04fa74090454bdcc95f95e93584894ed60"
+        },
+        {
+          "path": "dist/runbridge_node-0.3.0.tar.gz",
+          "bytes": 179449,
+          "sha256": "cfc70c6e3b78fdff04eb6301447173b7c32dc56d3159d2e12ca1b7073cb1a662"
+        }
+      ]
+    }
+  ],
+  "wheel_install_validation": {
+    "status": "PASS",
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "environments": "each project root .venv, actual wheel import confirmed under site-packages; locked developer dependencies retained",
+    "evidence": [
+      {
+        "test": "chrome_existing_login_and_detach",
+        "status": "PASS",
+        "checked_at": "2026-10-12T01:03:20.006730+00:00",
+        "details": {
+          "chrome_version": "154.0.8037.99",
+          "original_page_reused": true,
+          "business_login_preserved": true,
+          "cookie_and_local_storage_unchanged": true,
+          "native_page_actions_and_screenshot": true,
+          "browser_exit_commands_rejected": true,
+          "sdk_and_api_release_disconnect_only": true,
+          "old_objects_invalid": true,
+          "browser_survives": true
+        }
+      },
+      {
+        "test": "chrome_disconnect_node-kill",
+        "status": "PASS",
+        "checked_at": "2026-10-12T01:03:29.928918+00:00",
+        "details": {
+          "old_sdk_objects_invalid": true,
+          "original_target_detached": true,
+          "browser_process_survives": true,
+          "original_login_and_storage_preserved": true,
+          "hub_cleanup": "UNKNOWN",
+          "execution_outcome": "OUTCOME_UNKNOWN"
+        }
+      },
+      {
+        "test": "chrome_documented_examples",
+        "status": "PASS",
+        "checked_at": "2026-10-12T01:03:35.443079+00:00",
+        "details": {
+          "standalone_example_executed": true,
+          "guide_code_executed": true,
+          "original_page_reused": true,
+          "screenshot_verified": true
+        }
+      },
+      {
+        "test": "official_sdk_native_playwright",
+        "status": "PASS",
+        "checked_at": "2026-10-12T01:03:42.330140+00:00",
+        "details": {
+          "browser_version": "153.0.8010.12",
+          "screenshot_bytes": 1449339,
+          "screenshot_sha256": "120650e16f9de0bd60548fcd7f5446e4b84265ce5162f37836dd3d3299e2af21",
+          "upload_bytes": 262144,
+          "download_bytes": 262144,
+          "download_sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+          "events": [
+            "dialog",
+            "popup",
+            "download"
+          ],
+          "native_route_callback": true,
+          "native_timeout_error": true,
+          "node_local_http_navigation": true,
+          "cleanup": "COMPLETE",
+          "native_trace_zip": true,
+          "resource_conflict_rejected": true,
+          "heartbeat_continues_during_execution": true,
+          "secrets_absent_from_logs": true
+        }
+      }
+    ],
+    "restoration": {
+      "status": "PASS",
+      "package_version": "0.3.0",
+      "import_location": "project src package",
+      "locked_uv_environment_restored": true
+    }
+  },
+  "scope": "packaged source/assets/metadata/CLI; sdist guides/runtime record/examples; representative real installed-wheel R3/R4 executions; not capacity or cross-platform validation",
+  "cleanup_validation": {
+    "status": "PASS",
+    "owned_test_processes_remaining": 0,
+    "private_test_directories_removed": [
+      "hub-pytest",
+      "node-pytest",
+      "chrome-recheck",
+      "final-node-tests",
+      "wheel-tests"
+    ],
+    "owner_created_test_profiles_removed": 29,
+    "managed_runtime_sessions_remaining": 0,
+    "managed_cleanup_unknown_markers": 0,
+    "shared_browser_cache_modified": false,
+    "user_browser_profiles_modified": false,
+    "scope": "test-owned directories only; library/browser installation cache retained"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "checked_at": "2026-10-11T23:38:49.493761+08:00",
+  "release_version": "0.2.0",
+  "result": "PASS",
+  "build_checks": [
+    {
+      "project": "runbridge-hub",
+      "version": "0.2.0",
+      "source_files_matched": 12,
+      "wheel_metadata_and_cli_matched": true,
+      "sdist_includes_guide_lock_runtime_record": true,
+      "runtime_assets_matched": false,
+      "artifacts": [
+        {
+          "path": "dist/runbridge_hub-0.2.0-py3-none-any.whl",
+          "bytes": 25292,
+          "sha256": "3687752ac9af8b9f46ccc1d242975b32fa9b089117fa8b4e8f9b5b30e83733c8"
+        },
+        {
+          "path": "dist/runbridge_hub-0.2.0.tar.gz",
+          "bytes": 154640,
+          "sha256": "edd8030452b611206917144c25d05bac3fe7007e8b7f1f8c71e5848057f4be07"
+        }
+      ]
+    },
+    {
+      "project": "runbridge-node",
+      "version": "0.2.0",
+      "source_files_matched": 11,
+      "wheel_metadata_and_cli_matched": true,
+      "sdist_includes_guide_lock_runtime_record": true,
+      "runtime_assets_matched": true,
+      "artifacts": [
+        {
+          "path": "dist/runbridge_node-0.2.0-py3-none-any.whl",
+          "bytes": 23104,
+          "sha256": "8168695004c85c3e3b2a8b767c25e9ea9ad5cecd397a126560bfcef5ce234df7"
+        },
+        {
+          "path": "dist/runbridge_node-0.2.0.tar.gz",
+          "bytes": 160294,
+          "sha256": "192ff9250a2d7fa2369112355368d672d605e1f7db03922bb3d6418e3094367c"
+        }
+      ]
+    }
+  ],
+  "wheel_installation_checks": {
+    "environments": "Both actual project-root .venv; uv pip install --no-deps --reinstall local built wheel, then restore editable with uv sync",
+    "imports": [
+      {
+        "version": "0.2.0",
+        "module": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/.venv/lib/python3.14/site-packages/runbridge_hub/__init__.py",
+        "wheel_import_confirmed": true
+      },
+      {
+        "version": "0.2.0",
+        "module": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/.venv/lib/python3.14/site-packages/runbridge_node/__init__.py",
+        "wheel_import_confirmed": true,
+        "runtime_assets_found": true
+      }
+    ],
+    "real_cli_sdk_checks": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "cases": [
+      "test_independent_example_runs_and_releases",
+      "test_helper_crash_also_cleans_detached_owned_browser"
+    ],
+    "live_evidence": [
+      {
+        "test": "independent_example",
+        "status": "PASS",
+        "checked_at": "2026-10-11T15:33:24.988743+00:00",
+        "details": {
+          "official_sdk_connected": true,
+          "page_title": "RunBridge",
+          "screenshot_created_on_caller": true,
+          "resource_cleaned": true,
+          "documentation_python_block_executed": true
+        }
+      },
+      {
+        "test": "helper_crash_cleanup",
+        "status": "PASS",
+        "checked_at": "2026-10-11T15:33:25.699679+00:00",
+        "details": {
+          "helper_crashed": true,
+          "detached_owned_browser_reclaimed": true
+        }
+      }
+    ]
+  },
+  "scope": "4 artifacts, exact source and Node runtime assets, current README metadata and console entries, sdist guides/locks/run evidence/example; 2 representative real CLI/SDK checks from wheel-installed projects",
+  "exclusion": "This build-hash record and current document-hash record are excluded from sdist to avoid self-reference; historical records remain byte-preserved",
+  "final_cleanup_verification": {
+    "private_test_directories_removed": 14,
+    "final_owned_browser_temporary_directories_remaining": [],
+    "unknown_cleanup_markers_remaining": [],
+    "browser_runtime_cache_retained": true,
+    "process_cleanup": "Fixtures waited all tracked Hub/Node/HTTP processes; actual helper/browser PID exit verified by passing tests"
+  },
+  "editable_development_installation_restored": true
+}

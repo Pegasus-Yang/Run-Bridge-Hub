@@ -1,0 +1,282 @@
+{
+  "checked_at": "2026-10-11T21:26:08.150201+08:00",
+  "scope": "R0 基础项目/锁定/安装/构建和 R1 管理 API/节点控制通道；不包含原生执行、真机、TLS 部署或容量验收",
+  "result": "PASS",
+  "stages": {
+    "R0_foundation": "PASS",
+    "R0_execution_runtime_preparation": "MATCHED_METADATA_NOT_INSTALLED",
+    "R1": "PASS",
+    "R2_R6": "NOT_IMPLEMENTED"
+  },
+  "environments": [
+    {
+      "project": "RunBridge Hub",
+      "python": "3.14.7",
+      "implementation": "CPython",
+      "gil_disabled_build": false,
+      "executable": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/.venv/bin/python",
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "packages": {
+        "runbridge-hub": "0.1.0",
+        "pydantic": "2.14.0",
+        "pydantic-core": "2.50.0",
+        "fastapi": "0.143.0",
+        "starlette": "1.7.0",
+        "uvicorn": "0.54.0",
+        "websockets": "17.2",
+        "aiosqlite": "0.22.1",
+        "httpx": "0.28.1",
+        "pytest": "9.1.1",
+        "pytest-asyncio": "1.4.0"
+      }
+    },
+    {
+      "project": "RunBridge Node",
+      "python": "3.14.7",
+      "implementation": "CPython",
+      "gil_disabled_build": false,
+      "executable": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/.venv/bin/python",
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "packages": {
+        "runbridge-node": "0.1.0",
+        "pydantic": "2.14.0",
+        "pydantic-core": "2.50.0",
+        "websockets": "17.2",
+        "httpx": "0.28.1",
+        "pytest": "9.1.1",
+        "pytest-asyncio": "1.4.0"
+      }
+    }
+  ],
+  "dependency_installation": {
+    "tool": "uv",
+    "python": "3.14.7",
+    "index": "http://mirrors.aliyun.com/pypi/simple/",
+    "trusted_host": "mirrors.aliyun.com",
+    "virtual_environment": "each-project-root/.venv",
+    "locks": "each-project-root/uv.lock"
+  },
+  "tests": {
+    "hub": {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 0.601,
+      "cases": [
+        "test_registration_requires_enrollment[None]",
+        "test_registration_requires_enrollment[incorrect]",
+        "test_registration_is_idempotent_and_cannot_overwrite",
+        "test_validation_does_not_echo_secret_input",
+        "test_identity_and_caller_grants_have_separate_roles",
+        "test_resource_scope_filters_capabilities",
+        "test_grant_expiry_is_enforced",
+        "test_heartbeat_query_and_restart_snapshot",
+        "test_revocation_survives_restart",
+        "test_missing_heartbeat_marks_node_offline",
+        "test_old_connection_cleanup_cannot_remove_replacement",
+        "test_protocol_version_and_unknown_fields_are_rejected[message0]",
+        "test_protocol_version_and_unknown_fields_are_rejected[message1]",
+        "test_stale_generation_is_rejected"
+      ]
+    },
+    "node": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 8.506,
+      "cases": [
+        "test_identity_file_is_private_and_never_overwritten",
+        "test_hub_url_disallows_credentials_and_non_http[ftp://example.test]",
+        "test_hub_url_disallows_credentials_and_non_http[https://user:secret@example.test]",
+        "test_hub_url_disallows_credentials_and_non_http[https://example.test?secret=value]",
+        "test_probe_reports_installed_tools_without_fake_ready_devices",
+        "test_actual_cli_connects_heartbeats_reconnects_and_persists",
+        "test_replaced_node_process_stops_and_replacement_remains_online",
+        "test_node_rejects_wrong_identity_without_retrying"
+      ]
+    }
+  },
+  "test_total": 22,
+  "live_process_checks": [
+    {
+      "test": "actual_cli_lifecycle",
+      "status": "PASS",
+      "checked_at": "2026-10-11T13:26:01.311437+00:00",
+      "details": {
+        "python_version": "3.14.7",
+        "client_version": "0.1.0",
+        "initial_generation": 1,
+        "reconnected_generation": 2,
+        "initial_heartbeats_observed": 2,
+        "registration_idempotent": true,
+        "wrong_identity_rejected": true,
+        "automatic_reconnect": true,
+        "revocation_survives_restart": true,
+        "offline_snapshot_marked_stale": true,
+        "secrets_absent_from_logs": true
+      }
+    },
+    {
+      "test": "duplicate_identity_replacement",
+      "status": "PASS",
+      "checked_at": "2026-10-11T13:26:03.407219+00:00",
+      "details": {
+        "old_process_stopped": true,
+        "replacement_online": true,
+        "generation_increased": true
+      }
+    },
+    {
+      "test": "invalid_node_identity",
+      "status": "PASS",
+      "checked_at": "2026-10-11T13:26:04.963067+00:00",
+      "details": {
+        "process_rejected": true,
+        "credential_not_printed": true
+      }
+    }
+  ],
+  "transport_tested": "loopback HTTP + WebSocket; real Hub and Node CLI processes in their own virtual environments",
+  "warnings": [
+    "Hub Starlette TestClient 对 HTTPX 的一条弃用提示；锁定的兼容路径与真实联调均通过"
+  ],
+  "build_artifacts": {
+    "runbridge-hub": [
+      {
+        "path": "dist/runbridge_hub-0.1.0-py3-none-any.whl",
+        "bytes": 16502,
+        "sha256": "c2e118df5961351eb0c9728a7184c47759395b638c33aae7f02b5cb8708dfccb"
+      },
+      {
+        "path": "dist/runbridge_hub-0.1.0.tar.gz",
+        "bytes": 130002,
+        "sha256": "a01e680b9cd63e3963453296b2bb9070fe6f31925ba381b9a319cf4f5029e745"
+      }
+    ],
+    "runbridge-node": [
+      {
+        "path": "dist/runbridge_node-0.1.0-py3-none-any.whl",
+        "bytes": 12549,
+        "sha256": "1a8000753047aeb7c1b65aa2803dc6b9412816369c97103b2581674435a4088f"
+      },
+      {
+        "path": "dist/runbridge_node-0.1.0.tar.gz",
+        "bytes": 127815,
+        "sha256": "5e80d37e10752cc233275f8acb78f7a48535f046ba2340fc7142997628264bc8"
+      }
+    ]
+  },
+  "source_hashes": {
+    "runbridge-hub": [
+      {
+        "path": "pyproject.toml",
+        "sha256": "e88efa86639a664906a61dfc299b3ca0056ad48092d80615e78f334b6035b0c3"
+      },
+      {
+        "path": ".python-version",
+        "sha256": "a876e0b10411037a012498b9fe18d9bc1df32ed8b722a13564dc944ddcfd9135"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "7996192dc9a8ff29556a7b445d216daad053aa972bd5ea8cdb31574a0fe91b56"
+      },
+      {
+        "path": "src/runbridge_hub/__init__.py",
+        "sha256": "9895852f759f1bc9bfdd02af06dfa69a4d2e220b0d4325c78d4dfa863cf37142"
+      },
+      {
+        "path": "src/runbridge_hub/api.py",
+        "sha256": "9762085c0167789e88083afbfb798d615192927411de3fc65fddb096aec40b4b"
+      },
+      {
+        "path": "src/runbridge_hub/app.py",
+        "sha256": "aae1ce53a1fbee1b36f2ea462dce3e53f5aa65521c8cb3345b1c6ffb0e86a064"
+      },
+      {
+        "path": "src/runbridge_hub/cli.py",
+        "sha256": "75e2286334e3a34fd32a7b21360ac79a8762bd08cfbf5d7ca6e27359f9acc0e4"
+      },
+      {
+        "path": "src/runbridge_hub/gateway.py",
+        "sha256": "574a192cf21a942f6635497442948e33a4248f00a744259edc15f4e125ede3e0"
+      },
+      {
+        "path": "src/runbridge_hub/protocol.py",
+        "sha256": "d4e048ca3685a4086f292922afad2407712eebb0b97082c01a57b41e2a8bed0e"
+      },
+      {
+        "path": "src/runbridge_hub/security.py",
+        "sha256": "578d0e61a2c4fc75e6bfad39bffb9ac1b6440db0d13946e23f340176d1629f85"
+      },
+      {
+        "path": "src/runbridge_hub/service.py",
+        "sha256": "3bf1cacc33be75278a4e53803f6fc36c4e32a8d6b12bd83b38d6af2fc7b887c7"
+      },
+      {
+        "path": "src/runbridge_hub/settings.py",
+        "sha256": "0ca6c2450140a8fba4f2e669aa2e3d56de21cc38619ad42d74e23f10b2cee467"
+      },
+      {
+        "path": "src/runbridge_hub/store.py",
+        "sha256": "2f6e727d3696b0e68d93396266ac54fd42631d85b1ffdff7f37bb84ba91d3f8a"
+      },
+      {
+        "path": "tests/test_r1.py",
+        "sha256": "a4b2dd175e922e30f8da35445f965d2f62d8866f37e5150dc1ba1668d5628d44"
+      }
+    ],
+    "runbridge-node": [
+      {
+        "path": "pyproject.toml",
+        "sha256": "f6a17debb4a09769377d3eeda26710ce9ce12e6849f1fe7a1bdd514825da8e77"
+      },
+      {
+        "path": ".python-version",
+        "sha256": "a876e0b10411037a012498b9fe18d9bc1df32ed8b722a13564dc944ddcfd9135"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "6704e9003bff4d78950d8ab80101effa8b6558c7b7953d6ed06e2bc5b6fe619c"
+      },
+      {
+        "path": "src/runbridge_node/__init__.py",
+        "sha256": "7078fc88e657b5633fcbc3822f7c3bc30cf5f206f9c71a537238651771f7a5c4"
+      },
+      {
+        "path": "src/runbridge_node/capabilities.py",
+        "sha256": "43760008af1e4f66674f2f18c31e826abc97afcb4376eb73eea8619902bdc71d"
+      },
+      {
+        "path": "src/runbridge_node/cli.py",
+        "sha256": "4520c22efdf717b86730b9760377f527e4d54a21bdcf532bb2bbabe93898af39"
+      },
+      {
+        "path": "src/runbridge_node/client.py",
+        "sha256": "9d62f85943341d11238ee21dbbdbb9aea90c294ea47a552211ea957f3e445488"
+      },
+      {
+        "path": "src/runbridge_node/config.py",
+        "sha256": "1eb60378851bd2a6a4eddacf3014be0429ccc1e3c950185fb611172cab5cc21e"
+      },
+      {
+        "path": "src/runbridge_node/protocol.py",
+        "sha256": "d4e048ca3685a4086f292922afad2407712eebb0b97082c01a57b41e2a8bed0e"
+      },
+      {
+        "path": "tests/test_config.py",
+        "sha256": "93a72cd0828dfd8787c6fc16aa95798fb382a8c897ad23b82f9b77c9348a17ad"
+      },
+      {
+        "path": "tests/test_live_connection.py",
+        "sha256": "cfb5d8f41e7a10ef772a99430e69bffc37088f4692338384e5801906f8ef11d6"
+      }
+    ]
+  },
+  "control_contract": "v1; no cross-project Python import",
+  "capacity_validation": "NOT_RUN",
+  "browser_and_device_validation": "NOT_RUN",
+  "remote_tls_and_other_os_validation": "NOT_RUN",
+  "test_process_cleanup": "All test child processes stopped by fixture cleanup"
+}

@@ -1,0 +1,162 @@
+{
+  "recorded_at": "2026-10-13T04:29:53.563727+00:00",
+  "scope": "同一 macOS 主机的独立 Hub/Node 进程和真实受管理 Chromium；无用户浏览器或现有登录复用",
+  "environment": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.7",
+    "runbridge-hub": "0.4.0",
+    "mcp": "2.3.0",
+    "playwright": "1.63.0",
+    "fastapi": "0.143.0",
+    "starlette": "1.7.0"
+  },
+  "checks": {
+    "hub_regression": {
+      "command": "uv run --locked --no-sync pytest -q --tb=short",
+      "passed": 71,
+      "skipped": 6,
+      "seconds": 2.06,
+      "skip_reason": "默认不启动真实浏览器，另行显式验收"
+    },
+    "mcp_live": {
+      "command": "RUNBRIDGE_RUN_BROWSER_TESTS=1 uv run --locked --no-sync pytest -q tests/test_mcp_live.py --tb=short",
+      "passed": 6,
+      "seconds": 13.02
+    },
+    "node_native_regression": {
+      "command": "uv run --locked --no-sync pytest -q tests/test_playwright.py tests/test_live_connection.py tests/test_config.py tests/test_visual_versions.py --tb=short",
+      "initial_passed": 25,
+      "initial_failed": 1,
+      "initial_failure": "原有测试从已移走的 Markdown Python 代码块提取示例",
+      "repair": "改为执行当前文档指向的独立执行会话调用.py；Node 运行代码未修改",
+      "retest_command": "uv run --locked --no-sync pytest -q tests/test_playwright.py::test_independent_example_runs_and_releases --tb=short",
+      "retest_passed": 1,
+      "verified_scenarios": 26
+    },
+    "installation": {
+      "base_wheel_health_http": 200,
+      "base_mcp_absent": true,
+      "base_playwright_absent": true,
+      "enable_without_extra_cli_exit": 2,
+      "extra_wheel_mcp_http": 200,
+      "extra_tools": 12,
+      "hub_local_browser_launched": false
+    },
+    "lock": {
+      "check_passed": true,
+      "existing_dependency_versions_changed": false
+    }
+  },
+  "live_events": [
+    {
+      "test": "mcp_form_auto",
+      "checked_at": "2026-10-13T03:47:00.799007+00:00",
+      "status": "PASS",
+      "facts": {
+        "protocol_version": "2026-07-28",
+        "tools": 12,
+        "external_form_submissions": 1,
+        "png_dimensions": [
+          1280,
+          720
+        ],
+        "cleanup": "COMPLETE",
+        "resource": "FREE",
+        "owned_browser_pids_exited": 1,
+        "temporary_directory_removed": true
+      }
+    },
+    {
+      "test": "mcp_form_legacy",
+      "checked_at": "2026-10-13T03:47:01.624572+00:00",
+      "status": "PASS",
+      "facts": {
+        "protocol_version": "2025-11-25",
+        "tools": 12,
+        "external_form_submissions": 1,
+        "png_dimensions": [
+          1280,
+          720
+        ],
+        "cleanup": "COMPLETE",
+        "resource": "FREE",
+        "owned_browser_pids_exited": 1,
+        "temporary_directory_removed": true
+      }
+    },
+    {
+      "test": "mcp_permissions_and_revoke",
+      "checked_at": "2026-10-13T03:47:02.410516+00:00",
+      "status": "PASS",
+      "facts": {
+        "other_grant_denied": true,
+        "resource_scope_checked": true,
+        "pending_operation_interrupted": true,
+        "revoked_http_status": 401,
+        "resource": "FREE"
+      }
+    },
+    {
+      "test": "mcp_disconnect_and_lease",
+      "checked_at": "2026-10-13T03:47:05.531289+00:00",
+      "status": "PASS",
+      "facts": {
+        "transport_disconnect_retains_session": true,
+        "new_client_can_recover": true,
+        "close_reason": "SESSION_EXPIRED",
+        "cleanup": "COMPLETE",
+        "resource": "FREE"
+      }
+    },
+    {
+      "test": "mcp_stop_and_grant_expiry",
+      "checked_at": "2026-10-13T03:47:09.306617+00:00",
+      "status": "PASS",
+      "facts": {
+        "stop_interrupts_wait": true,
+        "cleanup": "COMPLETE",
+        "lease_capped_by_grant": true,
+        "expired_token_status": 401,
+        "resource": "FREE"
+      }
+    },
+    {
+      "test": "mcp_documented_example",
+      "checked_at": "2026-10-13T03:47:10.305988+00:00",
+      "status": "PASS",
+      "facts": {
+        "example_exit_code": 0,
+        "snapshot_read": true,
+        "png_saved": true,
+        "cleanup": "COMPLETE",
+        "resource": "FREE"
+      }
+    }
+  ],
+  "source_sha256": {
+    "pyproject.toml": "69d2a9ae060c07d6a38af104be749af91dc762d8139e079aefad16f8177e3b2c",
+    "uv.lock": "035a9f40552a591f2254a910d710a8f1ecc400d4f697fdc29510ea7a7b356d82",
+    "src/runbridge_hub/app.py": "45391feee5db4260b81536b24d6261d2010ba61e95bb01394a4326c3f98141d2",
+    "src/runbridge_hub/cli.py": "d9d72985130a29d4521f781c7bf712f558ece8d61d2c6ba4a86b5b7a2cacca0a",
+    "src/runbridge_hub/settings.py": "97e83d95bb6cd1cab9e83164a5caff4f4e916226172ebaf9c188aa06c6c7b907",
+    "src/runbridge_hub/service.py": "316eb936cf9b688f44a854b3591b2b91e77095f03905a9add74086cab7d92955",
+    "src/runbridge_hub/browser.py": "aa71cf12dbb32c6bc58dd7e344ed8aef77a6862f4e85f3959a238d3df70a67b0",
+    "src/runbridge_hub/mcp_server.py": "a8d74c359b4a013188605f157a6b3bbc970b4a706b51bd47a66c5f588842a50d",
+    "tests/test_mcp.py": "3c82d4c7975a0f57d89b1382de06a0609d02fa97c66109609ef654bafd181ad3",
+    "tests/test_mcp_live.py": "34eeab8b4d66aab5f76f1c8363341ca30cd41c769393b111e7785b22a1326cb6",
+    "doc/reference/examples/mcp_browser.py": "f5cdff9d36473f0cec9c24ce3e4bb02223ff3025f9a4a96d8b79a5aef4fcac25"
+  },
+  "screenshot": {
+    "file": "doc/reference/MCP浏览器页面验证.png",
+    "sha256": "bcb3c8d75ec9181004fd92d038ebbb4b0b0f40a9e315dfd5a1f8e5657a34a8f8",
+    "dimensions": [
+      1280,
+      720
+    ]
+  },
+  "not_verified": [
+    "跨机器 MCP 及公网反向代理",
+    "特定第三方 Agent 产品的配置界面",
+    "OAuth、已有 Chrome 复用、多 Worker 和高级浏览器工具"
+  ]
+}

@@ -1,0 +1,346 @@
+{
+  "schema": "runbridge-r4-verification-v1",
+  "version": "0.3.0",
+  "checked_at": "2026-10-12T09:01:16.291700+08:00",
+  "status": "PASS",
+  "environment": {
+    "platform": "Darwin",
+    "machine": "arm64",
+    "dependencies": {
+      "hub": {
+        "python": "3.14.7",
+        "pydantic": "2.14.0",
+        "websockets": "17.2",
+        "package": "0.3.0",
+        "uvicorn": "0.54.0"
+      },
+      "node": {
+        "python": "3.14.7",
+        "pydantic": "2.14.0",
+        "websockets": "17.2",
+        "package": "0.3.0",
+        "playwright": "1.63.0"
+      }
+    },
+    "chrome_version": "154.0.8037.99"
+  },
+  "suite_results": {
+    "hub": {
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0
+    },
+    "node": {
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0
+    },
+    "total_passed": 54
+  },
+  "verification_scope": {
+    "chrome": "Google Chrome; independent owner-started headless test Profile; login before Node starts",
+    "authorization": "BROWSER_INSTANCE; node/resource/creating grant; endpoint fixed locally",
+    "browser_lifecycle": "only test owner starts/closes Chrome; Node opens/closes WebSocket only"
+  },
+  "evidence": [
+    {
+      "test": "chrome_existing_login_and_detach",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:57:44.196180+00:00",
+      "details": {
+        "chrome_version": "154.0.8037.99",
+        "original_page_reused": true,
+        "business_login_preserved": true,
+        "cookie_and_local_storage_unchanged": true,
+        "native_page_actions_and_screenshot": true,
+        "browser_exit_commands_rejected": true,
+        "sdk_and_api_release_disconnect_only": true,
+        "old_objects_invalid": true,
+        "browser_survives": true
+      }
+    },
+    {
+      "test": "chrome_authorization_scope",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:57:48.502670+00:00",
+      "details": {
+        "scope": "BROWSER_INSTANCE",
+        "outside_resource_rejected": true,
+        "different_grant_rejected": true,
+        "endpoint_injection_rejected": true,
+        "wrong_protocol_and_sdk_rejected": true,
+        "idle_session_cleanup_complete": true
+      }
+    },
+    {
+      "test": "chrome_foreign_instance_targets",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:57:53.391454+00:00",
+      "details": {
+        "different_real_browser_target_rejected": true,
+        "different_browser_not_visible": true,
+        "both_browser_processes_survive": true
+      }
+    },
+    {
+      "test": "chrome_documented_examples",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:00.520633+00:00",
+      "details": {
+        "standalone_example_executed": true,
+        "guide_code_executed": true,
+        "original_page_reused": true,
+        "screenshot_verified": true
+      }
+    },
+    {
+      "test": "chrome_disconnect_lease",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:07.505796+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_grant-expiry",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:14.609303+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_revoke",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:19.761846+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_node-stop",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:24.013495+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "COMPLETE",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_node-kill",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:28.206549+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "UNKNOWN",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "chrome_disconnect_hub-restart",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:34.644949+00:00",
+      "details": {
+        "old_sdk_objects_invalid": true,
+        "original_target_detached": true,
+        "browser_process_survives": true,
+        "original_login_and_storage_preserved": true,
+        "hub_cleanup": "UNKNOWN",
+        "execution_outcome": "OUTCOME_UNKNOWN"
+      }
+    },
+    {
+      "test": "actual_cli_lifecycle",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:41.762324+00:00",
+      "details": {
+        "python_version": "3.14.7",
+        "client_version": "0.3.0",
+        "initial_generation": 1,
+        "reconnected_generation": 2,
+        "initial_heartbeats_observed": 2,
+        "registration_idempotent": true,
+        "wrong_identity_rejected": true,
+        "automatic_reconnect": true,
+        "revocation_survives_restart": true,
+        "offline_snapshot_marked_stale": true,
+        "secrets_absent_from_logs": true
+      }
+    },
+    {
+      "test": "duplicate_identity_replacement",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:43.836324+00:00",
+      "details": {
+        "old_process_stopped": true,
+        "replacement_online": true,
+        "generation_increased": true
+      }
+    },
+    {
+      "test": "invalid_node_identity",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:45.102354+00:00",
+      "details": {
+        "process_rejected": true,
+        "credential_not_printed": true
+      }
+    },
+    {
+      "test": "owned_browser_cleanup",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:46.098724+00:00",
+      "details": {
+        "runtime_version": "1.63.0",
+        "node_version": "v25.6.1",
+        "browser_process_exited": true
+      }
+    },
+    {
+      "test": "official_sdk_native_playwright",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:51.215382+00:00",
+      "details": {
+        "browser_version": "153.0.8010.12",
+        "screenshot_bytes": 1449333,
+        "screenshot_sha256": "648d2db0488eabb65a0ee00a33d56dd7fa44f1fd282fe0d70987ee1371370481",
+        "upload_bytes": 262144,
+        "download_bytes": 262144,
+        "download_sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "events": [
+          "dialog",
+          "popup",
+          "download"
+        ],
+        "native_route_callback": true,
+        "native_timeout_error": true,
+        "node_local_http_navigation": true,
+        "cleanup": "COMPLETE",
+        "native_trace_zip": true,
+        "resource_conflict_rejected": true,
+        "heartbeat_continues_during_execution": true,
+        "secrets_absent_from_logs": true
+      }
+    },
+    {
+      "test": "session_isolation_revoke_expiry",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:58:56.566137+00:00",
+      "details": {
+        "wrong_token_rejected": true,
+        "other_grant_rejected": true,
+        "revoked_connection_closed": true,
+        "revoked_resource_cleaned": true,
+        "unattached_session_lease_cleaned": true
+      }
+    },
+    {
+      "test": "active_sdk_restart",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:59:02.923327+00:00",
+      "details": {
+        "old_session_state": "INTERRUPTED",
+        "execution_outcome": "OUTCOME_UNKNOWN",
+        "new_connection_generation": 2,
+        "old_objects_invalid": true,
+        "new_session_ready_and_cleaned": true,
+        "abrupt_restart_unclaimed_session_interrupted": true
+      }
+    },
+    {
+      "test": "independent_example",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:59:07.278634+00:00",
+      "details": {
+        "official_sdk_connected": true,
+        "page_title": "RunBridge",
+        "screenshot_created_on_caller": true,
+        "resource_cleaned": true,
+        "documentation_python_block_executed": true
+      }
+    },
+    {
+      "test": "helper_crash_cleanup",
+      "status": "PASS",
+      "checked_at": "2026-10-12T00:59:08.067440+00:00",
+      "details": {
+        "helper_crashed": true,
+        "detached_owned_browser_reclaimed": true
+      }
+    }
+  ],
+  "source_hashes": {
+    "hub": {
+      "pyproject.toml": "5b102f0216165b5cb8a52d752262f76e76a75d7aa26c146dd4ff2f8672065124",
+      "src/runbridge_hub/__init__.py": "ec7b54a7769991185fdee2ba815c6e45312fe85eeea8ec504b46bfa1f4b135a9",
+      "src/runbridge_hub/api.py": "2798b06aacb5bd740a577c24fd808618e3b12e3d32beb03723e1316eae82946d",
+      "src/runbridge_hub/app.py": "b25921a04baf4fb5881a2a9213380563bfa920c165568b26d1a2446d7d82500f",
+      "src/runbridge_hub/cli.py": "216ef13f4e1e59ee5095dc8e8029493d7004c411d782006f4f4e1a7347f6fc7e",
+      "src/runbridge_hub/gateway.py": "211c5d37f99b81f82df27d30c3a94c86f0f2f2f6c01a67d207c741f26c857d2f",
+      "src/runbridge_hub/native.py": "01b941ce15d16f680eaa4450a0f65e178bd43034a3f5c0aefba65433960c9efd",
+      "src/runbridge_hub/protocol.py": "cace64f0c8b862a770339d665eed7cc5a463b933960bd3ae16e12a739337dea7",
+      "src/runbridge_hub/security.py": "578d0e61a2c4fc75e6bfad39bffb9ac1b6440db0d13946e23f340176d1629f85",
+      "src/runbridge_hub/service.py": "0b3b87ceefaf0948139f9a03469d4a879ce8ff80a06d7db642434a11d3cdedf4",
+      "src/runbridge_hub/sessions.py": "dc3c6590c934201e0a9238f4f38f3c553b24b809f6fbbca5d4b3a23f802af048",
+      "src/runbridge_hub/settings.py": "0ca6c2450140a8fba4f2e669aa2e3d56de21cc38619ad42d74e23f10b2cee467",
+      "src/runbridge_hub/store.py": "b3ca82ec57d4bb8ccecff068f3124a7cd8ad221e6fac8cd4297334418383c154",
+      "tests/test_r1.py": "a4b2dd175e922e30f8da35445f965d2f62d8866f37e5150dc1ba1668d5628d44",
+      "tests/test_sessions.py": "2f9c3ff9cb6e5b7c959083c6a5a716c00506b142f6d508da4c3b569976f106fe",
+      "uv.lock": "4507b093973df8911ad3c4f095f8746502ea7c5057600275752c612c08dad74c"
+    },
+    "node": {
+      "examples/chrome_reuse.py": "6c3464764e5c820938c1d34146566b9d9173488a50beb5744f95f82bdc6cc268",
+      "examples/playwright_smoke.py": "34d0848e55182f63241ca71dc19c560072e1b54a6b44eae3cd9b99368fe98049",
+      "pyproject.toml": "9aab01426cbbb86d8ec802585af8216e7209bc427c498f7d7732cf46008caad0",
+      "src/runbridge_node/__init__.py": "a27556f585a55cd65164bb4c7ffff3b152ec579687a9b427e6900ba6f1032d48",
+      "src/runbridge_node/capabilities.py": "43760008af1e4f66674f2f18c31e826abc97afcb4376eb73eea8619902bdc71d",
+      "src/runbridge_node/chrome.py": "3a7988661e2f6b8d00c9d1a1e6cf78bf4ebaf0fd1590a79512d44cd59d253297",
+      "src/runbridge_node/cli.py": "1956fa65c9b90e094396bdd6f95cc80571fa78f4bfb6828b44d485166e56db1a",
+      "src/runbridge_node/client.py": "c90b7b0a5a9cd68e35dd7a25829c2ea33112102b4f3df558d6275efe2ecfcba1",
+      "src/runbridge_node/config.py": "1eb60378851bd2a6a4eddacf3014be0429ccc1e3c950185fb611172cab5cc21e",
+      "src/runbridge_node/executor.py": "729520e3823e5d0de92a2ccce43d2d9d023687e6282a848d913ed721dad2a8a5",
+      "src/runbridge_node/playwright_runtime/package-lock.json": "57ffed357787b3d23e3ee8f40b82b68025442885a6db033900130f154432afcc",
+      "src/runbridge_node/playwright_runtime/package.json": "5aac73516b8de432ae5dfd8021a7bbb351c382b9cbfea6d206af163bfb5f1f80",
+      "src/runbridge_node/playwright_runtime/server.mjs": "9c583212e1acb54934d2bcacd158ee7eb15acbc41121660c33861b8e395a5b3b",
+      "src/runbridge_node/protocol.py": "cace64f0c8b862a770339d665eed7cc5a463b933960bd3ae16e12a739337dea7",
+      "src/runbridge_node/runtime.py": "6771ede42dd19a721a063365fc37e9504eb5eb7d2486db5d67d70e3f8fe6b7e3",
+      "tests/test_chrome.py": "ccb07236eb1ec160fb409fdba1e0610d39202e157197e21f6f93a4132c406e29",
+      "tests/test_config.py": "93a72cd0828dfd8787c6fc16aa95798fb382a8c897ad23b82f9b77c9348a17ad",
+      "tests/test_live_connection.py": "cfb5d8f41e7a10ef772a99430e69bffc37088f4692338384e5801906f8ef11d6",
+      "tests/test_playwright.py": "0fae7b2fe143f985764881356efc83a2cf152bf0e7eeede1a034211945e6fafa",
+      "uv.lock": "876f16f384ee8dddb15651afe86d4e6546d0d5d4a1b7df80b2db121b3dae34af"
+    }
+  },
+  "unverified": [
+    "extension or single-tab authorization",
+    "default daily Chrome without an authorized CDP endpoint",
+    "GUI minimized/locked/background edge cases",
+    "Linux/Windows/production TLS and proxies",
+    "all advanced CDP and Playwright methods",
+    "cross-Node deduplication of the same Chrome instance",
+    "100 users and 10 concurrent executions",
+    "Appium/ADB and independent business HTTP"
+  ]
+}

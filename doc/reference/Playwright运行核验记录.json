@@ -1,0 +1,428 @@
+{
+  "checked_at": "2026-10-11T23:28:50.423014+08:00",
+  "release_version": "0.2.0",
+  "result": "PASS",
+  "scope": "R0/R1 回归、R2 资源会话、R3 受管理 Chromium 原生连接与 SDK；独立 HTTP、已有浏览器、Appium 与容量不在本轮验收范围",
+  "stages": {
+    "R0_R1": "PASS",
+    "R2_resources_sessions": "PASS",
+    "R2_independent_http": "DEFERRED",
+    "R3_managed_chromium": "PASS",
+    "R4_existing_browser": "NOT_IMPLEMENTED",
+    "R5_appium_adb": "NOT_IMPLEMENTED",
+    "R6_capacity": "NOT_RUN"
+  },
+  "environments": [
+    {
+      "project": "runbridge-hub",
+      "python": "3.14.7",
+      "gil_enabled": true,
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "sqlite": "3.53.4",
+      "executable": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/.venv/bin/python",
+      "packages": {
+        "runbridge-hub": "0.2.0",
+        "pydantic": "2.14.0",
+        "pydantic-core": "2.50.0",
+        "fastapi": "0.143.0",
+        "starlette": "1.7.0",
+        "uvicorn": "0.54.0",
+        "websockets": "17.2",
+        "aiosqlite": "0.22.1",
+        "httpx": "0.28.1",
+        "pytest": "9.1.1"
+      },
+      "asgi_workers": 1,
+      "uvicorn_ws_implementation": "websockets",
+      "native_max_bytes": 16777216,
+      "ws_max_queue": 4
+    },
+    {
+      "project": "runbridge-node",
+      "python": "3.14.7",
+      "gil_enabled": true,
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "machine": "arm64",
+      "sqlite": "3.53.4",
+      "executable": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/.venv/bin/python",
+      "packages": {
+        "runbridge-node": "0.2.0",
+        "pydantic": "2.14.0",
+        "pydantic-core": "2.50.0",
+        "websockets": "17.2",
+        "httpx": "0.28.1",
+        "pytest": "9.1.1",
+        "playwright": "1.63.0",
+        "greenlet": "3.5.6",
+        "pyee": "13.0.1"
+      },
+      "node_binary": "/opt/homebrew/bin/node",
+      "node_version": "v25.6.1",
+      "npm_version": "11.9.0"
+    }
+  ],
+  "dependency_installation": {
+    "tool": "uv",
+    "index": "http://mirrors.aliyun.com/pypi/simple/",
+    "trusted_host": "mirrors.aliyun.com",
+    "virtual_environment": "each-project-root/.venv",
+    "python_lock": "each-project-root/uv.lock",
+    "node_runtime_lock": "runbridge-node/src/runbridge_node/playwright_runtime/package-lock.json"
+  },
+  "tests": {
+    "hub": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 0.856,
+      "cases": [
+        "test_registration_requires_enrollment[None]",
+        "test_registration_requires_enrollment[incorrect]",
+        "test_registration_is_idempotent_and_cannot_overwrite",
+        "test_validation_does_not_echo_secret_input",
+        "test_identity_and_caller_grants_have_separate_roles",
+        "test_resource_scope_filters_capabilities",
+        "test_grant_expiry_is_enforced",
+        "test_heartbeat_query_and_restart_snapshot",
+        "test_revocation_survives_restart",
+        "test_missing_heartbeat_marks_node_offline",
+        "test_old_connection_cleanup_cannot_remove_replacement",
+        "test_protocol_version_and_unknown_fields_are_rejected[message0]",
+        "test_protocol_version_and_unknown_fields_are_rejected[message1]",
+        "test_stale_generation_is_rejected",
+        "test_resource_must_be_ready_and_free[UNAVAILABLE-FREE-RESOURCE_NOT_READY]",
+        "test_resource_must_be_ready_and_free[READY-BUSY-RESOURCE_BUSY]",
+        "test_resource_scope_and_protocol_version_are_checked",
+        "test_native_frames_remain_typed_ordered_and_isolated",
+        "test_unknown_cleanup_does_not_release_resource",
+        "test_schema_one_migrates_without_losing_node_identity"
+      ]
+    },
+    "node": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 29.201,
+      "cases": [
+        "test_identity_file_is_private_and_never_overwritten",
+        "test_hub_url_disallows_credentials_and_non_http[ftp://example.test]",
+        "test_hub_url_disallows_credentials_and_non_http[https://user:secret@example.test]",
+        "test_hub_url_disallows_credentials_and_non_http[https://example.test?secret=value]",
+        "test_probe_reports_installed_tools_without_fake_ready_devices",
+        "test_actual_cli_connects_heartbeats_reconnects_and_persists",
+        "test_replaced_node_process_stops_and_replacement_remains_online",
+        "test_node_rejects_wrong_identity_without_retrying",
+        "test_unknown_launch_options_are_not_silently_ignored",
+        "test_browser_server_exits_and_owned_browser_is_gone",
+        "test_official_sdk_objects_events_files_and_errors",
+        "test_session_isolation_revocation_and_expiry",
+        "test_restart_interrupts_sdk_and_node_recovers_without_replay",
+        "test_independent_example_runs_and_releases",
+        "test_unknown_cleanup_marker_survives_node_restart",
+        "test_helper_crash_also_cleans_detached_owned_browser"
+      ]
+    }
+  },
+  "test_total": 36,
+  "live_process_checks": [
+    {
+      "test": "actual_cli_lifecycle",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:04.176616+00:00",
+      "details": {
+        "python_version": "3.14.7",
+        "client_version": "0.2.0",
+        "initial_generation": 1,
+        "reconnected_generation": 2,
+        "initial_heartbeats_observed": 2,
+        "registration_idempotent": true,
+        "wrong_identity_rejected": true,
+        "automatic_reconnect": true,
+        "revocation_survives_restart": true,
+        "offline_snapshot_marked_stale": true,
+        "secrets_absent_from_logs": true
+      }
+    },
+    {
+      "test": "duplicate_identity_replacement",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:06.112987+00:00",
+      "details": {
+        "old_process_stopped": true,
+        "replacement_online": true,
+        "generation_increased": true
+      }
+    },
+    {
+      "test": "invalid_node_identity",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:07.421160+00:00",
+      "details": {
+        "process_rejected": true,
+        "credential_not_printed": true
+      }
+    },
+    {
+      "test": "owned_browser_cleanup",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:08.251211+00:00",
+      "details": {
+        "runtime_version": "1.63.0",
+        "node_version": "v25.6.1",
+        "browser_process_exited": true
+      }
+    },
+    {
+      "test": "official_sdk_native_playwright",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:13.279036+00:00",
+      "details": {
+        "browser_version": "153.0.8010.12",
+        "screenshot_bytes": 1449342,
+        "screenshot_sha256": "5135c08b00cf9bc242c2657766215c19f4f4da77e69eceee377193cdbe1af71d",
+        "upload_bytes": 262144,
+        "download_bytes": 262144,
+        "download_sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "events": [
+          "dialog",
+          "popup",
+          "download"
+        ],
+        "native_route_callback": true,
+        "native_timeout_error": true,
+        "node_local_http_navigation": true,
+        "cleanup": "COMPLETE",
+        "native_trace_zip": true,
+        "resource_conflict_rejected": true,
+        "heartbeat_continues_during_execution": true,
+        "secrets_absent_from_logs": true
+      }
+    },
+    {
+      "test": "session_isolation_revoke_expiry",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:18.170200+00:00",
+      "details": {
+        "wrong_token_rejected": true,
+        "other_grant_rejected": true,
+        "revoked_connection_closed": true,
+        "revoked_resource_cleaned": true,
+        "unattached_session_lease_cleaned": true
+      }
+    },
+    {
+      "test": "active_sdk_restart",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:24.745218+00:00",
+      "details": {
+        "old_session_state": "INTERRUPTED",
+        "execution_outcome": "OUTCOME_UNKNOWN",
+        "new_connection_generation": 2,
+        "old_objects_invalid": true,
+        "new_session_ready_and_cleaned": true,
+        "abrupt_restart_unclaimed_session_interrupted": true
+      }
+    },
+    {
+      "test": "independent_example",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:28.804561+00:00",
+      "details": {
+        "official_sdk_connected": true,
+        "page_title": "RunBridge",
+        "screenshot_created_on_caller": true,
+        "resource_cleaned": true,
+        "documentation_python_block_executed": true
+      }
+    },
+    {
+      "test": "helper_crash_cleanup",
+      "status": "PASS",
+      "checked_at": "2026-10-11T15:26:29.538594+00:00",
+      "details": {
+        "helper_crashed": true,
+        "detached_owned_browser_reclaimed": true
+      }
+    }
+  ],
+  "native_frame_management_test": {
+    "evidence_level": "ASGI_TESTCLIENT_WITH_SIMULATED_NODE",
+    "binary_payload_bytes": 2097152,
+    "text_and_binary_types_preserved": true,
+    "ordering_and_unknown_native_fields_preserved": true
+  },
+  "source_hashes": {
+    "runbridge-hub": [
+      {
+        "path": ".python-version",
+        "sha256": "a876e0b10411037a012498b9fe18d9bc1df32ed8b722a13564dc944ddcfd9135"
+      },
+      {
+        "path": "README.md",
+        "sha256": "58f190b98196c78349a7104f7517c0cc2e6b9898fa78a9f114d724f60f78ef08"
+      },
+      {
+        "path": "doc/user-guide/Playwright快速开始.md",
+        "sha256": "81582e9994c64ccaa9d25a179838fa36cb9e8979337c658a2689cbcf5d863e55"
+      },
+      {
+        "path": "pyproject.toml",
+        "sha256": "6b2c2aa339505eb824c8ae65035e8b995a6e68037535cc64ebf50e34c13749dc"
+      },
+      {
+        "path": "src/runbridge_hub/__init__.py",
+        "sha256": "79e306e8d9f41240c157bc38f751300568a124b7478c06862695eae528c1b4bf"
+      },
+      {
+        "path": "src/runbridge_hub/api.py",
+        "sha256": "2798b06aacb5bd740a577c24fd808618e3b12e3d32beb03723e1316eae82946d"
+      },
+      {
+        "path": "src/runbridge_hub/app.py",
+        "sha256": "b25921a04baf4fb5881a2a9213380563bfa920c165568b26d1a2446d7d82500f"
+      },
+      {
+        "path": "src/runbridge_hub/cli.py",
+        "sha256": "216ef13f4e1e59ee5095dc8e8029493d7004c411d782006f4f4e1a7347f6fc7e"
+      },
+      {
+        "path": "src/runbridge_hub/gateway.py",
+        "sha256": "211c5d37f99b81f82df27d30c3a94c86f0f2f2f6c01a67d207c741f26c857d2f"
+      },
+      {
+        "path": "src/runbridge_hub/native.py",
+        "sha256": "49d86c7c6e3a5a3fcccd83923f3f32f1139ce214fd655f8546619fe02363ddbb"
+      },
+      {
+        "path": "src/runbridge_hub/protocol.py",
+        "sha256": "6166ad3d2e3d15c0bc8af87dea3d42a85a360d65f78d51abe26f2ce268acba8b"
+      },
+      {
+        "path": "src/runbridge_hub/security.py",
+        "sha256": "578d0e61a2c4fc75e6bfad39bffb9ac1b6440db0d13946e23f340176d1629f85"
+      },
+      {
+        "path": "src/runbridge_hub/service.py",
+        "sha256": "0b3b87ceefaf0948139f9a03469d4a879ce8ff80a06d7db642434a11d3cdedf4"
+      },
+      {
+        "path": "src/runbridge_hub/sessions.py",
+        "sha256": "a2aa5aa539b993b1053a5d0cc2bde75b697b520332ac31603a7258dbaf998348"
+      },
+      {
+        "path": "src/runbridge_hub/settings.py",
+        "sha256": "0ca6c2450140a8fba4f2e669aa2e3d56de21cc38619ad42d74e23f10b2cee467"
+      },
+      {
+        "path": "src/runbridge_hub/store.py",
+        "sha256": "b3ca82ec57d4bb8ccecff068f3124a7cd8ad221e6fac8cd4297334418383c154"
+      },
+      {
+        "path": "tests/test_r1.py",
+        "sha256": "a4b2dd175e922e30f8da35445f965d2f62d8866f37e5150dc1ba1668d5628d44"
+      },
+      {
+        "path": "tests/test_sessions.py",
+        "sha256": "637fc23b2cd4e0b28b1a98a132611f172caf997330d0d65050ec80cab06ee016"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "10f17646f302fdea03cf8e7c69f15df1729c3477cd7bff590261b80c4c62f48e"
+      }
+    ],
+    "runbridge-node": [
+      {
+        "path": ".python-version",
+        "sha256": "a876e0b10411037a012498b9fe18d9bc1df32ed8b722a13564dc944ddcfd9135"
+      },
+      {
+        "path": "README.md",
+        "sha256": "ff59c753831742b87981b49a24e9b0af22030a0e65a010643c144eb8bf5c413d"
+      },
+      {
+        "path": "doc/user-guide/Playwright快速开始.md",
+        "sha256": "3deed358f7ce7c99e9af2da5e603caad825add7ccb0a0e7e58abc3c6d45e0787"
+      },
+      {
+        "path": "examples/playwright_smoke.py",
+        "sha256": "34d0848e55182f63241ca71dc19c560072e1b54a6b44eae3cd9b99368fe98049"
+      },
+      {
+        "path": "pyproject.toml",
+        "sha256": "c245abcdcbdb1ac86a8835bebaee2de4ad963f4448d78408f4d05b32a6e7458c"
+      },
+      {
+        "path": "src/runbridge_node/__init__.py",
+        "sha256": "449761985eba281d9e2b211692c597cb2e1a561df9446e40f3fc6c68e75094b1"
+      },
+      {
+        "path": "src/runbridge_node/capabilities.py",
+        "sha256": "43760008af1e4f66674f2f18c31e826abc97afcb4376eb73eea8619902bdc71d"
+      },
+      {
+        "path": "src/runbridge_node/cli.py",
+        "sha256": "f8349342e68efc6a82b95fcc99c82ed1990328660400c666ae73050f4636309c"
+      },
+      {
+        "path": "src/runbridge_node/client.py",
+        "sha256": "0bfdef5557faa5372d942332424c46a5957864b18989dac3cf64c6e0395e8bc6"
+      },
+      {
+        "path": "src/runbridge_node/config.py",
+        "sha256": "1eb60378851bd2a6a4eddacf3014be0429ccc1e3c950185fb611172cab5cc21e"
+      },
+      {
+        "path": "src/runbridge_node/executor.py",
+        "sha256": "729520e3823e5d0de92a2ccce43d2d9d023687e6282a848d913ed721dad2a8a5"
+      },
+      {
+        "path": "src/runbridge_node/playwright_runtime/package-lock.json",
+        "sha256": "57ffed357787b3d23e3ee8f40b82b68025442885a6db033900130f154432afcc"
+      },
+      {
+        "path": "src/runbridge_node/playwright_runtime/package.json",
+        "sha256": "5aac73516b8de432ae5dfd8021a7bbb351c382b9cbfea6d206af163bfb5f1f80"
+      },
+      {
+        "path": "src/runbridge_node/playwright_runtime/server.mjs",
+        "sha256": "9c583212e1acb54934d2bcacd158ee7eb15acbc41121660c33861b8e395a5b3b"
+      },
+      {
+        "path": "src/runbridge_node/protocol.py",
+        "sha256": "6166ad3d2e3d15c0bc8af87dea3d42a85a360d65f78d51abe26f2ce268acba8b"
+      },
+      {
+        "path": "src/runbridge_node/runtime.py",
+        "sha256": "6771ede42dd19a721a063365fc37e9504eb5eb7d2486db5d67d70e3f8fe6b7e3"
+      },
+      {
+        "path": "tests/test_config.py",
+        "sha256": "93a72cd0828dfd8787c6fc16aa95798fb382a8c897ad23b82f9b77c9348a17ad"
+      },
+      {
+        "path": "tests/test_live_connection.py",
+        "sha256": "cfb5d8f41e7a10ef772a99430e69bffc37088f4692338384e5801906f8ef11d6"
+      },
+      {
+        "path": "tests/test_playwright.py",
+        "sha256": "0fae7b2fe143f985764881356efc83a2cf152bf0e7eeede1a034211945e6fafa"
+      },
+      {
+        "path": "uv.lock",
+        "sha256": "abd338f353c13fc82d5aec1ed82f2c22ecbf44cae2e527bc7ea134f8124724a2"
+      }
+    ]
+  },
+  "transport_tested": "loopback HTTP/WebSocket on one macOS arm64 host; separate Hub/Node CLI processes and official Python SDK",
+  "capacity_validation": "NOT_RUN",
+  "remote_tls_nat_other_os_validation": "NOT_RUN",
+  "warnings": [
+    "Hub Starlette TestClient 对 HTTPX 的弃用提示",
+    "Uvicorn websockets 后端的上游弃用提示；锁定版本完成拒绝握手和原生传输验证"
+  ],
+  "test_process_cleanup": "Fixtures terminated and waited all Hub/Node/HTTP child processes; actual browser PID exit and temporary directory cleanup verified",
+  "build_record": "构建产物核验记录.json (generated after build, excluded from sdist)"
+}
