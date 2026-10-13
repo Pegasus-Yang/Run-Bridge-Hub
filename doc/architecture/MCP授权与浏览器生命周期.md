@@ -2,7 +2,7 @@
 
 [文档导航](../README.md) · [使用与工具合同](../user-guide/MCP浏览器接入.md) · [原生会话架构](Playwright执行与会话管理.md)
 
-本文描述当前实现：Agent 通过 Hub 的 MCP 工具操作 Node 新建的受管理 Chromium。`mcp_server.py` 提供传输与工具，`browser.py` 持有 SDK 对象，现有 `SessionService` 继续负责授权、预约、租期和清理。Node 的 0.4.0 协议和受管理执行器不需要改动。
+本文描述当前实现：Agent 通过 Hub 的 MCP 工具操作 Node 新建的受管理 Chromium。`mcp_server.py` 提供传输与工具，`browser.py` 持有 SDK 对象，现有 `SessionService` 继续负责授权、预约、租期和清理。控制合同版本保持 1；Node 0.5.0 探测受管理 CDP 画面能力。
 
 ## 1. 凭据与授权建立
 
@@ -137,3 +137,7 @@ Hub 内部的 SDK 连接使用部署配置 `mcp_native_url`，不从外部请求
 | Agent 本次任务断开 | 先释放浏览器，再结束 MCP 客户端；Node 的长期控制连接继续在线 |
 
 本轮实测使用同一台 macOS 主机的独立 Hub/Node 进程和回环 HTTP/WebSocket。它验证完整协议链路；公网反向代理、跨机器 MCP 和不同 Agent 产品的 UI 配置兼容性尚未重新验收。
+
+## 0.5.0 的同页画面与启动请求
+
+browser_tools.py 提供原子交互和固定采集，managed_visual.py 从 browser.py 已持有的同一 Page 采集。采集任务不等待业务锁，页面选择和停止通过代次取消旧任务；visual.py 复用已有会话授权和有界分发。启动 request_id 按 grant/node 隔离，调用取消不重复创建；旧请求返回当前实际终态，清理结果仍由 Node 确认。详见[画面架构](浏览器画面采集与分发.md)。

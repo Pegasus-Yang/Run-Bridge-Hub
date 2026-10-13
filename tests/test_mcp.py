@@ -71,7 +71,7 @@ def test_discovery_and_scope_work_without_shared_transport_identity(mcp_client, 
     response = rpc(client=mcp_client, token=first["access_token"], protocol=protocol)
     assert response.status_code == 200, response.text
     tools = response.json()["result"]["tools"]
-    assert len(tools) == 12
+    assert len(tools) == 26
     assert "access_token" not in str(tools) and "node_token" not in str(tools)
     assert "mcp-session-id" not in response.headers
     own = call(client=mcp_client, token=first["access_token"], name="node_inspect", arguments={"node_id": "node_a"}, protocol=protocol)

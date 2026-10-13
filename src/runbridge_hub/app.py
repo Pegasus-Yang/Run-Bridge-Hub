@@ -48,7 +48,7 @@ def create_app(*, settings: HubSettings) -> FastAPI:
                 if mcp is not None:
                     from runbridge_hub.browser import BrowserService
 
-                    browsers = BrowserService(sessions=sessions, native_url=settings.mcp_native_url)
+                    browsers = BrowserService(sessions=sessions, native_url=settings.mcp_native_url, visual=visual)
                     app.state.browsers = browsers
 
                     async def close_extensions(*, session_id: str, reason: str) -> None:

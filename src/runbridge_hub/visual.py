@@ -31,6 +31,7 @@ class VisualChannel:
     selection_started_at: float | None = None
     last_stream_id: str | None = None
     last_sequence: int = 0
+    source: object | None = None
     subscribers: dict[asyncio.Queue, WebSocket] = field(default_factory=dict)
 
 
@@ -52,6 +53,9 @@ class VisualService:
     def supported(self, *, view: SessionView) -> bool:
         """画面声明只关联已配置的 Chrome 执行资源。"""
         live = self.sessions.nodes.connections.get(view.node_id)
+        if view.backend == "playwright":
+            channel = self.channels.get(view.session_id)
+            return bool(channel is not None and channel.source is not None and live is not None)
         if view.backend != "chrome-cdp" or live is None or live.capabilities is None:
             return False
         return any(item.name == view.backend and VISUAL_PROTOCOL in item.declared_protocols for item in live.capabilities.backends)
@@ -77,7 +81,7 @@ class VisualService:
         session = self.sessions.sessions.get(view.session_id)
         if session is None or self.sessions.nodes.connections.get(view.node_id) is not session.connection:
             return VisualView(supported=supported, reason_code="NODE_OFFLINE")
-        if view.backend != "chrome-cdp":
+        if view.backend != "chrome-cdp" and not supported:
             return VisualView(reason_code="UNSUPPORTED_BACKEND")
         if not supported:
             return VisualView(reason_code="EXTENSION_NOT_ADVERTISED")
@@ -101,6 +105,8 @@ class VisualService:
                     and self.active(session=session) and self.supported(view=item)):
                 result.streams.append(VisualStreamView(session_id=item.session_id, resource_id=item.resource_id,
                                                      **self.describe(view=item).model_dump()))
+        if result.streams:
+            result.supported = True
         return result
 
     def publish(self, *, channel: VisualChannel) -> None:
@@ -150,6 +156,8 @@ class VisualService:
                 raise ServiceError(status=410, code="SESSION_NOT_ACTIVE")
             if not self.supported(view=session.view):
                 raise ServiceError(status=409, code="VISUAL_UNSUPPORTED")
+            if session.view.backend != "chrome-cdp":
+                raise ServiceError(status=409, code="VISUAL_UPLOAD_FORBIDDEN")
             channel = self.channel(session=session)
             if channel.uploader is not None:
                 raise ServiceError(status=409, code="VISUAL_UPLOAD_BUSY")
@@ -232,6 +240,10 @@ class VisualService:
     async def select(self, *, session_id: str, target_id: str) -> VisualSelection:
         """串行受理选择，首张新图才完成切换。"""
         channel = self.channels.get(session_id)
+        if channel is not None and channel.source is not None:
+            if not self.active(session=channel.session):
+                raise ServiceError(status=409, code="SESSION_NOT_ACTIVE")
+            return await channel.source.select(target_id=target_id)
         if channel is None or not channel.hello or channel.uploader is None or not self.active(session=channel.session):
             raise ServiceError(status=409, code="VISUAL_UPLOAD_NOT_READY")
         self.refresh(channel=channel)
@@ -260,13 +272,15 @@ class VisualService:
         channel = self.channels.pop(session_id, None)
         if channel is None:
             return
+        if channel.source is not None:
+            await channel.source.close()
         self.clear(channel=channel)
         channel.view.state = "STOPPED"
         channel.view.stream_path = None
         channel.view.reason_code = reason
         self.publish(channel=channel)
         await asyncio.gather(*(close_websocket(websocket=socket, reason=reason)
-                               for socket in [channel.uploader, *channel.subscribers.values()]))
+                               for socket in [channel.uploader, *channel.subscribers.values()] if socket is not None))
 
     def detach(self, *, channel: VisualChannel, websocket: WebSocket) -> None:
         """断开仅影响画面，晚到的旧连接清理不覆盖新上传者。"""

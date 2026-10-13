@@ -10,13 +10,14 @@ from urllib.parse import urlsplit
 from mcp.server import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp_types import CallToolResult, ImageContent, TextContent, ToolAnnotations
-from playwright.async_api import Page, expect
-from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from playwright.async_api import expect
+from pydantic import Field, SecretStr
 from starlette.datastructures import Headers
 from starlette.responses import JSONResponse
 
 from runbridge_hub import __version__
 from runbridge_hub.browser import BrowserError, BrowserService
+from runbridge_hub.browser_tools import Target, locate, register_tools
 from runbridge_hub.protocol import Identifier
 from runbridge_hub.security import bearer_token
 from runbridge_hub.service import ServiceError
@@ -28,35 +29,6 @@ Timeout = Annotated[int, Field(ge=1, le=30000)]
 Lease = Annotated[float, Field(ge=1, le=3600)]
 TEXT_LIMIT = 20000
 IMAGE_LIMIT = 2 * 1024 * 1024
-
-
-class Target(BaseModel):
-    """使用精确语义或 CSS 定位，多个匹配时拒绝猜测。"""
-
-    model_config = ConfigDict(extra="forbid")
-    by: Literal["role", "label", "text", "test_id", "css"]
-    value: str = Field(min_length=1, max_length=2000)
-    name: str | None = Field(default=None, max_length=2000)
-
-
-async def locate(*, page: Page, target: Target):
-    """创建公开 Playwright 定位器并拒绝已知歧义。
-
-    :returns: 保持 Playwright 严格匹配语义的定位器。
-    """
-    if target.by == "role":
-        locator = page.get_by_role(role=target.value, name=target.name, exact=True)
-    elif target.by == "label":
-        locator = page.get_by_label(text=target.value, exact=True)
-    elif target.by == "text":
-        locator = page.get_by_text(text=target.value, exact=True)
-    elif target.by == "test_id":
-        locator = page.get_by_test_id(test_id=target.value)
-    else:
-        locator = page.locator(selector=f"css={target.value}")
-    if await locator.count() > 1:
-        raise BrowserError(code="AMBIGUOUS_TARGET")
-    return locator
 
 
 def result(*, values: dict, error: bool = False, image: bytes | None = None) -> CallToolResult:
@@ -129,14 +101,14 @@ def build_mcp(*, hub, settings: HubSettings):
         return (await hub.state.service.query(node_id=node_id, token=token())).model_dump(mode="json")
 
     @tool()
-    async def browser_start(node_id: Identifier, resource_id: Identifier | None = None, lease_seconds: Lease = 300) -> dict:
+    async def browser_start(node_id: Identifier, resource_id: Identifier | None = None, lease_seconds: Lease = 300, request_id: Identifier | None = None) -> dict:
         """创建新的受管理 Chromium 和空白页，返回 session_id/page_id；单资源时可省略 resource_id。"""
-        return await browsers().open(node_id=node_id, token=token(), resource_id=resource_id, lease_seconds=lease_seconds)
+        return await browsers().open(node_id=node_id, token=token(), resource_id=resource_id, lease_seconds=lease_seconds, request_id=request_id)
 
     @tool(readonly=True, idempotent=True)
-    async def browser_sessions(node_id: Identifier) -> dict:
+    async def browser_sessions(node_id: Identifier, request_id: Identifier | None = None) -> dict:
         """列出当前访问许可创建的活动 MCP 浏览器，供中断后找回句柄。"""
-        return await browsers().listing(node_id=node_id, token=token())
+        return await browsers().listing(node_id=node_id, token=token(), request_id=request_id)
 
     @tool(readonly=True, idempotent=True)
     async def browser_status(session_id: Identifier) -> dict:
@@ -205,13 +177,15 @@ def build_mcp(*, hub, settings: HubSettings):
             return {"matched": True}
 
     @tool(readonly=True, idempotent=True)
-    async def browser_screenshot(session_id: Identifier, page_id: Identifier, timeout_ms: Timeout = 10000) -> CallToolResult:
+    async def browser_screenshot(session_id: Identifier, page_id: Identifier, full_page: bool = False, timeout_ms: Timeout = 10000) -> CallToolResult:
         """返回当前视口 PNG 图像，不写 Hub 或 Node 文件；最大 2 MiB。"""
         async with browsers().page(session_id=session_id, page_id=page_id, token=token(), timeout_ms=timeout_ms) as page:
-            data = await page.screenshot(type="png", full_page=False, timeout=timeout_ms)
+            data = await page.screenshot(type="png", full_page=full_page, timeout=timeout_ms)
             if len(data) > IMAGE_LIMIT:
                 raise BrowserError(code="SCREENSHOT_TOO_LARGE")
             return result(values={"mime_type": "image/png", "bytes": len(data)}, image=data)
+
+    register_tools(tool=tool, browsers=browsers, token=token)
 
     app = server.streamable_http_app(streamable_http_path="/mcp", json_response=True, stateless_http=True,
                                     transport_security=TransportSecuritySettings(allowed_hosts=settings.mcp_allowed_hosts, allowed_origins=settings.mcp_allowed_origins))

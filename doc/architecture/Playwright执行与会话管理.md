@@ -2,7 +2,7 @@
 
 [文档导航](../README.md) · [会话接口](../reference/会话接口与原生连接.md) · [阶段验收](../project/Playwright阶段验收记录.md)
 
-当前版本为 0.4.0；本文说明受管理 Chromium 路线，已有 Chrome 的路线见[Chrome 复用与授权清理](Chrome复用与授权清理.md)。在 R0/R1 之上完成 R2 的资源/会话部分和 R3 的受管理 Chromium 原生接入。R2 的独立业务 HTTP 执行、Appium/ADB 和容量压测未实施。本文件描述当前代码，定稿路线保留在 `doc/design/`。
+当前版本为 0.5.0；本文说明受管理 Chromium 路线，已有 Chrome 的路线见[Chrome 复用与授权清理](Chrome复用与授权清理.md)。在 R0/R1 之上完成 R2 的资源/会话部分和 R3 的受管理 Chromium 原生接入。R2 的独立业务 HTTP 执行、Appium/ADB 和容量压测未实施。本文件描述当前代码，定稿路线保留在 `doc/design/`。
 
 ## 执行路径与模块
 
@@ -79,3 +79,9 @@ SQLite v2 新增 `sessions`；保存公开状态、归属、代次与时间，�
 原生方法调用错误保持 SDK 原始内容；浏览器启动失败作为管理准备错误返回公开错误码，helper 不把可能含本地启动秘密的原始日志交付调用方。启动失败排查见[运行与排障](../deployment/Playwright运行与排障.md)。
 
 R4 Chrome CDP 的实际验收另见[Chrome 记录](../project/R4Chrome复用验收记录.md)。本文件的受管理矩阵仍以 macOS 为基线，扩展、Firefox/WebKit、独立 HTTP 执行、Appium、远程 TLS/NAT、受管理 Linux/Windows、超大输出/慢接收者压力和 100 在线/10 并发尚未验收。已有 Chrome 模式另已完成[Ubuntu ARM64 跨机器与字体测试](../project/虚拟机Node跨机器验收记录.md)，不推及受管理后端。该矩阵证明代表性原生能力可用，不等于对 Playwright 所有方法逐项认证。
+
+## 受管理 MCP 与临时目录更新
+
+0.5.0 的 Node 用专用探测页面确认 `managed_visual=cdp-png`；Hub MCP 持有的同一页面可提供持续画面，详见[画面架构](浏览器画面采集与分发.md)。普通 SDK 对象归属保持原有语义。浏览器临时文件位于私有短路径 `/tmp/rb-*`（POSIX），避免长 runtime_directory 使 Chromium UNIX SingletonSocket 超长。仅实际进程退出确认后删除，UNKNOWN 保留目录及隔离。
+
+新增实际范围为 Ubuntu ARM64、Playwright 1.63.0、Chromium 153.0.8010.12 的受管理 MCP 操作和持续画面；历史 macOS 矩阵保留原验证范围，不扩展为全部 SDK 方法认证。详见[DSH 与受管理画面联调](../project/DSH与受管理画面联调.md)。

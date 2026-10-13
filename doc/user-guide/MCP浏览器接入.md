@@ -2,7 +2,7 @@
 
 [文档导航](../README.md) · [运行时序](../architecture/MCP授权与浏览器生命周期.md) · [受管理 Chromium 准备](Playwright快速开始.md)
 
-当前源码在 Hub 0.4.0 基础上增加可选 `/mcp` 入口。Agent 的 MCP 客户端通过访问许可操作 Node 上**新建的受管理 Chromium**。浏览器运行在 Node；Hub 安装 Playwright 客户端，不需要安装 Chromium。Node 继续使用现有 0.4.0 控制和执行协议，无需安装 MCP 包。
+当前版本为 Hub 0.5.0，提供可选 `/mcp` 入口。Agent 的 MCP 客户端通过访问许可操作 Node 上**新建的受管理 Chromium**。浏览器运行在 Node；Hub 安装 Playwright 客户端，不需要安装 Chromium。Node 0.5.0 使用控制合同版本 1 和原生 Playwright 执行协议，无需安装 MCP 包。
 
 ## 1. 准备和启动
 
@@ -77,7 +77,7 @@ uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --r
 | 工具 | 其他主要参数 | 结果/限制 |
 | --- | --- | --- |
 | `node_inspect` | `node_id` | 许可内节点和资源快照 |
-| `browser_start` | `node_id`、可选 `resource_id`、`lease_seconds` | 新 Context、空白页，视口 1280×720、locale `zh-CN` |
+| `browser_start` | `node_id`、可选 `resource_id`、`lease_seconds`、`request_id` | 新 Context、空白页，视口 1280×720、locale `zh-CN` |
 | `browser_sessions` | `node_id` | 此 grant 当前活动 MCP 会话，不含其他 grant |
 | `browser_status` | `session_id` | 持久会话状态及仍有效的页面 ID/URL |
 | `browser_stop` | `session_id` | 幂等释放；不等待页面工具锁 |
@@ -87,11 +87,29 @@ uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --r
 | `browser_click` | `target` | 唯一目标的普通点击，不自动重试结果未知的动作 |
 | `browser_read` | `target`、`kind=text/input_value` | 最多 20000 字符，包含 `truncated` |
 | `browser_wait_for` | `target`、`state`、可选 `value` | `visible/hidden/attached/detached/text/value`；后两种要求完整预期值 |
-| `browser_screenshot` | 无 | 当前视口 PNG，MCP ImageContent，最大 2 MiB；不写远端文件 |
+| `browser_screenshot` | 可选 `full_page` | PNG，MCP ImageContent，最大 2 MiB；不写远端文件 |
 
-`target` 结构：`{"by":"role|label|text|test_id|css","value":"定位值","name":"可选角色名称"}`。`role` 的 `value` 是 `button`、`textbox` 等角色，`name` 是可访问名称；其余方式不使用 `name`。文本和名称精确匹配；已有多个匹配时返回 `AMBIGUOUS_TARGET`，不默认选第一个。CSS 按 CSS 解释，不开放任意 JavaScript 执行。
+`target` 结构：`{"by":"role|label|text|test_id|css","value":"定位值","name":"可选角色名称","frame_selector":"可选 iframe CSS"}`。`role` 的 `value` 是 `button`、`textbox` 等角色，`name` 是可访问名称；其余方式不使用 `name`。文本和名称精确匹配；已有多个匹配时返回 `AMBIGUOUS_TARGET`，不默认选第一个。CSS 按 CSS 解释，不开放任意 JavaScript 执行。
 
-页面 ID 仅在所属会话内有效。浏览器弹出新页面时会分配新 ID，可由 `browser_status` 查询；本期没有专门的创建/关闭标签页、Frame、文件上传下载、对话框、滚动或任意脚本工具。已有 Chrome 复用、OAuth、续租和多 Worker 也不在本期范围。
+页面 ID 仅在所属会话内有效。以下工具补齐正常测试所需的能力；页面工具继续要求本次 session_id/page_id，只有 browser_tabs 例外。
+
+| 工具 | 主要参数与结果 |
+| --- | --- |
+| `browser_inspect_dom` | CSS selector，返回标签、属性和文本，最多 200 元素/256 KiB；用于真实定位 |
+| `browser_capture` | captures 与 allowed_origins；固定 DOM 模式 text/number/count/visible/url/attribute/value，同次读取核对来源，拒绝歧义与超大结果 |
+| `browser_press_key` | key，可选 target；键盘动作单独记录 |
+| `browser_select_option` | target、字符串数组 values；返回实际选中的值 |
+| `browser_check` | target、checked；返回实际状态 |
+| `browser_hover` / `browser_drag` | 唯一 target；拖拽另有 source |
+| `browser_scroll` | delta_x、delta_y；不自动缩放 |
+| `browser_navigate_back` | 返回历史并等待 DOM 就绪 |
+| `browser_resize` | width 320～4096、height 200～4096 |
+| `browser_frames` | frame 名称和地址；操作用 target.frame_selector 明确 frame |
+| `browser_tabs` | action=list/new/select/close；默认列页；select/close 要明确 page_id，可在所有页关闭后再 new |
+| `browser_handle_dialog` | accept、可选 prompt_text；触发前配置下一次策略，未配置时 dismiss |
+| `browser_file_upload` | target、files；name/mime_type/base64 data，合计最多 4 MiB，空列表清空 |
+
+受管理 MCP 页面有持续 PNG 流，见[画面接口](../reference/浏览器画面流接口.md)。这些工具替代测试插件正常交互、固定采集和生命周期；不开放任意 evaluate/run_code、下载、网络拦截或整个 Playwright SDK。已有 Chrome 复用、OAuth、续租和多 Worker 不在这组 MCP 工具内。
 
 ## 5. 错误和中断恢复
 
@@ -108,6 +126,8 @@ uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --r
 | `AMBIGUOUS_TARGET` | 重新观察，收窄定位条件 |
 | `OPERATION_TIMEOUT` / `OPERATION_INTERRUPTED` / `OPERATION_FAILED` | 写动作已进入执行阶段时标记 `OUTCOME_UNKNOWN`；先观察或查业务系统，不能盲目再次提交 |
 | `cleanup=PENDING/UNKNOWN` | 清理没有确认；查询状态，不能当作 COMPLETE |
+
+启动可传唯一 request_id，Hub 按 grant/node/request 保留单次创建结果；参数改变会拒绝。同一请求的已结束会话不会被复活。响应丢失时用 browser_sessions(request_id) 核对，不盲目重复申请；Hub 重启后的未知创建仍需所有者确认。
 
 MCP HTTP 连接结束不会立即释放浏览器。客户端重连后可用同一个 grant 调用 `browser_sessions` 找回会话，再停止或继续操作；到期会自动清理。Hub 重启或 Node 断开会使原生对象失效，不能恢复旧 Page 对象。许可撤销会立刻触发会话关闭；被撤销的 token 也不能继续查询状态，应由所有者检查资源或签发新许可。
 

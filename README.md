@@ -2,14 +2,14 @@
 
 RunBridge 的服务端：管理节点、访问许可和执行会话，转发浏览器执行协议，并提供可选 MCP 浏览器工具和浏览器画面数据流。
 
-当前版本 **0.4.0**。Hub、Node 和调用方可以位于不同机器；Node 主动建立出站连接，本机浏览器调试端口不暴露给调用方。
+当前版本 **0.5.0**。Hub、Node 和调用方可以位于不同机器；Node 主动建立出站连接，本机浏览器调试端口不暴露给调用方。
 
 ## 能做什么
 
 | 场景 | 执行方式 | 画面 |
 | --- | --- | --- |
-| 新建受管理 Chromium | 官方 Playwright `chromium.connect()` | 当前不支持独立画面流 |
-| Agent 通过 MCP 操作新建 Chromium | 可选 `/mcp`，12 个浏览器与会话工具 | MCP 单次 PNG 截图 |
+| 新建受管理 Chromium | 官方 Playwright `chromium.connect()` | 普通 SDK 会话无独立画面流 |
+| Agent 通过 MCP 操作新建 Chromium | 可选 `/mcp`，26 个浏览器与会话工具 | MCP PNG 截图与同一页面的持续画面 |
 | 复用已授权 Chrome 的页面和登录 | 官方 Playwright `chromium.connect_over_cdp()` | Node 安装 `visual` 扩展后支持 |
 | 查询节点、资源和会话 | RunBridge HTTP JSON API | 查询一起返回画面状态与订阅路径 |
 
