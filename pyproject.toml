@@ -1,0 +1,43 @@
+[project]
+name = "runbridge-hub"
+version = "0.4.0"
+description = "RunBridge 节点管理与连接网关"
+readme = "README.md"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "aiosqlite>=0.21,<1",
+    "fastapi>=0.115,<1",
+    "packaging>=25",
+    "pydantic>=2.12,<3",
+    "uvicorn>=0.35,<1",
+    "websockets>=15,<18",
+]
+
+[project.scripts]
+runbridge-hub = "runbridge_hub.cli:main"
+
+[project.optional-dependencies]
+mcp = [
+    "mcp==2.3.0",
+    "playwright==1.63.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["httpx>=0.28,<1", "pytest>=8.4,<10", "pytest-asyncio>=1.2,<2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = ["browser: 需要显式启用的真实受管理浏览器联调"]
+
+[[tool.uv.index]]
+name = "aliyun"
+url = "http://mirrors.aliyun.com/pypi/simple/"
+default = true
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/doc/reference/构建产物核验记录.json", "/doc/reference/文档核验记录.json", "/doc/reference/R4构建产物核验记录.json", "/doc/reference/R4文档核验记录.json", "/doc/reference/画面流构建产物核验记录.json", "/doc/reference/画面流文档核验记录.json"]

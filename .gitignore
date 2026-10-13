@@ -1,0 +1,39 @@
+# Python 环境、字节码和工具缓存
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 构建产物与测试输出；依赖锁文件保留在版本管理中
+/build/
+/dist/
+*.egg-info/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+/test-results/
+/playwright-report/
+
+# 本地运行目录包含身份凭据、SQLite 和浏览器临时数据
+.runbridge/
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.db
+*.db-*
+*.log
+*.token
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# 编辑器配置与 macOS 临时文件
+.idea/
+.vscode/
+.DS_Store
+._*
