@@ -24,6 +24,7 @@
 | 读者 | 主要工作 | 推荐文档 |
 | --- | --- | --- |
 | Hub 部署者 | 安装、监听地址、登记凭据、SQLite、备份和升级 | [安装](deployment/安装与运行.md)、[跨机器部署](deployment/跨机器部署与中文字体.md)、[排障](deployment/Playwright运行与排障.md) |
+| 继续本次本机／虚拟机测试 | 查 SSH、实际地址、操作目录、配置与数据、许可状态 | [本机与虚拟机测试环境记录](deployment/本机与虚拟机测试环境记录.md)、[完整环境快照](reference/本机与虚拟机测试环境快照.json) |
 | Node 所有者 | 登记、准备浏览器、实例授权、签发和撤销许可 | [首次连通](user-guide/快速开始.md)、[Chrome](user-guide/Chrome复用快速开始.md)、[受管理模式](user-guide/Playwright快速开始.md) |
 | 调用方开发者 | HTTP 会话管理、官方 SDK 执行、查询和订阅 | [对接指南](user-guide/调用方对接与使用.md)、[接口总览](reference/对外接口总览.md)、[完整示例](reference/examples/README.md) |
 | 维护者 | 理解模块、协议边界、生命周期与实际验证范围 | 下方当前架构、接口参考和验收证据 |

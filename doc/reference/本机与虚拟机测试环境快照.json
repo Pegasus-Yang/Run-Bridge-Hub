@@ -1,0 +1,1058 @@
+{
+  "captured_at": "2026-10-13T21:32:06.455071+08:00",
+  "capture_scope": "只读 SSH、HTTP、配置元数据与 SQLite 查询；没有创建许可、执行浏览器会话或改变服务配置",
+  "host": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "hub_project": {
+      "python": "3.14.7",
+      "package_directory": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/src/runbridge_hub/__init__.py",
+      "packages": {
+        "aiosqlite": "0.22.1",
+        "annotated-doc": "0.0.5",
+        "annotated-types": "0.8.0",
+        "anyio": "4.15.1",
+        "attrs": "26.1.0",
+        "certifi": "2026.7.22",
+        "cffi": "2.1.1",
+        "click": "8.5.0",
+        "cryptography": "50.0.2",
+        "fastapi": "0.143.0",
+        "greenlet": "3.5.6",
+        "h11": "0.16.0",
+        "httpcore": "1.0.9",
+        "httpcore2": "2.13.1",
+        "httpx": "0.28.1",
+        "httpx2": "2.13.1",
+        "idna": "3.20",
+        "iniconfig": "2.3.1",
+        "jsonschema": "4.26.0",
+        "jsonschema-specifications": "2025.9.1",
+        "mcp": "2.3.0",
+        "mcp-types": "2.3.0",
+        "opentelemetry-api": "1.45.1",
+        "packaging": "26.3",
+        "playwright": "1.63.0",
+        "pluggy": "1.6.0",
+        "pycparser": "3.11",
+        "pydantic": "2.14.0",
+        "pydantic_core": "2.50.0",
+        "pyee": "13.0.1",
+        "Pygments": "2.21.0",
+        "PyJWT": "2.15.1",
+        "pytest": "9.1.1",
+        "pytest-asyncio": "1.4.0",
+        "python-multipart": "0.0.32",
+        "referencing": "0.37.0",
+        "rpds-py": "2026.9.1",
+        "runbridge-hub": "0.4.0",
+        "sse-starlette": "3.5.0",
+        "starlette": "1.7.0",
+        "truststore": "0.10.5",
+        "typing-inspection": "0.4.4",
+        "typing_extensions": "4.16.0",
+        "uvicorn": "0.54.0",
+        "websockets": "17.2"
+      },
+      "source_directory": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub",
+      "venv_directory": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/.venv",
+      "python_entry": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/.venv/bin/python",
+      "resolved_python_entry": "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+      "python_version_file": "3.14",
+      "dependency_files": [
+        "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/pyproject.toml",
+        "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub/uv.lock"
+      ],
+      "git_commit_before_environment_documentation": "d19bf1b625bc81cc24c2c453a09cd8a6818899c3"
+    },
+    "node_project": {
+      "python": "3.14.7",
+      "package_directory": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/src/runbridge_node/__init__.py",
+      "packages": {
+        "annotated-doc": "0.0.5",
+        "annotated-types": "0.8.0",
+        "anyio": "4.15.1",
+        "browscreen": "0.3.1",
+        "certifi": "2026.7.22",
+        "click": "8.5.0",
+        "fastapi": "0.143.0",
+        "greenlet": "3.5.6",
+        "h11": "0.16.0",
+        "httpcore": "1.0.9",
+        "httpx": "0.28.1",
+        "idna": "3.20",
+        "iniconfig": "2.3.1",
+        "opentelemetry-api": "1.45.1",
+        "packaging": "26.3",
+        "pillow": "12.3.0",
+        "playwright": "1.63.0",
+        "pluggy": "1.6.0",
+        "pydantic": "2.14.0",
+        "pydantic_core": "2.50.0",
+        "pyee": "13.0.1",
+        "Pygments": "2.21.0",
+        "pytest": "9.1.1",
+        "pytest-asyncio": "1.4.0",
+        "runbridge-node": "0.4.0",
+        "starlette": "1.7.0",
+        "typing-inspection": "0.4.4",
+        "typing_extensions": "4.16.0",
+        "uvicorn": "0.54.0",
+        "websockets": "17.2"
+      },
+      "source_directory": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node",
+      "venv_directory": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/.venv",
+      "python_entry": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/.venv/bin/python",
+      "resolved_python_entry": "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+      "python_version_file": "3.14",
+      "dependency_files": [
+        "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/pyproject.toml",
+        "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/uv.lock"
+      ],
+      "git_commit_before_environment_documentation": "b23f6d3c0e8d4d7ae57173e4e075d2acd00750fc"
+    },
+    "uv_entry": "/opt/homebrew/bin/uv",
+    "nodejs_entry": "/Users/pegasus-yang/.nvm/versions/node/v22.22.3/bin/node",
+    "ssh": {
+      "destination": "pegasus@192.168.20.129",
+      "host": "192.168.20.129",
+      "port": 22,
+      "user": "pegasus",
+      "authentication_verified": "publickey",
+      "identity_file": "/Users/pegasus-yang/.ssh/id_rsa",
+      "private_key_content_recorded": false
+    }
+  },
+  "retained_vm_test": {
+    "hub": {
+      "url": "http://192.168.20.1:49762",
+      "port": 49762,
+      "pid": 93396,
+      "working_directory": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-hub",
+      "launcher": "/private/tmp/runbridge-vm-hub.py",
+      "runtime_directory": "/private/tmp/runbridge-vm-test-20261013-011904",
+      "heartbeat_interval_seconds": 1,
+      "heartbeat_timeout_seconds": 10,
+      "workers": 1,
+      "uvicorn_loop": "asyncio",
+      "websocket_backend": "websockets",
+      "access_log": false,
+      "health_http_status": 200,
+      "mcp_http_status": 404,
+      "files": [
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/enrollment.token",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 65
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-after.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 746
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-after.png",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 40832
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-before.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 700
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-before.png",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 8366
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-final-state.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 177
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-installation.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 1804
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-original-owner-state.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 210
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-service-restart.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 216
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-stream-result.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 556
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-stream.png",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 17075
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/hub-runtime.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 69
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/hub.log",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 13018
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/hub.sqlite3",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 4096
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/hub.sqlite3-shm",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 32768
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/hub.sqlite3-wal",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 490312
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/installation-check.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 296
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/node-runtime.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 15
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/other-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/owner-runtime.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 243
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/stop-services.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 2021
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/vm-disconnect-result.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 477
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/vm-stream.png",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 10713
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/vm-test-result.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 1630
+        }
+      ],
+      "access_files": [
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "grant_id": "grant_ffb3fec2e3124003a5bb62763b5ab27c",
+          "expires_at": "2026-10-12T18:23:01.922032Z",
+          "access_token_present": true,
+          "expired_at_capture": true
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/other-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "grant_id": "grant_a17c9e636cf8428e89fbe7a8afeeb6a3",
+          "expires_at": "2026-10-12T18:23:02.139415Z",
+          "access_token_present": true,
+          "expired_at_capture": true
+        },
+        {
+          "path": "/private/tmp/runbridge-vm-test-20261013-011904/font-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "grant_id": "grant_56e5f840788d46e88803c23b414ef40e",
+          "expires_at": "2026-10-13T01:12:40.236997Z",
+          "access_token_present": true,
+          "expired_at_capture": true
+        }
+      ],
+      "database": {
+        "path": "/private/tmp/runbridge-vm-test-20261013-011904/hub.sqlite3",
+        "schema_version": 2,
+        "tables": [
+          "nodes",
+          "grants",
+          "sessions"
+        ],
+        "nodes": [
+          {
+            "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+            "name": "ubuntu-arm64-vm",
+            "generation": 7,
+            "last_seen_at_in_database": "2026-10-13T06:55:59.272087+00:00"
+          }
+        ],
+        "grants": [
+          {
+            "grant_id": "grant_ffb3fec2e3124003a5bb62763b5ab27c",
+            "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+            "resource_ids": [
+              "vm-chrome"
+            ],
+            "created_at": "2026-10-12T17:23:01.922032+00:00",
+            "expires_at": "2026-10-12T18:23:01.922032+00:00",
+            "revoked_at": null
+          },
+          {
+            "grant_id": "grant_a17c9e636cf8428e89fbe7a8afeeb6a3",
+            "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+            "resource_ids": [
+              "vm-chrome"
+            ],
+            "created_at": "2026-10-12T17:23:02.139415+00:00",
+            "expires_at": "2026-10-12T18:23:02.139415+00:00",
+            "revoked_at": null
+          },
+          {
+            "grant_id": "grant_56e5f840788d46e88803c23b414ef40e",
+            "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+            "resource_ids": [
+              "vm-chrome"
+            ],
+            "created_at": "2026-10-13T00:12:40.236997+00:00",
+            "expires_at": "2026-10-13T01:12:40.236997+00:00",
+            "revoked_at": null
+          },
+          {
+            "grant_id": "grant_b1c0fbd975bd43758b27295161a23a10",
+            "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+            "resource_ids": [
+              "vm-chrome"
+            ],
+            "created_at": "2026-10-13T01:38:22.913511+00:00",
+            "expires_at": "2026-10-13T01:53:22.913511+00:00",
+            "revoked_at": "2026-10-13T01:51:43.111429+00:00"
+          }
+        ],
+        "session_count": 9,
+        "session_states": {
+          "CLOSED": 8,
+          "INTERRUPTED": 1
+        },
+        "cleanup_counts": {
+          "COMPLETE": 8,
+          "UNKNOWN": 1
+        },
+        "active_session_count": 0
+      }
+    },
+    "vm_node": {
+      "observed_at": "2026-10-13T13:32:06.473633+00:00",
+      "deployment_directory": "/home/pegasus/runbridge-visual-test-20261012-171400",
+      "recommended_operation_directory": "/home/pegasus/runbridge-visual-test-20261012-171400",
+      "os": "Ubuntu 26.04.1 LTS",
+      "kernel_platform": "Linux-7.0.0-31-generic-aarch64-with-glibc2.43",
+      "python": "3.14.4",
+      "packages": {
+        "annotated-doc": "0.0.5",
+        "annotated-types": "0.8.0",
+        "anyio": "4.15.1",
+        "browscreen": "0.3.1",
+        "certifi": "2026.7.22",
+        "click": "8.5.0",
+        "fastapi": "0.143.0",
+        "h11": "0.16.0",
+        "httpcore": "1.0.9",
+        "httpx": "0.28.1",
+        "idna": "3.20",
+        "opentelemetry-api": "1.45.1",
+        "pillow": "12.3.0",
+        "pydantic": "2.14.1",
+        "pydantic_core": "2.50.1",
+        "runbridge-node": "0.4.0",
+        "starlette": "1.7.0",
+        "typing-inspection": "0.4.4",
+        "typing_extensions": "4.16.0",
+        "uvicorn": "0.54.0",
+        "websockets": "17.2"
+      },
+      "uv_entry": "/home/pegasus/runbridge-visual-test-20261012-171400/tools/uv",
+      "uv_version": "uv 0.13.0 (aarch64-unknown-linux-gnu)",
+      "configuration": {
+        "node": {
+          "config_version": 1,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "name": "ubuntu-arm64-vm",
+          "node_token_present": true
+        },
+        "chrome": {
+          "resource_id": "vm-chrome",
+          "authorization_scope": "BROWSER_INSTANCE",
+          "cdp_endpoint": "ws://127.0.0.1:45301/devtools/browser/<browser-id>"
+        }
+      },
+      "processes": [
+        {
+          "role": "node",
+          "pid": 597081,
+          "alive": true,
+          "executable": "/usr/bin/python3.14",
+          "working_directory": "/home/pegasus"
+        },
+        {
+          "role": "browser_owner",
+          "pid": 596943,
+          "alive": true,
+          "executable": "/usr/bin/python3.14",
+          "working_directory": "/home/pegasus"
+        },
+        {
+          "role": "browser",
+          "pid": 596945,
+          "alive": true,
+          "executable": "/home/pegasus/.cache/ms-playwright/chromium-1243/chrome-linux-arm64/chrome",
+          "working_directory": "/home/pegasus"
+        }
+      ],
+      "node_hub_tcp_established": true,
+      "owner_runtime": {
+        "owner_pid": 596943,
+        "browser_pid": 596945,
+        "url": "http://127.0.0.1:39433/account",
+        "profile": "/home/pegasus/runbridge-visual-test-20261012-171400/chrome-profile",
+        "resource_id": "vm-chrome"
+      },
+      "browser_version": "Chrome/153.0.8010.12",
+      "browser_executable": "/home/pegasus/.cache/ms-playwright/chromium-1243/chrome-linux-arm64/chrome",
+      "hub_route": "192.168.20.1 dev enp2s0 src 192.168.20.129 uid 1000 \n    cache",
+      "font": {
+        "directory": "/home/pegasus/.local/share/fonts/noto-cjk",
+        "config": "/home/pegasus/.config/fontconfig/conf.d/70-fonts-noto-cjk.conf",
+        "simplified_chinese_match": "NotoSansCJK-Regular.ttc: \"Noto Sans CJK SC\" \"Regular\""
+      },
+      "files": [
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/.venv",
+          "exists": true,
+          "kind": "directory",
+          "mode": "0o775"
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/browser-owner.before-font-install.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 4510
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/browser-owner.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 4742
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/chrome-profile",
+          "exists": true,
+          "kind": "directory",
+          "mode": "0o700"
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/chrome.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 165
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/chrome.log",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 2528
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/control.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 4566
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/doc-guide-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/doc-guide-viewer.html",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 6085
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/doc-viewer-probe.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 6184
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/doc-viewer-proof.png",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 60186
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/enrollment.token",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 65
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-after.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 746
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-after.png",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 40832
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-before.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 700
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-before.png",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 8366
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-final-state.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 177
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-install",
+          "exists": true,
+          "kind": "directory",
+          "mode": "0o775"
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-install.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 2260
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-installation.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 1804
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-original-owner-state.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 210
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-probe.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 4372
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-restart.py",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 4398
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-service-restart.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 216
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/fonts-noto-cjk.deb",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 61175182
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/install-uv.sh",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 71300
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/installation-check.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 296
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/node-runtime.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 15
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/node.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 235
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/node.log",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 19797
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/other-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/owner-runtime.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 243
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/owner.log",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 0
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/registration.log",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 720
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/runbridge_node-0.4.0-py3-none-any.whl",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o644",
+          "bytes": 38953
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/tools",
+          "exists": true,
+          "kind": "directory",
+          "mode": "0o775"
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/uv-cache",
+          "exists": true,
+          "kind": "directory",
+          "mode": "0o775"
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/uv-install.log",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o664",
+          "bytes": 155
+        }
+      ],
+      "access_files": [
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "grant_id": "grant_ffb3fec2e3124003a5bb62763b5ab27c",
+          "expires_at": "2026-10-12T18:23:01.922032Z",
+          "access_token_present": true,
+          "expired_at_capture": true
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/other-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "grant_id": "grant_a17c9e636cf8428e89fbe7a8afeeb6a3",
+          "expires_at": "2026-10-12T18:23:02.139415Z",
+          "access_token_present": true,
+          "expired_at_capture": true
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/font-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "grant_id": "grant_56e5f840788d46e88803c23b414ef40e",
+          "expires_at": "2026-10-13T01:12:40.236997Z",
+          "access_token_present": true,
+          "expired_at_capture": true
+        },
+        {
+          "path": "/home/pegasus/runbridge-visual-test-20261012-171400/doc-guide-access.json",
+          "exists": true,
+          "kind": "file",
+          "mode": "0o600",
+          "bytes": 288,
+          "hub_url": "http://192.168.20.1:49762",
+          "node_id": "node_8e9f477e09344fbdbcbe498e6e88c059",
+          "grant_id": "grant_b1c0fbd975bd43758b27295161a23a10",
+          "expires_at": "2026-10-13T01:53:22.913511Z",
+          "access_token_present": true,
+          "expired_at_capture": true
+        }
+      ],
+      "disk_usage_bytes": {
+        "/home/pegasus/runbridge-visual-test-20261012-171400": 276520960,
+        "/home/pegasus/runbridge-visual-test-20261012-171400/.venv": 45629440,
+        "/home/pegasus/runbridge-visual-test-20261012-171400/chrome-profile": 12640256,
+        "/home/pegasus/runbridge-visual-test-20261012-171400/uv-cache": 44740608,
+        "/home/pegasus/runbridge-visual-test-20261012-171400/font-install": 114585600,
+        "/home/pegasus/.local/share/fonts/noto-cjk": 93376512,
+        "/home/pegasus/.cache/ms-playwright/chromium-1243": 411365376
+      }
+    },
+    "network": {
+      "host_bridge_address": "192.168.20.1",
+      "vm_address": "192.168.20.129/24",
+      "vm_interface": "enp2s0",
+      "transport": "虚拟机直接访问宿主机网桥，无 SSH 端口转发"
+    }
+  },
+  "completed_local_mcp_test": {
+    "runtime_directory": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0",
+    "historical_hub_url": "http://127.0.0.1:59789",
+    "endpoint_status_at_capture": "UNREACHABLE",
+    "node_configuration_without_secret": {
+      "config_version": 1,
+      "hub_url": "http://127.0.0.1:59789",
+      "node_id": "node_8e74c34ba93141539122f2d922a32767",
+      "name": "mcp-live-test",
+      "node_token_present": true
+    },
+    "playwright_configuration": {
+      "runtime_directory": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/runtime",
+      "node_executable": "/Users/pegasus-yang/.nvm/versions/node/v22.22.3/bin/node",
+      "launch_options": {
+        "headless": true
+      }
+    },
+    "files": [
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/enrollment.token",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o600",
+        "bytes": 64
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/example-access.json",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o600",
+        "bytes": 334
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/example.png",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o644",
+        "bytes": 16260
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/hub.sqlite3",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o644",
+        "bytes": 40960
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/node.json",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o600",
+        "bytes": 230
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/page-auto.png",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o644",
+        "bytes": 18643
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/page-legacy.png",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o644",
+        "bytes": 19386
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/playwright.json",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o644",
+        "bytes": 209
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/runbridge-hub.log",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o644",
+        "bytes": 25670
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/runbridge-node.log",
+        "exists": true,
+        "kind": "file",
+        "mode": "0o644",
+        "bytes": 749
+      },
+      {
+        "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/runtime",
+        "exists": true,
+        "kind": "directory",
+        "mode": "0o755"
+      }
+    ],
+    "example_access": {
+      "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/example-access.json",
+      "exists": true,
+      "kind": "file",
+      "mode": "0o600",
+      "bytes": 334,
+      "hub_url": "http://127.0.0.1:59789",
+      "node_id": "node_8e74c34ba93141539122f2d922a32767",
+      "grant_id": "grant_6dd578f2d52d41bda243aab1338ee915",
+      "expires_at": null,
+      "access_token_present": true,
+      "expired_at_capture": false
+    },
+    "database": {
+      "path": "/private/tmp/runbridge-mcp-live-verified-01a13314/mcp-live0/hub.sqlite3",
+      "schema_version": 2,
+      "tables": [
+        "nodes",
+        "grants",
+        "sessions"
+      ],
+      "nodes": [
+        {
+          "node_id": "node_8e74c34ba93141539122f2d922a32767",
+          "name": "mcp-live-test",
+          "generation": 1,
+          "last_seen_at_in_database": "2026-10-13T03:47:10.569995+00:00"
+        }
+      ],
+      "grants": [
+        {
+          "grant_id": "grant_6dd578f2d52d41bda243aab1338ee915",
+          "node_id": "node_8e74c34ba93141539122f2d922a32767",
+          "resource_ids": null,
+          "created_at": "2026-10-13T03:46:59.393710+00:00",
+          "expires_at": null,
+          "revoked_at": null
+        },
+        {
+          "grant_id": "grant_705ba480ce314b3e8168063ab3c5f4ce",
+          "node_id": "node_8e74c34ba93141539122f2d922a32767",
+          "resource_ids": null,
+          "created_at": "2026-10-13T03:47:01.627747+00:00",
+          "expires_at": null,
+          "revoked_at": "2026-10-13T03:47:02.294724+00:00"
+        },
+        {
+          "grant_id": "grant_dc18f6ad0e9a4c64bf6a7bc6eed6c227",
+          "node_id": "node_8e74c34ba93141539122f2d922a32767",
+          "resource_ids": null,
+          "created_at": "2026-10-13T03:47:01.629033+00:00",
+          "expires_at": null,
+          "revoked_at": null
+        },
+        {
+          "grant_id": "grant_bb901fe451f649dbb1f2710f8151cea4",
+          "node_id": "node_8e74c34ba93141539122f2d922a32767",
+          "resource_ids": [
+            "other_resource"
+          ],
+          "created_at": "2026-10-13T03:47:01.630080+00:00",
+          "expires_at": null,
+          "revoked_at": null
+        },
+        {
+          "grant_id": "grant_db24fcd347624d32a36b84460746d6ab",
+          "node_id": "node_8e74c34ba93141539122f2d922a32767",
+          "resource_ids": null,
+          "created_at": "2026-10-13T03:47:06.225499+00:00",
+          "expires_at": "2026-10-13T03:47:09.225499+00:00",
+          "revoked_at": null
+        }
+      ],
+      "session_count": 7,
+      "session_states": {
+        "CLOSED": 7
+      },
+      "cleanup_counts": {
+        "COMPLETE": 7
+      },
+      "active_session_count": 0
+    },
+    "shared_installed_node_runtime": "/Users/pegasus-yang/Projects/PythonProjects/Personal/runbridge-node/.runbridge/playwright",
+    "uv_cache": "/private/tmp/runbridge-mcp-uv-cache",
+    "build_output": "/private/tmp/runbridge-mcp-dist-01a13314",
+    "baseline_backup": "/private/tmp/runbridge-mcp-baseline-20261013-110711",
+    "packaging_test_venv": "/private/tmp/runbridge-mcp-base-env-01a13314",
+    "raw_evidence_file": "/private/tmp/runbridge-mcp-evidence-verified-01a13314.json"
+  },
+  "credentials": {
+    "raw_values_recorded": false,
+    "notes": "私有令牌和浏览器授权端点只保留原文件位置、存在性与到期状态；完整 Chrome WS 端点继续在虚拟机 chrome.json 中读取"
+  }
+}
