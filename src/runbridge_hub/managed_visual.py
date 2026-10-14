@@ -104,7 +104,9 @@ class ManagedCapture:
                 self.channel.view.reason_code = "CAPTURE_FAILED"
                 self.visual.publish(channel=self.channel)
         finally:
-            if cdp:
+            # 会话关闭后原生路由已失效，迟到的 detach RPC 会与正常关闭竞争。
+            # Node 自建浏览器关闭时回收 CDP；仅活动会话的换页需要显式 detach。
+            if cdp and not self.closed and self.visual.active(session=self.session):
                 with suppress(Error, TimeoutError):
                     await asyncio.wait_for(cdp.detach(), timeout=2)
 

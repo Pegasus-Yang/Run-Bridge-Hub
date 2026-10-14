@@ -281,19 +281,22 @@ class SessionService:
             session.view.updated_at = datetime.now(UTC)
             if session.claimed and reason not in {"SESSION_RELEASED", "NATIVE_CLOSED"}:
                 session.view.execution_outcome = "OUTCOME_UNKNOWN"
+            # 先调度停止意图，不能等采集/原生连接收尾后才通知 Node。
+            stop = asyncio.create_task(session.connection.send(message=SessionStop(connection_generation=session.view.connection_generation, session_id=session.view.session_id, reason=reason)))
             await self._save(view=session.view)
             session.prepared.set()
             session.finished.set()
-        closing = [close_websocket(websocket=session.caller, reason=reason),
-                   close_websocket(websocket=session.tunnel, reason=reason)]
-        if self.on_close is not None:
-            closing.insert(0, self.on_close(session_id=session.view.session_id, reason=reason))
-        # 画面清理不能延迟原生调用方收到中断，各连接分别限时退出。
-        await asyncio.gather(*closing)
+        extension = asyncio.create_task(self.on_close(session_id=session.view.session_id, reason=reason)) if self.on_close is not None else None
         try:
-            await session.connection.send(message=SessionStop(connection_generation=session.view.connection_generation, session_id=session.view.session_id, reason=reason))
+            await stop
         except (WebSocketDisconnect, RuntimeError, OSError, TimeoutError):
             pass
+        closing = [close_websocket(websocket=session.caller, reason=reason),
+                   close_websocket(websocket=session.tunnel, reason=reason)]
+        if extension is not None:
+            closing.insert(0, extension)
+        # 画面清理不能延迟原生调用方收到中断，各连接分别限时退出。
+        await asyncio.gather(*closing)
 
     async def release(self, *, session_id: str, token: str | None) -> SessionView:
         """释放接口幂等，等待清理报告后返回真实清理状态。

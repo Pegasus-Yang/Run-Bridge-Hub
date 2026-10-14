@@ -20,7 +20,7 @@ from runbridge_hub.mcp_server import REQUEST_TOKEN
 from runbridge_hub.protocol import CapabilitySnapshot, SessionClosed, SessionOpen, SessionPrepared, SessionStop, SessionView
 from runbridge_hub.security import token_hash
 from runbridge_hub.service import NodeService, ServiceError
-from runbridge_hub.sessions import SessionService
+from runbridge_hub.sessions import Session, SessionService
 from runbridge_hub.store import Store
 from test_r1 import settings
 
@@ -344,3 +344,33 @@ async def test_schema_two_migration_preserves_historical_metadata(runtime):
     assert (await runtime.store.session(session_id="historical"))["cleanup"] == "COMPLETE"
     assert await runtime.nodes.authorize_access(node_id="node_a", token=TOKEN)
     assert await runtime.store.mcp_request(key=KEY) is None
+
+
+@pytest.mark.asyncio
+async def test_stop_notifies_node_before_native_close_and_does_not_block_extension_cancel():
+    sending, sent, extension_started = asyncio.Event(), asyncio.Event(), asyncio.Event()
+    allow_stop, allow_extension = asyncio.Event(), asyncio.Event()
+    async def send(**kwargs):
+        sending.set()
+        await allow_stop.wait()
+        sent.set()
+    async def close_extension(**kwargs):
+        extension_started.set()
+        await allow_extension.wait()
+    async def close_socket(**kwargs):
+        assert sent.is_set()
+    now = datetime.now(UTC)
+    view = SessionView(session_id="ordering", node_id="node_a", grant_id="grant_a", resource_id="chromium", connection_generation=1, backend="playwright", runtime_version="1.63.0", client_version="1.63.0", native_protocol="playwright", state="ACTIVE", created_at=now, updated_at=now, expires_at=now+timedelta(seconds=30))
+    socket = SimpleNamespace(close=AsyncMock(side_effect=close_socket))
+    session = Session(view=view, connection=SimpleNamespace(send=send), caller=socket, tunnel=socket)
+    service = SessionService(nodes=SimpleNamespace(lock=asyncio.Lock(), store=SimpleNamespace(save_session=AsyncMock())))
+    service.on_close = close_extension
+    closing = asyncio.create_task(service.close(session=session, reason="SESSION_RELEASED"))
+    await asyncio.wait_for(sending.wait(), timeout=1)
+    await asyncio.wait_for(extension_started.wait(), timeout=1)
+    socket.close.assert_not_awaited()
+    allow_stop.set()
+    await asyncio.wait_for(sent.wait(), timeout=1)
+    allow_extension.set()
+    await asyncio.wait_for(closing, timeout=1)
+    assert socket.close.await_count == 2

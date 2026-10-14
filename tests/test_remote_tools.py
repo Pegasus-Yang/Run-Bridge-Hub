@@ -64,8 +64,58 @@ async def test_managed_capture_uses_same_page_without_execution_lock_and_stops_l
     assert selection.state=='PENDING'
     await asyncio.wait_for(sent.wait(),timeout=1)
     await source.close();blocking.set();await asyncio.sleep(0)
-    assert packets==[] and cdp.detach.await_count==1
+    assert packets==[] and cdp.detach.await_count==0
     entry.lock.release()
+
+
+@pytest.mark.asyncio
+async def test_target_switch_detaches_old_cdp_but_session_close_sends_no_rpc():
+    started = [asyncio.Event(), asyncio.Event()]
+    cdps = []
+    pages = []
+    for index in range(2):
+        async def send(*, current=index, **kwargs):
+            started[current].set()
+            await asyncio.Event().wait()
+        cdp = SimpleNamespace(send=send, detach=AsyncMock())
+        cdps.append(cdp)
+        pages.append(SimpleNamespace(context=SimpleNamespace(new_cdp_session=AsyncMock(return_value=cdp)), is_closed=lambda: False))
+    entry = BrowserSession(session_id="s", node_id="n", grant_id="g")
+    entry.pages.update({"p0": pages[0], "p1": pages[1]})
+    channel = SimpleNamespace(source=None, hello=False, view=SimpleNamespace(selection=None, stream_id=None))
+    visual = SimpleNamespace(channel=lambda **kw: channel, clear=lambda **kw: None, publish=lambda **kw: None, active=lambda **kw: True, targets=lambda **kw: None)
+    source = ManagedCapture(visual=visual, session=SimpleNamespace(), entry=entry)
+    await source.select(target_id="p0")
+    await asyncio.wait_for(started[0].wait(), timeout=1)
+    await source.select(target_id="p1")
+    await asyncio.wait_for(started[1].wait(), timeout=1)
+    assert cdps[0].detach.await_count == 1
+    await source.close()
+    cdps[1].detach.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_capture_finally_never_detaches_through_inactive_native_route():
+    active = True
+    started = asyncio.Event()
+    cdp = SimpleNamespace(detach=AsyncMock())
+    async def send(**kwargs):
+        started.set()
+        await asyncio.Event().wait()
+    cdp.send = send
+    page = SimpleNamespace(context=SimpleNamespace(new_cdp_session=AsyncMock(return_value=cdp)), is_closed=lambda: False)
+    entry = BrowserSession(session_id="s", node_id="n", grant_id="g", pages={"p": page})
+    channel = SimpleNamespace(source=None, hello=False, view=SimpleNamespace(selection=None, stream_id=None))
+    visual = SimpleNamespace(channel=lambda **kw: channel, clear=lambda **kw: None, publish=lambda **kw: None, active=lambda **kw: active, targets=lambda **kw: None)
+    source = ManagedCapture(visual=visual, session=SimpleNamespace(), entry=entry)
+    await source.select(target_id="p")
+    await asyncio.wait_for(started.wait(), timeout=1)
+    active = False
+    source.task.cancel()
+    await asyncio.gather(source.task, return_exceptions=True)
+    assert source.closed is False
+    cdp.detach.assert_not_awaited()
+    await source.close()
 
 
 @pytest.mark.asyncio

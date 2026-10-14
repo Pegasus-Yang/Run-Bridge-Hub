@@ -78,13 +78,13 @@ sequenceDiagram
     A->>M: browser_stop(session_id)
     M->>H: release，同一 grant 校验
     H->>H: CLOSING，拒绝新操作
-    par 使 MCP 句柄失效
+    par 提前通知 Node 停止
+        H->>N: 控制 WS：SessionStop
+    and 使 MCP 句柄失效
         H->>M: 关闭回调，移除条目并中断在途/排队工具
-    and 关闭原生连接
-        H-->>M: 关闭 SDK 原生 WS
-        H-->>N: 关闭本次执行隧道
     end
-    H->>N: 控制 WS：SessionStop
+    H-->>M: 停止通知已发送后关闭 SDK 原生 WS
+    H-->>N: 关闭本次执行隧道
     N->>B: 关闭本次 BrowserServer
     N->>N: 核验自建进程退出并删除专用临时目录
     N->>H: SessionClosed(cleanup)
