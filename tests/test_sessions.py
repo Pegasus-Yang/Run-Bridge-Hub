@@ -137,7 +137,7 @@ def test_schema_one_migrates_without_losing_node_identity(tmp_path):
         register(client=client)
         assert register(client=client)["created"] is False
     with sqlite3.connect(database=configuration.database_path) as database:
-        assert database.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert database.execute("PRAGMA user_version").fetchone()[0] == 3
         assert database.execute("SELECT COUNT(*) FROM nodes").fetchone()[0] == 1
         assert database.execute("SELECT COUNT(*) FROM sessions").fetchone()[0] == 0
 

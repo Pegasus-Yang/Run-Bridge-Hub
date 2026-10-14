@@ -78,7 +78,7 @@ uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --r
 | --- | --- | --- |
 | `node_inspect` | `node_id` | 许可内节点和资源快照 |
 | `browser_start` | `node_id`、可选 `resource_id`、`lease_seconds`、`request_id` | 新 Context、空白页，视口 1280×720、locale `zh-CN` |
-| `browser_sessions` | `node_id` | 此 grant 当前活动 MCP 会话，不含其他 grant |
+| `browser_sessions` | `node_id`、可选 `request_id` | 默认列此 grant 活动 MCP 会话；指定请求时返回持久请求及已分配会话，不含其他 grant |
 | `browser_status` | `session_id` | 持久会话状态及仍有效的页面 ID/URL |
 | `browser_stop` | `session_id` | 幂等释放；不等待页面工具锁 |
 | `browser_navigate` | `url` | HTTP(S) 地址、DOM 就绪、标题和 HTTP 状态；不接受 URL 内用户名密码 |
@@ -122,12 +122,33 @@ uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --r
 | `MANAGED_RESOURCE_REQUIRED` | 指定获许可的受管理资源；不自动复用已有 Chrome |
 | `PLAYWRIGHT_VERSION_MISMATCH` | Hub extra SDK 与 Node 运行时主次版本必须一致 |
 | `BROWSER_CONNECT_FAILED` | 检查内部 Hub 根地址和网络；服务会请求清理已申请的浏览器 |
+| `REQUEST_ARGUMENTS_MISMATCH` | 同一 request_id 的 resource_id / lease_seconds 不得改变 |
+| `REQUEST_RECORD_LIMIT` / `REQUEST_CONCURRENCY_LIMIT` | 分配前拒绝；当前许可记录或 Hub 在途请求达到容量，不能删除未决记录后重放 |
+| `REQUEST_OUTCOME_UNKNOWN` / `REQUEST_CANCELLED` | 按原 request_id 查询，核对 session_id 和实际 cleanup，不盲目启动第二个浏览器 |
 | `SESSION_NOT_ACTIVE` / `PAGE_NOT_FOUND` | 查询当前状态，不继续使用过期句柄 |
 | `AMBIGUOUS_TARGET` | 重新观察，收窄定位条件 |
 | `OPERATION_TIMEOUT` / `OPERATION_INTERRUPTED` / `OPERATION_FAILED` | 写动作已进入执行阶段时标记 `OUTCOME_UNKNOWN`；先观察或查业务系统，不能盲目再次提交 |
 | `cleanup=PENDING/UNKNOWN` | 清理没有确认；查询状态，不能当作 COMPLETE |
 
-启动可传唯一 request_id，Hub 按 grant/node/request 保留单次创建结果；参数改变会拒绝。同一请求的已结束会话不会被复活。响应丢失时用 browser_sessions(request_id) 核对，不盲目重复申请；Hub 重启后的未知创建仍需所有者确认。
+### 5.1 启动请求与失败恢复（Hub 0.5.1）
+
+启动可传唯一 request_id，Hub 在 SQLite v3 按 grant/node/request 保留单次创建记录；参数改变会拒绝。会话首次分配与 request_id → session_id 关联在同一事务中提交，准备或 SDK 连接失败后也能查询会话身份。完成的 Task、异常和请求上下文不缓存，记录只保存参数、状态、不透明句柄和公开错误码。
+
+`browser_sessions(node_id, request_id)` 保留 `sessions` 数组，并增加 `request`：`request_id`、`node_id`、`grant_id`、`state`、`session_id`、`error_code`、`execution_outcome`。后面三个字段在不适用时为 null。
+
+| request.state | 含义与恢复规则 |
+| --- | --- |
+| PENDING | 创建在途，可能已分配 session_id；不能根据 sessions 为空推断未启动 |
+| SUCCEEDED | 创建已完成；sessions 返回当前会话状态，已结束会话不会被复活 |
+| FAILED | 创建失败；有 session_id 时继续核对并清理该会话；仅 session_id=null 且 execution_outcome=NOT_STARTED 证明未分配 |
+| UNKNOWN | 上次进程未完成或结果未知；保留已分配身份，禁止自动重放 |
+| NOT_FOUND | 同键没有记录；不表示确定未启动，也不能作为解除隔离的证据 |
+
+非空 request.session_id 应与 sessions 中唯一项的 session_id、grant_id、node_id 一致，且该项的 request_id 匹配。request 状态不能代替真实会话的技术终态和 cleanup=COMPLETE。旧 Hub 没有 request 字段时，调用方可继续按原有唯一 sessions 项核对身份；不得把缺字段解释为未分配。
+
+Hub 最多保留 64 个在途请求，每有效许可最多保留 1024 个不同 request_id。重复查询和相同请求不占新名额；有效许可的历史记录不按时间删除，避免重复分配。新请求受理时可回收已过期或撤销许可的请求记录，原 token 已无法通过授权，因此不能利用回收重放旧请求；会话历史元数据保留。容量拒绝发生在分配前，正常收到该错误时为 NOT_STARTED；若错误响应丢失而查询返回 NOT_FOUND，仍需保留未知状态。
+
+MCP 调用方取消或响应丢失后，已受理的创建任务继续完成并受原租期约束。Hub 重启会将在途请求标为 UNKNOWN，保留关联供核对，不重建旧对象或重放请求。未确认清理的历史会话仍需所有者处置。
 
 MCP HTTP 连接结束不会立即释放浏览器。客户端重连后可用同一个 grant 调用 `browser_sessions` 找回会话，再停止或继续操作；到期会自动清理。Hub 重启或 Node 断开会使原生对象失效，不能恢复旧 Page 对象。许可撤销会立刻触发会话关闭；被撤销的 token 也不能继续查询状态，应由所有者检查资源或签发新许可。
 

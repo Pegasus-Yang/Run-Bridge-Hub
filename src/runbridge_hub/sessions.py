@@ -80,17 +80,19 @@ class SessionService:
             await self._save(view=view)
         self.maintenance_task = asyncio.create_task(self._maintenance())
 
-    async def _save(self, *, view: SessionView) -> None:
+    async def _save(self, *, view: SessionView, mcp_request_id: str | None = None) -> None:
         """仅保存公开元数据。
 
         :param view: 会话视图。
+        :param mcp_request_id: 仅首次分配时关联的 MCP 请求。
         """
-        await self.nodes.store.save_session(session_id=view.session_id, node_id=view.node_id, grant_id=view.grant_id, record=view.model_dump_json())
+        await self.nodes.store.save_session(session_id=view.session_id, node_id=view.node_id, grant_id=view.grant_id, record=view.model_dump_json(), mcp_request_id=mcp_request_id)
 
-    async def create(self, *, node_id: str, token: str | None, request: SessionCreate) -> SessionView:
+    async def create(self, *, node_id: str, token: str | None, request: SessionCreate, mcp_request_id: str | None = None) -> SessionView:
         """申请资源并等待节点确认，失败后禁止提前复用资源。
 
         :returns: 已就绪的会话。
+        :param mcp_request_id: 内部 MCP 关联，不改变公开 SessionCreate 合同。
         """
         async with self.nodes.lock:
             grant = await self.nodes.authorize_access(node_id=node_id, token=token)
@@ -123,7 +125,7 @@ class SessionService:
                 expires = min(expires, datetime.fromisoformat(grant["expires_at"]))
             view = SessionView(session_id=f"session_{uuid4().hex}", node_id=node_id, resource_id=request.resource_id, grant_id=grant["grant_id"], connection_generation=live.generation, backend=resource.backend, runtime_version=backend.runtime_version, client_version=request.client_version, native_protocol="cdp" if borrowed else "playwright", authorization_scope=resource.authorization_scope, state="PREPARING", created_at=now, updated_at=now, expires_at=expires)
             session = Session(view=view, connection=live)
-            await self._save(view=view)
+            await self._save(view=view, mcp_request_id=mcp_request_id)
             self.sessions[view.session_id] = session
             self.nodes.reservations[key] = view.session_id
         try:

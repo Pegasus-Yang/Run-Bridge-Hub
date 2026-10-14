@@ -141,3 +141,5 @@ Hub 内部的 SDK 连接使用部署配置 `mcp_native_url`，不从外部请求
 ## 0.5.0 的同页画面与启动请求
 
 browser_tools.py 提供原子交互和固定采集，managed_visual.py 从 browser.py 已持有的同一 Page 采集。采集任务不等待业务锁，页面选择和停止通过代次取消旧任务；visual.py 复用已有会话授权和有界分发。启动 request_id 按 grant/node 隔离，调用取消不重复创建；旧请求返回当前实际终态，清理结果仍由 Node 确认。详见[画面架构](浏览器画面采集与分发.md)。
+
+Hub 0.5.1 使用 SQLite v3 的 `mcp_requests` 记录替代永久 Task 缓存。`sessions` 首次分配与请求关联原子写入，准备失败、连接失败和取消均可按原请求找到 session_id；在途 Task 完成后即移除，且不继承 MCP 的 Bearer ContextVar。每有效许可最多 1024 个不同请求，Hub 最多 64 个在途请求；有效许可记录不因容量或时间而被逐出，已过期/撤销许可的记录在新请求受理时可回收。重启只将未完成请求标为 UNKNOWN，不恢复原生对象、不重放创建。公开状态与调用方核对规则见[启动请求与失败恢复](../user-guide/MCP浏览器接入.md#51-启动请求与失败恢复hub-051)。

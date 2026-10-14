@@ -1,7 +1,9 @@
 """MCP 持有的远程 Playwright 对象和受管理浏览器生命周期。"""
 
 import asyncio
+import json
 from contextlib import asynccontextmanager, suppress
+from contextvars import Context
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from importlib.metadata import version
@@ -13,6 +15,9 @@ from runbridge_hub.protocol import SessionCreate
 from runbridge_hub.managed_visual import ManagedCapture
 from runbridge_hub.service import ServiceError
 from runbridge_hub.sessions import SessionService
+
+
+PENDING_REQUEST_LIMIT = 64
 
 
 class BrowserError(ServiceError):
@@ -53,10 +58,12 @@ class BrowserService:
         self.cleanup_tasks: set[asyncio.Task] = set()
         self.visual = visual
         self.open_requests: dict[tuple[str, str, str], asyncio.Task] = {}
-        self.open_arguments: dict[tuple[str, str, str], tuple] = {}
+        self.open_arguments: dict[tuple[str, str, str], dict] = {}
+        self.request_lock = asyncio.Lock()
 
     async def start(self) -> None:
         """启动协议客户端驱动，不启动浏览器进程。"""
+        await self.sessions.nodes.store.interrupt_mcp_requests()
         self.playwright = await async_playwright().start()
 
     async def open(self, *, node_id: str, token: str, resource_id: str | None, lease_seconds: float, request_id: str | None = None) -> dict:
@@ -68,18 +75,59 @@ class BrowserService:
             return await self._open(node_id=node_id, token=token, resource_id=resource_id, lease_seconds=lease_seconds)
         grant = await self.sessions.nodes.authorize_access(node_id=node_id, token=token)
         key = (grant["grant_id"], node_id, request_id)
-        task = self.open_requests.get(key)
-        arguments = (resource_id, lease_seconds)
-        if task is not None and self.open_arguments[key] != arguments:
-            raise BrowserError(code="REQUEST_ARGUMENTS_MISMATCH")
-        if task is None:
-            task = asyncio.create_task(self._open(node_id=node_id, token=token, resource_id=resource_id, lease_seconds=lease_seconds, request_id=request_id))
-            self.open_requests[key] = task
-            self.open_arguments[key] = arguments
-            task.add_done_callback(lambda done: done.exception() if not done.cancelled() else None)
-        result = await asyncio.shield(task)
-        current = await self.sessions.query(session_id=result["session"]["session_id"], token=token)
-        return {**result, "session": current.model_dump(mode="json")}
+        arguments = {"resource_id": resource_id, "lease_seconds": lease_seconds}
+        async with self.request_lock:
+            record = await self.sessions.nodes.store.mcp_request(key=key)
+            task = self.open_requests.get(key)
+            if record is not None and json.loads(record["arguments"]) != arguments:
+                raise BrowserError(code="REQUEST_ARGUMENTS_MISMATCH")
+            if task is not None and self.open_arguments[key] != arguments:
+                raise BrowserError(code="REQUEST_ARGUMENTS_MISMATCH")
+            if task is None and record is None:
+                if len(self.open_requests) >= PENDING_REQUEST_LIMIT:
+                    raise BrowserError(code="REQUEST_CONCURRENCY_LIMIT")
+                # 独立上下文不继承 MCP 的 Bearer、请求对象及传输通道。
+                task = asyncio.create_task(self._run_open(key=key, token=token, arguments=arguments), context=Context())
+                task.add_done_callback(lambda done: done.exception() if not done.cancelled() else None, context=Context())
+                self.open_requests[key] = task
+                self.open_arguments[key] = arguments
+        if task is not None:
+            record = await asyncio.shield(task)
+        # 等待期间可能撤销或到期，旧结果不能绕过本次授权。
+        await self.sessions.nodes.authorize_access(node_id=node_id, token=token)
+        if record is None or record["state"] in {"PENDING", "UNKNOWN"}:
+            raise BrowserError(code="REQUEST_OUTCOME_UNKNOWN", outcome="OUTCOME_UNKNOWN")
+        if record["state"] == "FAILED":
+            raise BrowserError(code=record["error_code"], outcome=record["execution_outcome"])
+        current = await self.sessions.query(session_id=record["session_id"], token=token)
+        return {"session": current.model_dump(mode="json"), "page_id": record["page_id"], "request_id": request_id}
+
+    async def _run_open(self, *, key: tuple[str, str, str], token: str, arguments: dict) -> dict | None:
+        """创建任务只保留至完成，失败也保存分配身份和稳定错误码。
+
+        :returns: 无凭据终态记录。
+        """
+        store = self.sessions.nodes.store
+        try:
+            try:
+                record, fresh = await store.begin_mcp_request(key=key, arguments=arguments)
+                if record is None:
+                    return {"state": "FAILED", "error_code": "REQUEST_RECORD_LIMIT", "execution_outcome": "NOT_STARTED"}
+                if not fresh:
+                    return record
+                result = await self._open(node_id=key[1], token=token, request_id=key[2], **arguments)
+            except asyncio.CancelledError:
+                await store.finish_mcp_request(key=key, state="FAILED", error_code="REQUEST_CANCELLED")
+            except ServiceError as error:
+                await store.finish_mcp_request(key=key, state="FAILED", error_code=error.code)
+            except Exception:
+                await store.finish_mcp_request(key=key, state="UNKNOWN", error_code="REQUEST_OUTCOME_UNKNOWN")
+            else:
+                await store.finish_mcp_request(key=key, state="SUCCEEDED", page_id=result["page_id"])
+            return await store.mcp_request(key=key)
+        finally:
+            self.open_requests.pop(key, None)
+            self.open_arguments.pop(key, None)
 
     async def _open(self, *, node_id: str, token: str, resource_id: str | None, lease_seconds: float, request_id: str | None = None) -> dict:
         """申请新受管理实例并连接 Hub 原生入口。
@@ -100,7 +148,7 @@ class BrowserService:
             raise ServiceError(status=403, code="RESOURCE_OUTSIDE_GRANT")
         if resource_id not in {item.resource_id for item in managed}:
             raise BrowserError(code="MANAGED_RESOURCE_REQUIRED")
-        created = await self.sessions.create(node_id=node_id, token=token, request=SessionCreate(resource_id=resource_id, client_version=version("playwright"), lease_seconds=lease_seconds))
+        created = await self.sessions.create(node_id=node_id, token=token, request=SessionCreate(resource_id=resource_id, client_version=version("playwright"), lease_seconds=lease_seconds), mcp_request_id=request_id)
         entry = BrowserSession(session_id=created.session_id, node_id=node_id, grant_id=created.grant_id, request_id=request_id)
         self.entries[created.session_id] = entry
         try:
@@ -246,18 +294,17 @@ class BrowserService:
         """
         grant = await self.sessions.nodes.authorize_access(node_id=node_id, token=token)
         ids = [entry.session_id for entry in self.entries.values() if entry.node_id == node_id and entry.grant_id == grant["grant_id"]]
+        request = None
         if request_id is not None:
-            ids = [entry.session_id for entry in self.entries.values() if entry.node_id == node_id and entry.grant_id == grant["grant_id"] and entry.request_id == request_id]
-            task = self.open_requests.get((grant["grant_id"], node_id, request_id))
-            if task is not None and task.done() and not task.cancelled() and task.exception() is None:
-                saved = task.result()["session"]["session_id"]
-                if saved not in ids:
-                    ids.append(saved)
+            key = (grant["grant_id"], node_id, request_id)
+            record = await self.sessions.nodes.store.mcp_request(key=key)
+            ids = [record["session_id"]] if record is not None and record["session_id"] else []
+            request = {"request_id": request_id, "node_id": node_id, "grant_id": grant["grant_id"], "state": record["state"] if record else ("PENDING" if key in self.open_requests else "NOT_FOUND"), "session_id": record["session_id"] if record else None, "error_code": record["error_code"] if record else None, "execution_outcome": record["execution_outcome"] if record else None}
         values = [await self.status(session_id=session_id, token=token) for session_id in ids]
         if request_id is not None:
             for value in values:
                 value["request_id"] = request_id
-        return {"sessions": values}
+        return {"sessions": values, **({"request": request} if request is not None else {})}
 
     @asynccontextmanager
     async def page(self, *, session_id: str, page_id: str | None, token: str, timeout_ms: int, mutating: bool = False):

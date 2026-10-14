@@ -2,9 +2,13 @@
 
 import asyncio
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 import aiosqlite
+
+
+MCP_REQUEST_LIMIT = 1024
 
 
 class Store:
@@ -16,13 +20,13 @@ class Store:
         self.lock = asyncio.Lock()
 
     async def open(self) -> None:
-        """创建或打开版本 2 的元数据数据库。"""
+        """创建或迁移到版本 3，追加无凭据的 MCP 请求元数据。"""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.connection = await aiosqlite.connect(database=str(self.path))
         self.connection.row_factory = aiosqlite.Row
         async with self.connection.execute("PRAGMA user_version") as cursor:
             version = (await cursor.fetchone())[0]
-        if version not in {0, 1, 2}:
+        if version not in {0, 1, 2, 3}:
             await self.connection.close()
             raise RuntimeError("数据库版本不受支持")
         await self.connection.executescript("""
@@ -42,7 +46,15 @@ class Store:
                 session_id TEXT PRIMARY KEY, node_id TEXT NOT NULL REFERENCES nodes(node_id),
                 grant_id TEXT NOT NULL REFERENCES grants(grant_id), record TEXT NOT NULL
             );
-            PRAGMA user_version = 2;
+            CREATE TABLE IF NOT EXISTS mcp_requests (
+                grant_id TEXT NOT NULL REFERENCES grants(grant_id),
+                node_id TEXT NOT NULL REFERENCES nodes(node_id), request_id TEXT NOT NULL,
+                arguments TEXT NOT NULL, state TEXT NOT NULL,
+                session_id TEXT REFERENCES sessions(session_id), page_id TEXT,
+                error_code TEXT, execution_outcome TEXT,
+                PRIMARY KEY (grant_id, node_id, request_id)
+            );
+            PRAGMA user_version = 3;
         """)
         await self.connection.commit()
 
@@ -159,16 +171,68 @@ class Store:
             await self.connection.commit()
             return cursor.rowcount > 0
 
-    async def save_session(self, *, session_id: str, node_id: str, grant_id: str, record: str) -> None:
+    async def save_session(self, *, session_id: str, node_id: str, grant_id: str, record: str, mcp_request_id: str | None = None) -> None:
         """保存会话生命周期元数据，协议帧不落库。
 
         :param session_id: 会话 ID。
         :param node_id: 节点 ID。
         :param grant_id: 许可 ID。
         :param record: 不含秘密的会话 JSON。
+        :param mcp_request_id: 首次分配时原子关联的 MCP 请求标识。
         """
         async with self.lock:
-            await self.connection.execute("INSERT INTO sessions (session_id, node_id, grant_id, record) VALUES (?, ?, ?, ?) ON CONFLICT(session_id) DO UPDATE SET record = excluded.record", (session_id, node_id, grant_id, record))
+            try:
+                await self.connection.execute("INSERT INTO sessions (session_id, node_id, grant_id, record) VALUES (?, ?, ?, ?) ON CONFLICT(session_id) DO UPDATE SET record = excluded.record", (session_id, node_id, grant_id, record))
+                if mcp_request_id is not None:
+                    cursor = await self.connection.execute("UPDATE mcp_requests SET session_id = ? WHERE grant_id = ? AND node_id = ? AND request_id = ? AND state = 'PENDING' AND session_id IS NULL", (session_id, grant_id, node_id, mcp_request_id))
+                    if cursor.rowcount != 1:
+                        raise ValueError("MCP 请求不能重复分配会话")
+                await self.connection.commit()
+            except BaseException:
+                await self.connection.rollback()
+                raise
+
+    async def mcp_request(self, *, key: tuple[str, str, str]) -> dict | None:
+        """查询精确许可、节点和请求的无凭据记录。
+
+        :returns: 请求记录或空值。
+        """
+        async with self.lock:
+            async with self.connection.execute("SELECT * FROM mcp_requests WHERE grant_id = ? AND node_id = ? AND request_id = ?", key) as cursor:
+                row = await cursor.fetchone()
+                return dict(row) if row is not None else None
+
+    async def begin_mcp_request(self, *, key: tuple[str, str, str], arguments: dict) -> tuple[dict | None, bool]:
+        """保留同键记录；只回收已失效许可，达到容量时不分配资源。
+
+        :returns: 记录与是否首次受理；记录为空表示容量已满。
+        """
+        async with self.lock:
+            async with self.connection.execute("SELECT * FROM mcp_requests WHERE grant_id = ? AND node_id = ? AND request_id = ?", key) as cursor:
+                row = await cursor.fetchone()
+            if row is not None:
+                return dict(row), False
+            await self.connection.execute("DELETE FROM mcp_requests WHERE grant_id IN (SELECT grant_id FROM grants WHERE revoked_at IS NOT NULL OR (expires_at IS NOT NULL AND julianday(expires_at) <= julianday(?)))", (datetime.now(UTC).isoformat(),))
+            async with self.connection.execute("SELECT COUNT(*) FROM mcp_requests WHERE grant_id = ?", (key[0],)) as cursor:
+                count = (await cursor.fetchone())[0]
+            if count >= MCP_REQUEST_LIMIT:
+                await self.connection.commit()
+                return None, False
+            serialized = json.dumps(arguments, sort_keys=True)
+            await self.connection.execute("INSERT INTO mcp_requests (grant_id, node_id, request_id, arguments, state) VALUES (?, ?, ?, ?, 'PENDING')", (*key, serialized))
+            await self.connection.commit()
+            return {"grant_id": key[0], "node_id": key[1], "request_id": key[2], "arguments": serialized, "state": "PENDING", "session_id": None, "page_id": None, "error_code": None, "execution_outcome": None}, True
+
+    async def finish_mcp_request(self, *, key: tuple[str, str, str], state: str, page_id: str | None = None, error_code: str | None = None) -> None:
+        """仅保存终态必要字段，不保存 Task、异常或访问凭据。"""
+        async with self.lock:
+            await self.connection.execute("UPDATE mcp_requests SET state = ?, page_id = ?, error_code = ?, execution_outcome = CASE WHEN ? = 'SUCCEEDED' THEN NULL WHEN ? = 'FAILED' AND session_id IS NULL THEN 'NOT_STARTED' ELSE 'OUTCOME_UNKNOWN' END WHERE grant_id = ? AND node_id = ? AND request_id = ?", (state, page_id, error_code, state, state, *key))
+            await self.connection.commit()
+
+    async def interrupt_mcp_requests(self) -> None:
+        """重启不重放上次未完成请求，保留已分配的会话关联。"""
+        async with self.lock:
+            await self.connection.execute("UPDATE mcp_requests SET state = 'UNKNOWN', error_code = 'REQUEST_OUTCOME_UNKNOWN', execution_outcome = 'OUTCOME_UNKNOWN' WHERE state = 'PENDING'")
             await self.connection.commit()
 
     async def session(self, *, session_id: str) -> dict | None:

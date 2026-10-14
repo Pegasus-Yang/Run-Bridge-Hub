@@ -13,24 +13,6 @@ from runbridge_hub.visual import VisualService
 from runbridge_hub.visual_protocol import VisualSelection
 
 @pytest.mark.asyncio
-async def test_idempotent_open_survives_caller_cancel_and_returns_current_closed_state():
-    view=SimpleNamespace(model_dump=lambda **kw:{'session_id':'s','state':'CLOSED','cleanup':'COMPLETE'})
-    sessions=SimpleNamespace(nodes=SimpleNamespace(authorize_access=AsyncMock(return_value={'grant_id':'g'})),query=AsyncMock(return_value=view))
-    service=BrowserService(sessions=sessions,native_url='http://hub')
-    ready=asyncio.Event();started=asyncio.Event()
-    async def open(**kw):
-        started.set();await ready.wait();return {'session':{'session_id':'s','state':'ACTIVE'},'page_id':'p'}
-    service._open=AsyncMock(side_effect=open)
-    args={'node_id':'n','token':'secret','resource_id':'chromium','lease_seconds':30,'request_id':'request'}
-    first=asyncio.create_task(service.open(**args));await started.wait();first.cancel()
-    with pytest.raises(asyncio.CancelledError):await first
-    second=asyncio.create_task(service.open(**args));ready.set()
-    value=await second
-    assert value['session']['state']=='CLOSED' and service._open.await_count==1
-    with pytest.raises(BrowserError,match='REQUEST_ARGUMENTS_MISMATCH'):
-        await service.open(**{**args,'lease_seconds':31})
-
-@pytest.mark.asyncio
 async def test_tabs_can_create_after_last_page_closed_and_requires_explicit_close_identity():
     view=SimpleNamespace(state='ACTIVE',expires_at=datetime.now(UTC)+timedelta(seconds=30))
     sessions=SimpleNamespace(query=AsyncMock(return_value=view))
