@@ -109,6 +109,10 @@ uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --r
 | `browser_handle_dialog` | accept、可选 prompt_text；触发前配置下一次策略，未配置时 dismiss |
 | `browser_file_upload` | target、files；name/mime_type/base64 data，合计最多 4 MiB，空列表清空 |
 
+上传的 4 MiB 指所有文件解码后的原始字节合计，不是 base64 字符数。Hub 0.5.1 的 MCP HTTP 请求体上限为 8 MiB，为合法 base64 和 JSON 元数据留出空间；超过传输上限返回 HTTP 413。传输合规但解码后超过 4 MiB 时，工具返回 UPLOAD_TOO_LARGE / NOT_STARTED，尚未操作文件输入。非法 base64 返回 INVALID_UPLOAD_DATA；单个数据字符串仍受工具 Schema 的 6 MiB 字符数限制。
+
+固定 DOM 采集只覆盖主页面，不接受 frame_selector；交互工具的 iframe 支持不等于可信采集支持 iframe。browser_capture 和 browser_inspect_dom 的 256 KiB 限额在结果传回 Hub 后检查，超限拒绝，不静默截断，但不能当作浏览器侧采集或原生传输的大小保证。
+
 受管理 MCP 页面有持续 PNG 流，见[画面接口](../reference/浏览器画面流接口.md)。这些工具替代测试插件正常交互、固定采集和生命周期；不开放任意 evaluate/run_code、下载、网络拦截或整个 Playwright SDK。已有 Chrome 复用、OAuth、续租和多 Worker 不在这组 MCP 工具内。
 
 ## 5. 错误和中断恢复
@@ -132,7 +136,7 @@ uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --r
 
 ### 5.1 启动请求与失败恢复（Hub 0.5.1）
 
-启动可传唯一 request_id，Hub 在 SQLite v3 按 grant/node/request 保留单次创建记录；参数改变会拒绝。会话首次分配与 request_id → session_id 关联在同一事务中提交，准备或 SDK 连接失败后也能查询会话身份。完成的 Task、异常和请求上下文不缓存，记录只保存参数、状态、不透明句柄和公开错误码。
+需要可靠恢复时应传唯一 request_id；省略时保留原有无请求关联的调用方式。Hub 在 SQLite v3 按 grant/node/request 保留单次创建记录，参数改变会拒绝。会话首次分配与 request_id → session_id 关联在同一事务中提交，准备或 SDK 连接失败后也能查询会话身份。完成的 Task、异常和请求上下文不缓存，记录只保存参数、状态、不透明句柄和公开错误码。
 
 `browser_sessions(node_id, request_id)` 保留 `sessions` 数组，并增加 `request`：`request_id`、`node_id`、`grant_id`、`state`、`session_id`、`error_code`、`execution_outcome`。后面三个字段在不适用时为 null。
 

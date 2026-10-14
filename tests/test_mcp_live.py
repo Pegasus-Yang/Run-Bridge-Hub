@@ -2,9 +2,11 @@
 
 import asyncio
 import base64
+import hashlib
 import json
 import os
 import secrets
+import shlex
 import shutil
 import socket
 import struct
@@ -40,6 +42,7 @@ class Runtime:
         self.directory = directory
         self.processes = []
         self.credentials = []
+        self.temporary_directories: set[Path] = set()
         self.http = httpx.Client(trust_env=False, timeout=15)
         self.environment = {key: value for key, value in os.environ.items() if key not in {"VIRTUAL_ENV", "RUNBRIDGE_ENROLLMENT_TOKEN", "RUNBRIDGE_ACCESS_TOKEN"}}
         self.runtime_dir = directory / "runtime"
@@ -114,7 +117,7 @@ class Runtime:
                 view = response.json()
                 resources = (view.get("capabilities") or {}).get("resources", [])
                 if view["connection_status"] == "ONLINE" and resources and resources[0]["readiness"] == "READY" and resources[0]["occupancy"] == "FREE":
-                    assert not list((self.runtime_dir / "sessions").glob("browser-*"))
+                    assert all(not path.exists() for path in self.temporary_directories)
                     return
             time.sleep(0.03)
         raise AssertionError("Node 未达到 READY/FREE 或未清除会话临时目录")
@@ -122,8 +125,23 @@ class Runtime:
     def browser_pids(self) -> list[int]:
         if os.name != "posix":
             return []
-        output = subprocess.check_output(["ps", "-axo", "pid=,command="], text=True)
-        return [int(line.split(maxsplit=1)[0]) for line in output.splitlines() if str(self.runtime_dir / "sessions") in line and "--user-data-dir=" in line]
+        output = subprocess.check_output(["ps", "-axo", "pid=,ppid=,command="], text=True)
+        rows = [line.split(maxsplit=2) for line in output.splitlines()]
+        processes = {int(row[0]): (int(row[1]), row[2]) for row in rows if len(row) == 3}
+        owned = {process.pid for process in self.processes}
+        while True:
+            children = {pid for pid, (parent, _) in processes.items() if parent in owned}
+            if children <= owned:
+                break
+            owned.update(children)
+        pids = []
+        for pid in owned:
+            command = processes.get(pid, (0, ""))[1]
+            if "--user-data-dir=" in command and "--type=" not in command:
+                profile = next(Path(arg.split("=", 1)[1]) for arg in shlex.split(command) if arg.startswith("--user-data-dir="))
+                self.temporary_directories.add(profile.parent)
+                pids.append(pid)
+        return pids
 
     def check_exited(self, *, pids: list[int]):
         for pid in pids:
@@ -172,9 +190,14 @@ def website():
             html = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>MCP 联调</title>
 <h1>MCP 联调表单</h1><form><label>用户名<input name="name"></label><button>保存</button></form>
 <p role="status" id="result">待提交</p><button type="button">重复按钮</button><button type="button">重复按钮</button>
+<label>附件<input type="file" id="files" multiple></label><pre id="file_sizes">[]</pre>
 <script>document.querySelector('form').onsubmit=async e=>{e.preventDefault();
 let r=await fetch('/save',{method:'POST',body:JSON.stringify({name:document.querySelector('input').value})});
-document.querySelector('#result').textContent=(await r.json()).message;};</script></html>'''.encode()
+document.querySelector('#result').textContent=(await r.json()).message;};
+document.querySelector('#files').onchange=async e=>{
+const files=await Promise.all(Array.from(e.target.files,async f=>({name:f.name,size:f.size,
+sha256:Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await f.arrayBuffer())),b=>b.toString(16).padStart(2,'0')).join('')})));
+document.querySelector('#file_sizes').textContent='FILES:'+JSON.stringify(files);};</script></html>'''.encode()
             headers.append(dict(self.headers))
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -241,7 +264,7 @@ async def test_mcp_authorize_start_operate_verify_and_release(runtime, website, 
         negotiated = client.protocol_version
         assert negotiated == ("2026-07-28" if mode == "auto" else "2025-11-25")
         tools = await client.list_tools()
-        assert len(tools.tools) == 12
+        assert len(tools.tools) == 26
         node = await invoke(client=client, name="node_inspect", arguments={"node_id": runtime.identity["node_id"]})
         assert node["connection_status"] == "ONLINE"
         started = await invoke(client=client, name="browser_start", arguments={"node_id": node["node_id"]})
@@ -284,7 +307,55 @@ async def test_mcp_authorize_start_operate_verify_and_release(runtime, website, 
         assert ended.is_error and ended.structured_content["code"] == "SESSION_NOT_ACTIVE"
     runtime.wait_free()
     runtime.check_exited(pids=pids)
-    evidence(name=f"mcp_form_{mode}", facts={"protocol_version": negotiated, "tools": 12, "external_form_submissions": 1, "png_dimensions": [1280, 720], "cleanup": "COMPLETE", "resource": "FREE", "owned_browser_pids_exited": len(pids), "temporary_directory_removed": True})
+    evidence(name=f"mcp_form_{mode}", facts={"protocol_version": negotiated, "tools": 26, "external_form_submissions": 1, "png_dimensions": [1280, 720], "cleanup": "COMPLETE", "resource": "FREE", "owned_browser_pids_exited": len(pids), "temporary_directory_removed": True})
+
+
+@pytest.mark.parametrize("mode", ["auto", "legacy"])
+@pytest.mark.asyncio
+async def test_mcp_request_replay_upload_boundary_and_cleanup(runtime, website, mode):
+    """官方 MCP 客户端核对同请求、实际 File 内容与最终资源释放。"""
+    async with agent(runtime=runtime, mode=mode) as client:
+        start = {"node_id": runtime.identity["node_id"], "request_id": f"upload_{mode}"}
+        started = await invoke(client=client, name="browser_start", arguments=start)
+        ids = {"session_id": started["session"]["session_id"], "page_id": started["page_id"]}
+        pids = runtime.browser_pids()
+        assert os.name != "posix" or pids
+        try:
+            repeated = await invoke(client=client, name="browser_start", arguments=start)
+            assert repeated["session"]["session_id"] == ids["session_id"] and repeated["page_id"] == ids["page_id"]
+            status = await invoke(client=client, name="browser_sessions", arguments=start)
+            assert status["request"]["state"] == "SUCCEEDED" and status["request"]["session_id"] == ids["session_id"]
+            await invoke(client=client, name="browser_navigate", arguments={**ids, "url": website["url"]})
+            target = {"by": "css", "value": "#files"}
+            for sizes in [[4 * 1024 * 1024], [2 * 1024 * 1024, 2 * 1024 * 1024]]:
+                files, expected = [], []
+                for index, size in enumerate(sizes):
+                    raw = bytes(range(256)) * (size // 256)
+                    name = f"fixture{index}.bin"
+                    files.append({"name": name, "mime_type": "application/octet-stream", "data": base64.b64encode(raw).decode()})
+                    expected.append({"name": name, "size": size, "sha256": hashlib.sha256(raw).hexdigest()})
+                await invoke(client=client, name="browser_file_upload", arguments={**ids, "target": target, "files": files})
+                text = f"FILES:{json.dumps(expected, separators=(',', ':'))}"
+                await invoke(client=client, name="browser_wait_for", arguments={**ids, "target": {"by": "css", "value": "#file_sizes"}, "state": "text", "value": text})
+                captured = await invoke(client=client, name="browser_capture", arguments={**ids, "allowed_origins": [website["url"]], "captures": {"files": {"mode": "text", "selector": "#file_sizes"}}})
+                assert json.loads(captured["values"]["files"].removeprefix("FILES:")) == expected and captured["truncated"] is False
+            oversized = base64.b64encode(b"x" * (4 * 1024 * 1024 + 1)).decode()
+            failure = await client.call_tool(name="browser_file_upload", arguments={**ids, "target": target, "files": [{"name": "oversized.bin", "mime_type": "application/octet-stream", "data": oversized}]})
+            assert failure.is_error and failure.structured_content["code"] == "UPLOAD_TOO_LARGE"
+            current = await invoke(client=client, name="browser_read", arguments={**ids, "target": {"by": "css", "value": "#file_sizes"}})
+            assert json.loads(current["value"].removeprefix("FILES:")) == expected
+            await invoke(client=client, name="browser_file_upload", arguments={**ids, "target": target, "files": []})
+            await invoke(client=client, name="browser_wait_for", arguments={**ids, "target": {"by": "css", "value": "#file_sizes"}, "state": "text", "value": "FILES:[]"})
+        finally:
+            stopped = await invoke(client=client, name="browser_stop", arguments={"session_id": ids["session_id"]})
+        assert stopped["session"]["state"] == "CLOSED" and stopped["session"]["cleanup"] == "COMPLETE"
+        recovered = await invoke(client=client, name="browser_sessions", arguments=start)
+        assert recovered["request"]["state"] == "SUCCEEDED" and recovered["sessions"][0]["session"]["cleanup"] == "COMPLETE"
+        closed = await invoke(client=client, name="browser_start", arguments=start)
+        assert closed["session"]["state"] == "CLOSED" and closed["session"]["session_id"] == ids["session_id"]
+    runtime.wait_free()
+    runtime.check_exited(pids=pids)
+    evidence(name=f"mcp_request_and_upload_{mode}", facts={"request_replay_same_session": True, "single_file_bytes": 4194304, "multiple_file_total_bytes": 4194304, "browser_file_sha256_verified": True, "over_limit_preserves_previous_files": True, "cleared_files": True, "closed_request_not_recreated": True, "cleanup": "COMPLETE", "resource": "FREE", "owned_browser_pids_exited": len(pids), "temporary_directories_removed": True})
 
 
 @pytest.mark.asyncio

@@ -14,6 +14,7 @@ from runbridge_hub.protocol import Identifier
 
 
 Timeout = Annotated[int, Field(ge=1, le=30000)]
+UPLOAD_LIMIT = 4 * 1024 * 1024
 
 
 class Target(BaseModel):
@@ -202,13 +203,16 @@ def register_tools(*, tool, browsers, token):
     async def browser_file_upload(session_id: Identifier, page_id: Identifier, target: Target, files: Annotated[list[UploadFile], Field(max_length=32)], timeout_ms: Timeout = 10000) -> dict:
         """向唯一文件输入上传显式 base64 数据，最多合计 4 MiB；空列表清空。"""
         payloads = []
+        total = 0
         try:
             for item in files:
-                payloads.append({"name": item.name, "mimeType": item.mime_type, "buffer": base64.b64decode(item.data, validate=True)})
+                buffer = base64.b64decode(item.data, validate=True)
+                total += len(buffer)
+                if total > UPLOAD_LIMIT:
+                    raise BrowserError(code="UPLOAD_TOO_LARGE")
+                payloads.append({"name": item.name, "mimeType": item.mime_type, "buffer": buffer})
         except ValueError:
             raise BrowserError(code="INVALID_UPLOAD_DATA") from None
-        if sum(len(item["buffer"]) for item in payloads) > 4 * 1024 * 1024:
-            raise BrowserError(code="UPLOAD_TOO_LARGE")
         async with browsers().page(session_id=session_id, page_id=page_id, token=token(), timeout_ms=timeout_ms, mutating=True) as page:
             await (await locate(page=page, target=target)).set_input_files(files=payloads, timeout=timeout_ms)
             return {"files": [item.name for item in files]}

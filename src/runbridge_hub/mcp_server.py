@@ -29,6 +29,7 @@ Timeout = Annotated[int, Field(ge=1, le=30000)]
 Lease = Annotated[float, Field(ge=1, le=3600)]
 TEXT_LIMIT = 20000
 IMAGE_LIMIT = 2 * 1024 * 1024
+HTTP_REQUEST_LIMIT = 8 * 1024 * 1024
 
 
 def result(*, values: dict, error: bool = False, image: bytes | None = None) -> CallToolResult:
@@ -188,5 +189,6 @@ def build_mcp(*, hub, settings: HubSettings):
     register_tools(tool=tool, browsers=browsers, token=token)
 
     app = server.streamable_http_app(streamable_http_path="/mcp", json_response=True, stateless_http=True,
+                                    max_request_body_size=HTTP_REQUEST_LIMIT,
                                     transport_security=TransportSecuritySettings(allowed_hosts=settings.mcp_allowed_hosts, allowed_origins=settings.mcp_allowed_origins))
     return server, BearerMiddleware(app=app, hub=hub)
