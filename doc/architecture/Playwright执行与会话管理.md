@@ -2,7 +2,7 @@
 
 [文档导航](../README.md) · [会话接口](../reference/会话接口与原生连接.md) · [阶段验收](../project/Playwright阶段验收记录.md)
 
-当前版本为 0.5.0；本文说明受管理 Chromium 路线，已有 Chrome 的路线见[Chrome 复用与授权清理](Chrome复用与授权清理.md)。在 R0/R1 之上完成 R2 的资源/会话部分和 R3 的受管理 Chromium 原生接入。R2 的独立业务 HTTP 执行、Appium/ADB 和容量压测未实施。本文件描述当前代码，定稿路线保留在 `doc/design/`。
+当前实现对应 Hub 0.5.1 / Node 0.5.0；本文说明受管理 Chromium 路线，已有 Chrome 的路线见[Chrome 复用与授权清理](Chrome复用与授权清理.md)。在 R0/R1 之上完成 R2 的资源/会话部分和 R3 的受管理 Chromium 原生接入。R2 的独立业务 HTTP 执行、Appium/ADB 和容量压测未实施。本文件描述当前代码，定稿路线保留在 `doc/design/`。
 
 ## 执行路径与模块
 
@@ -14,7 +14,7 @@ flowchart LR
     Server --> Browser[本机受管理 Chromium]
     Node <-->|控制连接：准备/接入/停止/心跳| Control[Hub 控制网关]
     Manager[Hub 会话管理] <--> Control
-    Manager <--> DB[(SQLite v2)]
+    Manager <--> DB[(SQLite v3)]
 ```
 
 | 项目/模块 | 职责 |
@@ -70,7 +70,7 @@ Node 为每次浏览器创建运行时目录下的专用 sessions/browser-* 临�
 
 Hub 固定单 ASGI Worker、asyncio，当前 CLI 使用 Uvicorn `websockets` 后端，`ws_max_size=16 MiB`、`ws_max_queue=4`。R1 时的 SansIO 后端在本次锁定版本中对 HTTP 拒绝握手记录误报，因此当前改用已完成真实验收且能明确配置队列上限的后端；该实现有上游弃用提示，升级 Uvicorn/websockets 前要复核拒绝握手、消息上限和背压。[Uvicorn 配置](https://uvicorn.dev/settings/)
 
-SQLite v2 新增 `sessions`；保存公开状态、归属、代次与时间，不保存启动秘密、本机端点或执行帧。高频心跳和原生载荷不逐条落库。已结束的当前路由会从内存移除，历史元数据仍保存于 SQLite；清理未知的当前预约继续保留。
+SQLite v3 沿用 `sessions` 保存公开状态、归属、代次与时间，并增加无凭据 `mcp_requests`，原子关联 MCP 请求和首次会话分配；准备或连接失败后仍能恢复身份。不保存启动秘密、本机端点或执行帧。高频心跳和原生载荷不逐条落库。已结束的当前路由会从内存移除，历史元数据仍保存于 SQLite；清理未知的当前预约继续保留。
 
 ## 验证范围
 
@@ -78,7 +78,7 @@ SQLite v2 新增 `sessions`；保存公开状态、归属、代次与时间，�
 
 原生方法调用错误保持 SDK 原始内容；浏览器启动失败作为管理准备错误返回公开错误码，helper 不把可能含本地启动秘密的原始日志交付调用方。启动失败排查见[运行与排障](../deployment/Playwright运行与排障.md)。
 
-R4 Chrome CDP 的实际验收另见[Chrome 记录](../project/R4Chrome复用验收记录.md)。本文件的受管理矩阵仍以 macOS 为基线，扩展、Firefox/WebKit、独立 HTTP 执行、Appium、远程 TLS/NAT、受管理 Linux/Windows、超大输出/慢接收者压力和 100 在线/10 并发尚未验收。已有 Chrome 模式另已完成[Ubuntu ARM64 跨机器与字体测试](../project/虚拟机Node跨机器验收记录.md)，不推及受管理后端。该矩阵证明代表性原生能力可用，不等于对 Playwright 所有方法逐项认证。
+R4 Chrome CDP 的实际验收另见[Chrome 记录](../project/R4Chrome复用验收记录.md)。完整原生 SDK 矩阵仍以 macOS 为基线。Ubuntu ARM64 另已验证受管理 MCP 代表性交互和同页画面，见[DSH 联调](../project/DSH与受管理画面联调.md)；已有 Chrome 模式见[Ubuntu ARM64 与字体测试](../project/虚拟机Node跨机器验收记录.md)。扩展、Firefox/WebKit、独立 HTTP 执行、Appium、远程 TLS/NAT、Windows、完整 Linux 原生矩阵、超大输出/慢接收者压力和 100 在线/10 并发尚未验收。该矩阵证明代表性原生能力可用，不等于对 Playwright 所有方法逐项认证。
 
 ## 受管理 MCP 与临时目录更新
 

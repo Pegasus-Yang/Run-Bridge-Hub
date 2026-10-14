@@ -13,7 +13,7 @@ flowchart LR
     Node <-->|固定回环 CDP 端点| Chrome[用户已运行的 Google Chrome]
 ```
 
-Node 的 `chrome.py` 负责本地授权配置、只读版本探测、原生转发和连接清理。Hub 沿用单 Worker、SQLite v2、内存预约、资源许可和租期；不新增数据库表、Redis 或浏览器 RPC。两端查询客户端须一起升级到 0.4.0；仍使用控制合同版本 1，新能力和会话字段不保证旧版严格校验客户端可以解析。
+Node 的 `chrome.py` 负责本地授权配置、只读版本探测、原生转发和连接清理。Hub 沿用单 Worker、内存预约、资源许可和租期；当前 SQLite 为 v3。Chrome 路线复用会话表，新增 mcp_requests 仅用于受管理 MCP 请求恢复，不增加 Redis 或浏览器 RPC。两端查询客户端须一起升级到 0.4.0；仍使用控制合同版本 1，新能力和会话字段不保证旧版严格校验客户端可以解析。
 
 `run --chrome-config` 与 `run --playwright-config` 互斥，每个 Node 仍只提供一个浏览器资源位。前者资源类型为 `BORROWED_CHROME_CDP`、后端 `chrome-cdp`、默认 ID `chrome`；后者受管理 Chromium 行为保持原样。复用路线不需要 Node.js、npm Playwright 或下载新浏览器；调用方使用官方 Playwright SDK，验收锁定 1.63.0。
 

@@ -4,7 +4,7 @@
 
 [项目首页](../README.md)
 
-本导航对应 **0.4.0 当前实现**。安装步骤、使用方法、协议参考和历史设计分开组织；首次使用按下面的顺序阅读。
+本导航对应 **Hub 0.5.1 / Node 0.5.0 当前实现**。安装步骤、使用方法、协议参考和历史设计分开组织；首次使用按下面的顺序阅读。
 
 ## 从安装到第一次执行
 
@@ -15,11 +15,11 @@
 | 3A | [Chrome 复用快速开始](user-guide/Chrome复用快速开始.md) | 已有 Chrome 的 READY/FREE 资源和实例授权 |
 | 3B | [Playwright 快速开始](user-guide/Playwright快速开始.md) | 受管理 Chromium 的 READY/FREE 资源 |
 | 4 | [调用方对接与使用](user-guide/调用方对接与使用.md) | 官方 SDK 执行、截图与会话释放 |
-| 4A | [MCP 浏览器接入](user-guide/MCP浏览器接入.md) | Agent 使用访问许可调用 12 个工具，操作并释放新建浏览器 |
+| 4A | [MCP 浏览器接入](user-guide/MCP浏览器接入.md) | Agent 使用访问许可调用 26 个工具，操作并释放新建浏览器 |
 | 5 | [浏览器画面流接入](user-guide/浏览器画面流接入.md) | ACTIVE 会话的 PNG 订阅与调用方展示 |
 | 6 | [跨机器部署与中文字体](deployment/跨机器部署与中文字体.md) | 可达的 Hub 地址、虚拟机安装与可读的中文画面 |
 
-3A 和 3B 是两种可选模式，同一个 Node 启动时选择其中一种。已有 Chrome 模式支持可选画面流，受管理模式暂不支持该扩展。
+3A 和 3B 是两种可选模式，同一个 Node 启动时选择其中一种。已有 Chrome 模式由 Node/Browscreen 提供画面；受管理 MCP 页面由 Hub 持有同一 Page 采集。普通 REST/SDK 受管理会话仍不提供这条独立流。
 
 ## 按职责找文档
 
@@ -43,6 +43,7 @@
 
 | 记录 | 范围 |
 | --- | --- |
+| [DSH 扩展修复验收](project/DSH扩展修复验收.md) | Hub 0.5.1 / Node 0.5.0 的 F1–F4 修复、107 项回归和 8 项实机验证 |
 | [MCP 浏览器闭环验收](project/MCP浏览器闭环验收记录.md) | 官方 MCP 客户端、实际 Chromium、业务状态与资源清理 |
 | [0.4.0 画面流验收](project/浏览器画面流验收记录.md) | 回归、可选安装、真实 PNG、权限与生命周期 |
 | [虚拟机跨机器验收](project/虚拟机Node跨机器验收记录.md) | 本机 Hub 与 Ubuntu ARM64 Node、断线重连、中文字体 |

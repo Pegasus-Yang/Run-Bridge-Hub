@@ -1,0 +1,192 @@
+{
+  "checked_at": "2026-10-14T02:44:08.490620+00:00",
+  "versions": {
+    "hub": "0.5.1",
+    "node": "0.5.0",
+    "dsh_plugin": "0.12.1",
+    "playwright": "1.63.0",
+    "mcp": "2.3.0"
+  },
+  "service_commits": [
+    "cd64e01",
+    "f488bd5",
+    "7166dd0"
+  ],
+  "plugin_commits": [
+    "399f06b",
+    "82b138e"
+  ],
+  "ordinary_tests": {
+    "hub_passed": 107,
+    "hub_browser_skipped": 8,
+    "node_related_passed": 19
+  },
+  "live_tests": {
+    "passed": 8,
+    "failed": 0,
+    "environment": "macOS arm64 isolated Hub and Node",
+    "normal_releases": 6,
+    "all_normal_releases_closed_complete": true,
+    "all_normal_release_error_codes_null": true,
+    "scenes": [
+      {
+        "test": "mcp_form_auto",
+        "checked_at": "2026-10-14T02:33:33.151689+00:00",
+        "status": "PASS",
+        "facts": {
+          "protocol_version": "2026-07-28",
+          "tools": 26,
+          "external_form_submissions": 1,
+          "png_dimensions": [
+            1280,
+            720
+          ],
+          "cleanup": "COMPLETE",
+          "resource": "FREE",
+          "owned_browser_pids_exited": 1,
+          "temporary_directory_removed": true
+        }
+      },
+      {
+        "test": "mcp_form_legacy",
+        "checked_at": "2026-10-14T02:33:34.125307+00:00",
+        "status": "PASS",
+        "facts": {
+          "protocol_version": "2025-11-25",
+          "tools": 26,
+          "external_form_submissions": 1,
+          "png_dimensions": [
+            1280,
+            720
+          ],
+          "cleanup": "COMPLETE",
+          "resource": "FREE",
+          "owned_browser_pids_exited": 1,
+          "temporary_directory_removed": true
+        }
+      },
+      {
+        "test": "mcp_request_and_upload_auto",
+        "checked_at": "2026-10-14T02:33:36.217396+00:00",
+        "status": "PASS",
+        "facts": {
+          "request_replay_same_session": true,
+          "single_file_bytes": 4194304,
+          "multiple_file_total_bytes": 4194304,
+          "browser_file_sha256_verified": true,
+          "over_limit_preserves_previous_files": true,
+          "cleared_files": true,
+          "closed_request_not_recreated": true,
+          "cleanup": "COMPLETE",
+          "resource": "FREE",
+          "owned_browser_pids_exited": 1,
+          "temporary_directories_removed": true
+        }
+      },
+      {
+        "test": "mcp_request_and_upload_legacy",
+        "checked_at": "2026-10-14T02:33:37.913213+00:00",
+        "status": "PASS",
+        "facts": {
+          "request_replay_same_session": true,
+          "single_file_bytes": 4194304,
+          "multiple_file_total_bytes": 4194304,
+          "browser_file_sha256_verified": true,
+          "over_limit_preserves_previous_files": true,
+          "cleared_files": true,
+          "closed_request_not_recreated": true,
+          "cleanup": "COMPLETE",
+          "resource": "FREE",
+          "owned_browser_pids_exited": 1,
+          "temporary_directories_removed": true
+        }
+      },
+      {
+        "test": "mcp_permissions_and_revoke",
+        "checked_at": "2026-10-14T02:33:38.893042+00:00",
+        "status": "PASS",
+        "facts": {
+          "other_grant_denied": true,
+          "resource_scope_checked": true,
+          "pending_operation_interrupted": true,
+          "revoked_http_status": 401,
+          "resource": "FREE"
+        }
+      },
+      {
+        "test": "mcp_disconnect_and_lease",
+        "checked_at": "2026-10-14T02:33:41.994975+00:00",
+        "status": "PASS",
+        "facts": {
+          "transport_disconnect_retains_session": true,
+          "new_client_can_recover": true,
+          "close_reason": "SESSION_EXPIRED",
+          "cleanup": "COMPLETE",
+          "resource": "FREE"
+        }
+      },
+      {
+        "test": "mcp_stop_and_grant_expiry",
+        "checked_at": "2026-10-14T02:33:45.998155+00:00",
+        "status": "PASS",
+        "facts": {
+          "stop_interrupts_wait": true,
+          "cleanup": "COMPLETE",
+          "lease_capped_by_grant": true,
+          "expired_token_status": 401,
+          "resource": "FREE"
+        }
+      },
+      {
+        "test": "mcp_documented_example",
+        "checked_at": "2026-10-14T02:33:47.180726+00:00",
+        "status": "PASS",
+        "facts": {
+          "example_exit_code": 0,
+          "snapshot_read": true,
+          "png_saved": true,
+          "cleanup": "COMPLETE",
+          "resource": "FREE"
+        }
+      }
+    ]
+  },
+  "plugin_tests": {
+    "passed": 362,
+    "evidence_level": "peer-reported tests; repository and acceptance record independently inspected"
+  },
+  "documentation_and_builds": [
+    {
+      "project": "runbridge-hub",
+      "version": "0.5.1",
+      "local_links_checked": 402,
+      "sdist_current_documents_checked": 44,
+      "artifacts": [
+        {
+          "name": "runbridge_hub-0.5.1-py3-none-any.whl",
+          "sha256": "81af6370d141cdf1d482a06f214290b62a7fa2795d009a8af1c2e258dce66650"
+        },
+        {
+          "name": "runbridge_hub-0.5.1.tar.gz",
+          "sha256": "432bab4a22ca71a8446bf82b1417f3d29c28258426f165f13209544ca127725e"
+        }
+      ]
+    },
+    {
+      "project": "runbridge-node",
+      "version": "0.5.0",
+      "local_links_checked": 347,
+      "sdist_current_documents_checked": 39,
+      "artifacts": [
+        {
+          "name": "runbridge_node-0.5.0-py3-none-any.whl",
+          "sha256": "9dec3ce312d2fc3cc5231bd491f541b86ecef9af9a6657062a7957661c878a84"
+        },
+        {
+          "name": "runbridge_node-0.5.0.tar.gz",
+          "sha256": "e9e2b68701dc6a1a1760c0e3a54fd3f1f894c7b5dff6a12bcb5cbec07cb64cd6"
+        }
+      ]
+    }
+  ]
+}

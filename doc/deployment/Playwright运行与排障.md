@@ -2,7 +2,7 @@
 
 [文档导航](../README.md) · [安装](安装与运行.md) · [跨机器网络与字体](跨机器部署与中文字体.md) · [调用方指南](../user-guide/调用方对接与使用.md)
 
-适用于 0.4.0。按 Hub → Node → 资源 → 会话 → 原生 SDK → 画面顺序定位，先读取真实状态，再决定是否重启或重新申请。查询接口、执行接口和画面接口分别处理，不把一个通道连通当作所有功能正常。
+适用于 Hub 0.5.1 / Node 0.5.0。按 Hub → Node → 资源 → 会话 → 原生 SDK → 画面顺序定位，先读取真实状态，再决定是否重启或重新申请。查询接口、执行接口和画面接口分别处理，不把一个通道连通当作所有功能正常。
 
 ## 1. 最小诊断信息
 
@@ -82,7 +82,7 @@ READY 会话也受租期约束，即使从未接入 SDK。正常结束不回滚�
 | --- | --- |
 | supported=true 但 streams=[] | 无当前许可创建的 ACTIVE 会话；保持原生执行连接再查询 |
 | visual 缺失 | 旧 Hub/查询合同，按实际版本检查；新客户端允许缺省，旧严格模型需升级 |
-| UNSUPPORTED_BACKEND | 受管理模式当前没有独立画面流；已有 Chrome 才支持本扩展 |
+| UNSUPPORTED_BACKEND | 普通 REST/SDK 受管理会话无独立流；MCP 页面须由 Hub 持有且 Node 已声明 managed_visual=cdp-png |
 | WAITING_TARGET | 多页或目标关闭，查询 targets 并选择；切换不激活业务页 |
 | TARGET_SELECTION_PENDING | 前一个选择尚未完成；等待 APPLIED/FAILED，不重复并发 PUT |
 | VISUAL_TARGET_NOT_FOUND | 使用当前查询返回的目标 ID，列表可能刚更新 |
@@ -100,7 +100,7 @@ READY 会话也受租期约束，即使从未接入 SDK。正常结束不回滚�
 
 调用方 screenshot、download.save_as()、tracing.stop(path=...) 保存到调用机器；Node 本地自定义输出目录按工具语义保留。download.path() 在原生远程模式不提供远端本机路径。
 
-升级前一致性备份 SQLite 和身份，v2 数据库不能交给 0.1.0 程序直接回退。Hub 重启使旧会话中断，Node 重连后重新报告，调用方用新会话；不恢复或重放旧 SDK 对象。固定单 Worker，原生消息上限 16 MiB、库接收队列 4；升级 Uvicorn/websockets 时复核握手、背压与关闭行为。
+升级前一致性备份 SQLite 和身份，Hub 0.5.1 自动迁移到 v3，旧程序不能直接读取，回退须恢复升级前一致性备份。Hub 重启使旧会话中断，Node 重连后重新报告，调用方用新会话；不恢复或重放旧 SDK 对象。固定单 Worker，原生消息上限 16 MiB、库接收队列 4；升级 Uvicorn/websockets 时复核握手、背压与关闭行为。
 
 各自源码项目的构建命令：
 

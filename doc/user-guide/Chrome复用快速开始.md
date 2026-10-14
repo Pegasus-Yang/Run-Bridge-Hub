@@ -2,7 +2,7 @@
 
 [文档导航](../README.md) · [首次登记](快速开始.md) · [调用方指南](调用方对接与使用.md) · [授权与清理](../architecture/Chrome复用与授权清理.md)
 
-适用于 0.4.0。本模式连接所有者明确授权的已有 Chrome/Chromium 实例，复用其原页面、Cookie 和 localStorage。Node 不启动或关闭这个浏览器，也不复制 Profile。先完成 Hub 启动、Node 登记；如果先运行了仅控制模式，正常停止该 Node，再按本指南启动。
+适用于 Hub 0.5.1 / Node 0.5.0。本模式连接所有者明确授权的已有 Chrome/Chromium 实例，复用其原页面、Cookie 和 localStorage。Node 不启动或关闭这个浏览器，也不复制 Profile。先完成 Hub 启动、Node 登记；如果先运行了仅控制模式，正常停止该 Node，再按本指南启动。
 
 ## 1. 确认授权和前置条件
 

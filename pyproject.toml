@@ -40,4 +40,4 @@ url = "http://mirrors.aliyun.com/pypi/simple/"
 default = true
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/doc/reference/构建产物核验记录.json", "/doc/reference/文档核验记录.json", "/doc/reference/R4构建产物核验记录.json", "/doc/reference/R4文档核验记录.json", "/doc/reference/画面流构建产物核验记录.json", "/doc/reference/画面流文档核验记录.json"]
+exclude = ["/doc/reference/DSH扩展修复核验记录.json", "/doc/reference/构建产物核验记录.json", "/doc/reference/文档核验记录.json", "/doc/reference/R4构建产物核验记录.json", "/doc/reference/R4文档核验记录.json", "/doc/reference/画面流构建产物核验记录.json", "/doc/reference/画面流文档核验记录.json"]

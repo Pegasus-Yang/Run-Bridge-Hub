@@ -2,7 +2,7 @@
 
 [文档导航](../README.md) · [首次登记](快速开始.md) · [调用方指南](调用方对接与使用.md) · [运行与排障](../deployment/Playwright运行与排障.md)
 
-适用于 0.4.0 的受管理模式：Node 为每个执行会话启动一个独立 Chromium 服务，调用方通过官方 Playwright connect() 操作。需要复用已登录浏览器时选择[Chrome 模式](Chrome复用快速开始.md)；该模式不复用已有 Profile，当前也不提供独立画面流。
+适用于 Hub 0.5.1 / Node 0.5.0 的受管理模式：Node 为每个执行会话启动一个独立 Chromium 服务，调用方通过官方 Playwright connect() 操作。需要复用已登录浏览器时选择[Chrome 模式](Chrome复用快速开始.md)；受管理模式不复用已有 Profile；普通 REST/SDK 会话不提供独立画面流，MCP 持有的页面支持持续 PNG。
 
 先完成 Hub 启动和 Node 身份登记。以下在 Node 源码根目录运行，wheel 部署将命令前缀改为 .venv/bin/runbridge-node。
 
@@ -26,7 +26,7 @@ uv run --locked --no-sync runbridge-node prepare-playwright --runtime-dir .runbr
 
 同一锁文件目录可再次准备；若目录已有不同依赖文件，命令拒绝覆盖，选择独立新目录。源码不能只靠 Python 的 playwright install 替代这个 npm 服务运行时。
 
-浏览器仍依赖所在系统的本机库。prepare-playwright 不自动以管理员权限安装系统库；缺少依赖时按[官方浏览器部署说明](https://playwright.dev/docs/browsers#install-system-dependencies)处理。当前受管理模式的完整验收基线是 macOS arm64，不能据借用模式的 Ubuntu 验收推断受管理 Linux 已通过。
+浏览器仍依赖所在系统的本机库。prepare-playwright 不自动以管理员权限安装系统库；缺少依赖时按[官方浏览器部署说明](https://playwright.dev/docs/browsers#install-system-dependencies)处理。原生 SDK 的完整矩阵以 macOS arm64 为基线；Ubuntu ARM64 的 MCP 工具和同页画面已另有[DSH 联调记录](../project/DSH与受管理画面联调.md)，不能据此推及所有 Linux 原生方法。
 
 ## 3. 保存本地启动配置
 
@@ -82,4 +82,4 @@ Node 源码的原 examples/playwright_smoke.py 继续保留；它依赖本机安
 
 正常释放包含 Node 自建 helper/browser 和本次临时目录清理，不删除所有者指定的外部输出目录。一个资源同一时刻只供一个会话使用；尚未确认清理时不能当作 FREE 抢占。cleanup=UNKNOWN 时按[排障指南](../deployment/Playwright运行与排障.md)核查，不通过清空身份或运行时目录解决。
 
-当前安装 visual extra 也不会为受管理 Chromium 提供独立画面流；查询返回 UNSUPPORTED_BACKEND。需要执行期间持续 PNG 时选择已有 Chrome 路线，或由自己的 SDK 按业务需要主动 screenshot；两者是不同的调用方式。
+普通 REST/SDK 受管理会话没有独立画面流，安装 Node visual extra 也不改变这一点。通过 Hub MCP 启动的页面支持同页持续 PNG，无需 Browscreen；已有 Chrome 使用 Node/Browscreen 路线。自己的 SDK 也可主动 screenshot，具体入口见[画面指南](浏览器画面流接入.md)。
