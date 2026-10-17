@@ -1,6 +1,6 @@
 # RunBridge Playwright 阶段验收记录
 
-[文档导航](../README.md) · [当前架构](../architecture/Playwright执行与会话管理.md) · [完整调用](../user-guide/Playwright快速开始.md)
+[文档导航](../README.md) · [当前架构](../architecture/Playwright执行与会话管理.md) · [完整调用](../user-guide/调用方对接与使用.md)
 
 验收时间：2026-10-11T23:28:50.423014+08:00。版本：0.2.0。结果：**通过当前阶段验收**，R0/R1 保持可用，R2 资源/会话与 R3 受管理 Chromium 原生执行已完成。
 

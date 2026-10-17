@@ -1,51 +1,23 @@
 # MCP 浏览器接入
 
-[文档导航](../README.md) · [运行时序](../architecture/MCP授权与浏览器生命周期.md) · [受管理 Chromium 准备](Playwright快速开始.md)
+[文档导航](../README.md) · [Hub 部署](../deployment/部署与运行.md) · [运行时序](../architecture/MCP授权与浏览器生命周期.md)
 
-当前版本为 Hub 0.5.0，提供可选 `/mcp` 入口。Agent 的 MCP 客户端通过访问许可操作 Node 上**新建的受管理 Chromium**。浏览器运行在 Node；Hub 安装 Playwright 客户端，不需要安装 Chromium。Node 0.5.0 使用控制合同版本 1 和原生 Playwright 执行协议，无需安装 MCP 包。
+Hub 0.5.1 提供可选 /mcp 入口，Agent 使用已有访问许可操作远程设备上的受管理 Chromium。浏览器资源由 Node 所有者按 Node 项目文档准备；本指南说明 Hub 入口与 MCP 客户端使用。
 
-## 1. 准备和启动
+## 1. 核对服务和资源
 
-先按[首次登记](快速开始.md)和[受管理模式](Playwright快速开始.md)完成 Node 登记、Playwright 1.63.0 运行时准备及资源探测。节点必须是 `ONLINE`，目标资源为 `MANAGED_CHROMIUM`、`READY/FREE`。浏览器是否显示窗口由 Node 所有者的 `launch_options.headless` 决定；首次运行的配置没有已有登录数据。
+Hub 部署者按部署指南选择带 MCP 的发布包并启用入口、Host／Origin 和内部原生地址。Agent 用户取得实际 MCP 地址，无需启动服务端进程。
 
-在 **Hub 项目根目录**安装可选依赖：
+Node 所有者应提供 ONLINE、MANAGED_CHROMIUM、READY/FREE 的资源和实际资源 ID，运行时 Playwright 主次版本与 Hub SDK 匹配。Hub extra 当前锁定 mcp 2.3.0、Playwright 1.63.0；Hub 无需安装本机浏览器。
 
-```bash
-uv sync --locked --extra mcp --python 3.14 -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
-uv run --locked --no-sync runbridge-hub serve --enable-mcp --enrollment-token-file .runbridge/enrollment.token
-```
+## 2. 取得许可并配置 Agent
 
-首次部署先按快速开始生成登记凭据；已有文件时直接使用。当前锁定 `mcp==2.3.0` 和 `playwright==1.63.0`。默认未启用 MCP，未安装 extra 的原有 Hub 仍可运行。后续运行使用 `--no-sync`；重新同步时继续指定 `--extra mcp`，防止可选依赖被移除。
-
-| 参数 | 用法 |
-| --- | --- |
-| `--enable-mcp` | 开启 `/mcp`；仅安装依赖不会自动开放入口 |
-| `--mcp-native-url` | Hub 内部连接自身的 HTTP(S) **根地址**，不含凭据、查询参数或路径前缀；默认按监听 host/port 推导，通配监听转换为回环地址 |
-| `--mcp-allowed-host` | 额外允许的请求 Host，可重复；支持 `hub.example.com`、`hub.example.com:*`，不允许全局 `*` |
-| `--mcp-allowed-origin` | 允许的网页 Origin，可重复；无 Origin 的服务端 MCP 客户端无需此参数 |
-
-例如，外部经 HTTPS 代理访问 `hub.example.com`，Hub 本地监听 8787：
-
-```bash
-uv run --locked --no-sync runbridge-hub serve --host 0.0.0.0 --port 8787 --enable-mcp --mcp-native-url http://127.0.0.1:8787 --mcp-allowed-host hub.example.com --enrollment-token-file .runbridge/enrollment.token
-```
-
-反向代理需转发 `/mcp`，以及原有 Node 控制和原生 WebSocket 路由；带外部路径前缀时由代理剥离前缀。Host 允许列表匹配代理实际转发给 Hub 的值。非本机网络通过 HTTPS/WSS 传输访问凭据。保持 **一个 ASGI Worker**。
-
-## 2. 签发许可并配置 Agent
-
-在 **Node 项目根目录**，由节点所有者签发受限许可：
-
-```bash
-uv run --locked --no-sync runbridge-node grant --config .runbridge/node.json --resource-id chromium --expires-in 3600 --output .runbridge/agent-access.json
-```
-
-`chromium` 应替换为该 Node 实际的资源 ID。私有文件含 `hub_url`、`node_id`、`grant_id` 和 `access_token`。将地址和 `node_id` 交给 Agent；由 MCP 客户端的安全配置读取 `access_token`，不要把令牌写入工具参数、URL 或模型对话。
+从 Node 所有者取得私有访问 JSON 和实际 resource_id，确认文件中的 hub_url、node_id 和期限。文件结构见[访问许可参考](../reference/部署配置与凭据.md)。将访问令牌配置到客户端的安全请求头，不放入工具参数、URL 或模型对话。
 
 | MCP 客户端配置项 | 值 |
 | --- | --- |
 | 传输 | Streamable HTTP |
-| 服务地址 | `http://127.0.0.1:8787/mcp`，远程环境替换为可达 HTTPS 地址 |
+| 服务地址 | `https://hub.example.com/mcp`，替换为服务端交付的实际远程地址 |
 | HTTP 请求头 | `Authorization: Bearer <access_token>`，每次请求携带 |
 | 工具上下文 | 目标 `node_id`；必要时提供 `resource_id` |
 
@@ -158,18 +130,8 @@ MCP HTTP 连接结束不会立即释放浏览器。客户端重连后可用同�
 
 `browser_status`、`browser_stop` 沿用 REST 的 grant 归属检查，可查询/释放同 grant 通过 REST 创建的会话；页面工具只操作当前 MCP 服务持有的对象。不要对已经由 MCP 占用的原生入口再建立第二个 SDK 连接。
 
-## 6. 验证命令
+## 6. 接入核验与开发测试
 
-在装好 `mcp` extra 的 Hub 项目根目录运行普通回归；它默认跳过真实浏览器启动：
+先调用 node_inspect 核对授权及资源，再执行明确的浏览器任务；保留响应中的会话和页面身份，在 finally 中停止并核对 cleanup。客户端 HTTP 连接、浏览器动作完成和业务成功分别验证。
 
-```bash
-uv run --locked --no-sync pytest -q
-```
-
-准备好相邻 `runbridge-node` 的 `.venv` 和受管理运行时后，显式运行真实联调：
-
-```bash
-RUNBRIDGE_RUN_BROWSER_TESTS=1 uv run --locked --no-sync pytest -q tests/test_mcp_live.py
-```
-
-可用 `RUNBRIDGE_NODE_PROJECT`、`RUNBRIDGE_PLAYWRIGHT_RUNTIME` 指定目录；可用 `RUNBRIDGE_MCP_EVIDENCE_FILE` 指定脱敏 JSON 证据文件。测试只借用已安装的浏览器二进制，数据库、身份、会话目录和网页都在临时目录中。macOS 需在允许创建真实浏览器进程的环境运行；不要在受限沙箱中反复尝试启动。实际验证范围见 [MCP 验收记录](../project/MCP浏览器闭环验收记录.md)。
+源码回归、测试目录和显式真实浏览器联调参数见[Hub 开发与联调](../development/本地开发与联调.md)，不属于用户部署步骤。

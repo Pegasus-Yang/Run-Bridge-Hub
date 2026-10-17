@@ -1,8 +1,0 @@
-{
-  "runtime_directory": ".runbridge/playwright",
-  "node_executable": "node",
-  "resource_id": "chromium",
-  "launch_options": {
-    "headless": true
-  }
-}

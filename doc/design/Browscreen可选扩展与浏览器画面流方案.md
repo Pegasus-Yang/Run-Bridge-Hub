@@ -29,7 +29,7 @@
 
 | 事实 | 当前证据 | 对方案的影响 |
 | --- | --- | --- |
-| Hub/Node 当前包版本均为 0.3.0，要求 Python 3.14.x | [Hub pyproject](../../../runbridge-hub/pyproject.toml)、[Node pyproject](../../../runbridge-node/pyproject.toml) | 可选扩展需要沿用各项目 `.venv` 和现有打包方式 |
+| Hub/Node 当前包版本均为 0.3.0，要求 Python 3.14.x | [Hub pyproject](../../pyproject.toml)、[Node pyproject](../../../runbridge-node/pyproject.toml) | 可选扩展需要沿用各项目 `.venv` 和现有打包方式 |
 | Browscreen 本地版本为 0.3.1，要求 Python >=3.14 | [Browscreen pyproject](../../../../../SandBoxProjects/Browscreen/pyproject.toml) | 与 Node 的 Python 范围存在交集 |
 | PyPI 0.3.1 元数据可读取，有 wheel 和 sdist | 2026-10-12 实际读取 [PyPI 版本元数据](https://pypi.org/pypi/browscreen/0.3.1/json)，返回 HTTP 200；[发布页](https://pypi.org/project/browscreen/0.3.1/) | 可使用公开包作为可选依赖；本轮未安装包或验证镜像同步 |
 | 当前 Node 虚拟环境没有安装 browscreen | 读取 `.venv` 中的分发元数据 | 本轮没有可声称成功的 Node/Browscreen 集成运行结果 |
@@ -37,9 +37,9 @@
 | webhook 不支持注册认证请求头，采集循环等待发送结束 | [webhooks.py](../../../../../SandBoxProjects/Browscreen/src/browscreen/webhooks.py) 第 14–36 行；[capture.py](../../../../../SandBoxProjects/Browscreen/src/browscreen/capture.py) 第 109–116 行 | 直接把远程 Hub 注册为 webhook 会把网络等待带入采集循环 |
 | 浏览器级地址默认选择首个 page，页面级地址可精确连接 | [chrome_cdp.py](../../../../../SandBoxProjects/Browscreen/src/browscreen/adapters/chrome_cdp.py) 第 53–72 行；[使用说明](../../../../../SandBoxProjects/Browscreen/doc/user-guide/使用说明.md) | 必须由 Node 明确选择目标，避免展示错误页面 |
 | Node 已有固定实例授权和每会话出站隧道 | [chrome.py](../../../runbridge-node/src/runbridge_node/chrome.py) 第 24–40、150–183 行 | 沿用本机配置、资源归属和连接代次，不允许调用方传入 CDP 地址 |
-| 原生连接独占调用方位置，且 Hub 直接转发原生帧 | [sessions.py](../../../runbridge-hub/src/runbridge_hub/sessions.py) 第 215–255 行；[native.py](../../../runbridge-hub/src/runbridge_hub/native.py) 第 29–52 行 | 观看者不能占用原生调用连接，画面不能混入原生协议 |
-| 当前已有节点、节点能力与会话查询接口 | [api.py](../../../runbridge-hub/src/runbridge_hub/api.py) 第 55–80 行；[protocol.py](../../../runbridge-hub/src/runbridge_hub/protocol.py) 第 99–145 行 | 在查询响应中附带画面入口与状态，扩展查询模型并同步客户端解析 |
-| 控制合同使用 `extra="forbid"`，控制消息限制 64 KiB | [protocol.py](../../../runbridge-hub/src/runbridge_hub/protocol.py) 第 11–14 行；[gateway.py](../../../runbridge-hub/src/runbridge_hub/gateway.py) 第 14–44 行 | 不能随意给旧模型追加字段，也不能在控制消息中传图片 |
+| 原生连接独占调用方位置，且 Hub 直接转发原生帧 | [sessions.py](../../src/runbridge_hub/sessions.py) 第 215–255 行；[native.py](../../src/runbridge_hub/native.py) 第 29–52 行 | 观看者不能占用原生调用连接，画面不能混入原生协议 |
+| 当前已有节点、节点能力与会话查询接口 | [api.py](../../src/runbridge_hub/api.py) 第 55–80 行；[protocol.py](../../src/runbridge_hub/protocol.py) 第 99–145 行 | 在查询响应中附带画面入口与状态，扩展查询模型并同步客户端解析 |
+| 控制合同使用 `extra="forbid"`，控制消息限制 64 KiB | [protocol.py](../../src/runbridge_hub/protocol.py) 第 11–14 行；[gateway.py](../../src/runbridge_hub/gateway.py) 第 14–44 行 | 不能随意给旧模型追加字段，也不能在控制消息中传图片 |
 | 受管理模式提供 `launchServer().wsEndpoint()` | [server.mjs](../../../runbridge-node/src/runbridge_node/playwright_runtime/server.mjs)、[runtime.py](../../../runbridge-node/src/runbridge_node/runtime.py) 第 90–107 行 | 这是 Playwright 端点，不能直接交给 Chrome CDP 适配器 |
 
 以上是源码、当前环境和公开元数据核对。依赖声明的范围可以对齐，但新 extra 的锁定、wheel 安装、CDP 双连接共存、查询扩展和数据流消费尚未实测。

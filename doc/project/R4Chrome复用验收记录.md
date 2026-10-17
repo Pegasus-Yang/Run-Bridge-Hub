@@ -1,6 +1,6 @@
 # RunBridge R4 Chrome 复用验收记录
 
-[文档导航](../README.md) · [复用架构](../architecture/Chrome复用与授权清理.md) · [调用指南](../user-guide/Chrome复用快速开始.md)
+[文档导航](../README.md) · [复用架构](../architecture/Chrome复用与授权清理.md) · [调用指南](../user-guide/调用方对接与使用.md)
 
 实施日期：2026-10-12（Asia/Shanghai），版本 0.3.0。本轮范围为 R4 的一种 Chrome CDP 实例授权路径；受管理 Chromium、R0/R1 与会话管理继续回归。原 0.1.0、0.2.0 运行及打包记录按原字节保留，不代表新版本当前源码摘要。
 

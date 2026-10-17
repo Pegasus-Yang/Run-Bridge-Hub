@@ -76,7 +76,7 @@ SQLite v3 沿用 `sessions` 保存公开状态、归属、代次与时间，并�
 
 已验证本机 macOS arm64、独立 Hub/Node 进程、官方 Python SDK 的 Browser/Context/Page/Locator、弹窗/新页面、路由回调、PNG、文件上传/下载、Trace、原生 TimeoutError、授权拒绝、资源冲突、撤销、租期和正常/异常重启。
 
-原生方法调用错误保持 SDK 原始内容；浏览器启动失败作为管理准备错误返回公开错误码，helper 不把可能含本地启动秘密的原始日志交付调用方。启动失败排查见[运行与排障](../deployment/Playwright运行与排障.md)。
+原生方法调用错误保持 SDK 原始内容；浏览器启动失败作为管理准备错误返回公开错误码，helper 不把可能含本地启动秘密的原始日志交付调用方。启动失败排查见[运行与排障](../deployment/运行与排障.md)。
 
 R4 Chrome CDP 的实际验收另见[Chrome 记录](../project/R4Chrome复用验收记录.md)。完整原生 SDK 矩阵仍以 macOS 为基线。Ubuntu ARM64 另已验证受管理 MCP 代表性交互和同页画面，见[DSH 联调](../project/DSH与受管理画面联调.md)；已有 Chrome 模式见[Ubuntu ARM64 与字体测试](../project/虚拟机Node跨机器验收记录.md)。扩展、Firefox/WebKit、独立 HTTP 执行、Appium、远程 TLS/NAT、Windows、完整 Linux 原生矩阵、超大输出/慢接收者压力和 100 在线/10 并发尚未验收。该矩阵证明代表性原生能力可用，不等于对 Playwright 所有方法逐项认证。
 

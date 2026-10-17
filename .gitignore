@@ -18,6 +18,7 @@ htmlcov/
 /playwright-report/
 
 # 本地运行目录包含身份凭据、SQLite 和浏览器临时数据
+/local/
 .runbridge/
 *.sqlite
 *.sqlite3

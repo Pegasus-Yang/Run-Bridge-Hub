@@ -1,6 +1,6 @@
 # RunBridge 已有 Chrome 复用
 
-[文档导航](../README.md) · [使用指南](../user-guide/Chrome复用快速开始.md) · [会话接口](../reference/会话接口与原生连接.md)
+[文档导航](../README.md) · 使用指南（由 RunBridge Node 项目维护） · [会话接口](../reference/会话接口与原生连接.md)
 
 本文件描述 0.4.0 沿用的 R4 实现。Chrome 已由用户运行并登录，Node 仅连接所有者明确配置的本机 CDP 端点。首期使用整个浏览器实例授权；单标签页扩展桥接仍为后续路线。
 
