@@ -35,7 +35,7 @@ cd ~/runbridge-mcp-client
 umask 077
 mkdir -p .runbridge examples artifacts
 chmod 700 .runbridge
-uv venv --python 3.14 .venv
+uv venv --python 3.14 --no-python-downloads .venv
 uv pip install --python .venv/bin/python 'mcp==2.3.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 cp -n ~/Downloads/agent-access.json .runbridge/access.json
 chmod 600 .runbridge/access.json
