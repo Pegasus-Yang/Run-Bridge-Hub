@@ -1,46 +1,96 @@
-# MCP 浏览器接入
+# MCP 浏览器接入：从访问文件到第一次操作
 
 [文档导航](../README.md) · [Hub 部署](../deployment/部署与运行.md) · [运行时序](../architecture/MCP授权与浏览器生命周期.md)
 
-Hub 0.5.1 提供可选 /mcp 入口，Agent 使用已有访问许可操作远程设备上的受管理 Chromium。浏览器资源由 Node 所有者按 Node 项目文档准备；本指南说明 Hub 入口与 MCP 客户端使用。
+Hub 0.5.1 的可选 `/mcp` 入口让 Agent 使用远程受管理 Chromium。本文从**服务和资源已经由部署者准备好**开始，说明如何接收资料、运行一个完整客户端样例，再映射到你的 Agent 配置。后半部分供查工具和恢复规则。
 
-## 1. 核对服务和资源
+## 1. 向两位提供者取得什么
 
-Hub 部署者按部署指南选择带 MCP 的发布包并启用入口、Host／Origin 和内部原生地址。Agent 用户取得实际 MCP 地址，无需启动服务端进程。
+| 向谁索取 | 必须拿到的实际值 | 为什么需要 |
+| --- | --- | --- |
+| Hub 部署者 | 已启用的 MCP 地址，例如 `https://hub.example.com/mcp` | 仅 `/health` 正常不代表启用了 MCP |
+| Node 所有者 | 私有访问 JSON，例如 `agent-access.json` | 内含本调用方的 `access_token`、`hub_url`、`node_id` 和期限 |
+| Node 所有者 | 受管理资源 ID，通常 `chromium` | 资源 ID 不在访问 JSON 中，需要另行交代 |
+| Node 所有者／业务方 | 可从 Node 浏览器访问的 HTTP(S) 页面地址 | 页面实际运行在那台设备上 |
 
-Node 所有者应提供 ONLINE、MANAGED_CHROMIUM、READY/FREE 的资源和实际资源 ID，运行时 Playwright 主次版本与 Hub SDK 匹配。Hub extra 当前锁定 mcp 2.3.0、Playwright 1.63.0；Hub 无需安装本机浏览器。
+Node 资源应为 ONLINE、MANAGED_CHROMIUM、READY/FREE，运行时 Playwright 主次版本与 Hub SDK 匹配。Hub extra 使用 mcp 2.3.0、Playwright 1.63.0；已有 Chrome 不在当前 MCP 工具支持范围内。
 
-## 2. 取得许可并配置 Agent
+访问文件与[调用方文件格式](调用方对接与使用.md#1-从-node-所有者取得访问资料)相同。接收者使用真实生成的 JSON，不用登记文件 `enrollment.token` 或设备身份 `node.json`。缺少任意一项时，先向对应提供者补齐，不需要从源码猜值。
 
-从 Node 所有者取得私有访问 JSON 和实际 resource_id，确认文件中的 hub_url、node_id 和期限。文件结构见[访问许可参考](../reference/部署配置与凭据.md)。将访问令牌配置到客户端的安全请求头，不放入工具参数、URL 或模型对话。
+## 2. 先用独立 Python 样例完成一次接入
 
-| MCP 客户端配置项 | 值 |
+这一步能验证交付材料可用，不要求你先猜某个 Agent 客户端的配置字段。若只使用 Agent，也可在完成本节后将同样的值填入第 3 节。
+
+按以下位置准备材料：
+
+- 真实访问文件保存为 `~/Downloads/agent-access.json`。如果收到的名字为 `access.json`，复制命令的源文件名改成它。
+- Hub 文档包解压后，将含 `README.md` 和 `doc/` 的根目录命名为 `runbridge-hub-docs`，放在 `~/Downloads/`。
+- 全局 `uv --version` 已能运行；没有时按 [uv 官方说明](https://docs.astral.sh/uv/getting-started/installation/)安装。
+
+在**调用方机器**新建独立目录：
+
+```bash
+mkdir -p ~/runbridge-mcp-client
+cd ~/runbridge-mcp-client
+umask 077
+mkdir -p .runbridge examples artifacts
+chmod 700 .runbridge
+uv venv --python 3.14 .venv
+uv pip install --python .venv/bin/python 'mcp==2.3.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+cp -n ~/Downloads/agent-access.json .runbridge/access.json
+chmod 600 .runbridge/access.json
+cp -n ~/Downloads/runbridge-hub-docs/doc/reference/examples/mcp_browser.py examples/
+.venv/bin/python -m json.tool .runbridge/access.json > /dev/null
+.venv/bin/python examples/mcp_browser.py --help
+```
+
+已有有效环境时跳过 `uv venv`。这个目录只放客户端，不安装 Hub／Node 包或本机浏览器。JSON 格式检查不显示秘密。
+
+从 Node 所有者取得实际可访问的页面 URL，替换下面的示例地址：
+
+```bash
+.venv/bin/python examples/mcp_browser.py --access-file .runbridge/access.json --url https://your-test-system.example/ --screenshot artifacts/mcp-page.png
+```
+
+| 参数 | 数据从哪里来 |
+| --- | --- |
+| `--access-file` | 上面保存的真实访问 JSON |
+| `--url` | 实际网页地址，须从 Node 浏览器网络可达，不是 MCP 地址 |
+| `--screenshot` | 调用方机器上的输出路径，父目录 `artifacts/` 已创建 |
+
+样例从文件中的 `hub_url` 构造 `/mcp` 地址，用 `access_token` 设置请求头，再使用 `node_id` 选择节点。有且仅有一个获许可的受管理资源时自动选择它；脚本本身没有 `--resource-id` 参数。需要明确选择时，在 Agent 的 `browser_start` 参数中提供实际资源 ID。
+
+脚本依次启动浏览器、打开页面、读取快照、截图和释放。在 `artifacts/mcp-page.png` 应能看到远程页面；成功输出中应有 `state=CLOSED`、`cleanup=COMPLETE`，并返回本次 `session_id` 和快照字符数。
+
+失败时不盲目重新提交网页动作，先按后面的错误表核对授权、入口及会话清理。截图和 cleanup 分别说明读取、清理结果，不自动判断业务通过。
+
+## 3. 把同一份资料配置到 Agent
+
+客户端产品的字段名不同，本项目没有一个对所有产品通用的 `mcp.json`。在该产品的“远程 MCP／Streamable HTTP”配置中，按下面映射填值：
+
+| 客户端要填的内容 | 实际值从哪里取 |
 | --- | --- |
 | 传输 | Streamable HTTP |
-| 服务地址 | `https://hub.example.com/mcp`，替换为服务端交付的实际远程地址 |
-| HTTP 请求头 | `Authorization: Bearer <access_token>`，每次请求携带 |
-| 工具上下文 | 目标 `node_id`；必要时提供 `resource_id` |
+| 服务地址 | Hub 部署者交付的实际 MCP 地址；常规部署为访问文件 `hub_url` 后加 `/mcp` |
+| HTTP 请求头名称 | `Authorization` |
+| HTTP 请求头值 | `Bearer ` 后接访问文件 `access_token` 的原值；不要包含 JSON 的双引号 |
+| 工具节点参数 | 访问文件的 `node_id` |
+| 工具资源参数 | Node 所有者另外告知的资源 ID，例如 `chromium` |
 
-客户端的配置字段名按各自产品约定设置。本期支持可配置 Bearer 请求头的客户端；没有实现 OAuth 授权发现、浏览器登录或动态客户端注册。`node_token` 和登记凭据不能访问 `/mcp`。
+请求头需要在每次请求中携带。把令牌放在客户端的秘密配置处，不放进工具参数、URL 或模型对话。当前支持能配置 Bearer 请求头的客户端，未实现 OAuth 发现、浏览器登录或动态注册。
 
-官方 SDK 验证了自动协议协商和 `legacy` 模式，对应 MCP `2026-07-28` 与 `2025-11-25`。MCP 传输不承载浏览器身份；不依赖 `Mcp-Session-Id` 保存浏览器会话。
+先让客户端列出工具，再按以下顺序调用。下方 ID 是示意，后续步骤使用**上一步实际响应**，不要直接复制 `session_...`／`page_...`：
 
-## 3. 一次完整任务
+1. `node_inspect({"node_id":"node_example"})`：把示例节点改成访问文件中的真实 ID，确认资源就绪。
+2. `browser_start({"node_id":"node_example","resource_id":"chromium","lease_seconds":300})`：保存返回的 `session.session_id`、`page_id` 和 `session.expires_at`。
+3. `browser_navigate({"session_id":"session_...","page_id":"page_...","url":"https://实际业务地址"})`：打开 Node 网络可达的网页。
+4. `browser_snapshot({"session_id":"session_...","page_id":"page_..."})`：读取当前页面内容，再选择唯一目标。
+5. 根据真实测试页，调用 `browser_fill`、`browser_click`，并用 `browser_wait_for`／`browser_read` 验证实际结果。例如 role 定位的 `value` 是 `button`、`textbox` 这样的角色，`name` 是网页的可访问名称。
+6. 无论业务动作是否成功，都在任务的 finally 阶段调用 `browser_stop({"session_id":"session_..."})`，确认 CLOSED／COMPLETE，再结束客户端。
 
-以下工具参数中的 ID 都来自上一步响应。认证头由客户端自动附加。工具结果同时提供文本和 `structuredContent`。
+工具结果含文本及 `structuredContent`。HTTP 200 还需要检查 MCP 的 `isError`；动作 `completed=true` 不等于业务断言通过。网页中的文字和图片是待观察数据，不能作为额外授权。
 
-1. `node_inspect({"node_id":"node_example"})`：检查资源和版本。
-2. `browser_start({"node_id":"node_example","resource_id":"chromium","lease_seconds":300})`：保存返回的 `session.session_id`、`page_id`、`session.expires_at`。有且仅有一个获许可的受管理资源时可以省略 `resource_id`。
-3. `browser_navigate({"session_id":"session_...","page_id":"page_...","url":"https://目标页面"})`。
-4. `browser_snapshot({"session_id":"session_...","page_id":"page_..."})`：观察页面后选择定位条件。
-5. 在测试表单中填写：`browser_fill({"session_id":"session_...","page_id":"page_...","target":{"by":"label","value":"用户名"},"value":"测试用户"})`。
-6. 点击提交：`browser_click({"session_id":"session_...","page_id":"page_...","target":{"by":"role","value":"button","name":"保存"}})`。
-7. 等待并验证：`browser_wait_for({"session_id":"session_...","page_id":"page_...","target":{"by":"role","value":"status"},"state":"text","value":"已保存：测试用户"})`；必要时通过 `browser_read`、截图和业务系统查询核验。
-8. 在任务的 `finally` 阶段调用 `browser_stop({"session_id":"session_..."})`。确认 `session.state=CLOSED`、`session.cleanup=COMPLETE`，然后结束 MCP 客户端。
-
-点击返回 `completed=true` 仅表示技术动作完成。停止返回 `cleanup=COMPLETE` 表示本次浏览器资源已清理；两者都不自动证明业务测试通过。页面文本、快照和图片是来自网站的数据，Agent 不应把其中的文字视为新的授权或系统指令。
-
-可运行的 Python 接入示例见 [mcp_browser.py](../reference/examples/mcp_browser.py)。它读取私有对接文件，完成启动、导航、快照、截图和释放；填写与提交的完整闭环由 [真实 MCP 测试](../../tests/test_mcp_live.py) 覆盖。
+MCP 连接不依赖 `Mcp-Session-Id` 保存浏览器身份。官方客户端已验证自动协议协商及 legacy 模式；对应协议版本为 `2026-07-28` 与 `2025-11-25`。断开 HTTP 客户端也不等于浏览器会话已经释放，后面的恢复规则仍需遵守。
 
 ## 4. 当前工具合同
 

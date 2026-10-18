@@ -1,35 +1,30 @@
-# Hub 接口调用方示例
+# Hub 调用方示例文件
 
-[文档导航](../../README.md) · [调用方环境](../../user-guide/调用方对接与使用.md) · [画面订阅](../../user-guide/浏览器画面流接入.md)
+[文档导航](../../README.md) · [第一次 SDK 连接](../../user-guide/调用方对接与使用.md) · [MCP 接入](../../user-guide/MCP浏览器接入.md) · [画面订阅](../../user-guide/浏览器画面流接入.md)
 
-本目录只提供使用 Hub 公开接口的客户端脚本、展示页面和响应示例。将所需文件复制到调用方自己的 examples/，按对应指南准备独立 .venv；无需克隆或安装 Node 项目。
+这里是**示例文件的来源目录**，不是另一个服务安装目录。发布负责人应随 Hub 手册交付本目录；wheel 只安装程序，不包含这些操作示例。
 
-| 文件 | 用途 | 客户端依赖 |
+第一次使用按对应教程复制文件到自己的 `~/runbridge-client/examples/` 或 `~/runbridge-mcp-client/examples/`。教程提供目录创建、依赖安装、复制、访问文件接收和完整执行命令，不需要自行从文件名猜操作顺序。
+
+## 可执行脚本和页面
+
+| 文件 | 能完成什么 | 使用步骤 |
 | --- | --- | --- |
-| [mcp_browser.py](mcp_browser.py) | MCP 授权、创建、导航／截图及释放 | Python 3.14、mcp 2.3.0 |
-| [执行会话调用.py](执行会话调用.py) | 申请、官方 SDK 接入、读取页面／截图及释放 | httpx、Playwright 1.63.0 |
-| [画面流订阅.py](画面流订阅.py) | 查询活动会话、选择目标、保存少量 PNG | httpx、websockets |
-| [画面查看示例.html](画面查看示例.html) | 调用方前端认证、解码并展示最新 PNG | WebSocket、Canvas、createImageBitmap |
+| [执行会话调用.py](执行会话调用.py) | 自动申请会话、连接 SDK、读取／截图、释放并检查 cleanup | [SDK 教程](../../user-guide/调用方对接与使用.md) |
+| [mcp_browser.py](mcp_browser.py) | MCP 启动、导航、快照、截图、释放 | [MCP 教程第 2 节](../../user-guide/MCP浏览器接入.md#2-先用独立-python-样例完成一次接入) |
+| [画面流订阅.py](画面流订阅.py) | 查询已 ACTIVE 的会话、列出／选择目标、保存有限 PNG | [画面教程](../../user-guide/浏览器画面流接入.md) |
+| [画面查看示例.html](画面查看示例.html) | 在调用方浏览器认证并显示最新画面 | 画面教程第 6 节 |
 
-仅使用 MCP 的独立调用方可在自己的目录安装客户端并执行复制的脚本：
+Python 脚本只用公开接口，不导入 Hub／Node 内部包。每个脚本可加 `--help` 查看参数；脚本名称不是 shell 命令，需要调用方 `.venv/bin/python 文件路径` 来执行。
 
-```bash
-uv venv --python 3.14 .venv
-uv pip install --python .venv/bin/python 'mcp==2.3.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
-mkdir -p examples artifacts
-.venv/bin/python examples/mcp_browser.py --access-file access.json --url https://your-test-system.example/ --screenshot artifacts/page.png
-```
+`access.json` 由 Node 所有者另行签发并私下交付，**不会随公开示例包提供**。资源 ID 也由所有者另行告知。HTML 放在公开示例目录，访问文件放在私有 `.runbridge/`，不要一起提供静态服务。
 
-先取得有效访问文件、实际远程 MCP 地址和受管理资源。示例从文件安全读取令牌，使用 finally 释放会话；详见 [MCP 指南](../../user-guide/MCP浏览器接入.md)。
+## JSON 响应示例
 
-Python 示例只调用公开接口，不导入 Hub／Node 内部包。HTML 是调用方页面，不由 Hub 托管；静态目录仅放公开示例，不放访问文件。执行脚本的 --hold-seconds 用于在租期内保持连接，不能延长许可或会话期限。
-
-## 响应示例
-
-| 文件 | 含义 |
+| 文件 | 对应什么 |
 | --- | --- |
-| [节点查询示例.json](节点查询示例.json) | 节点查询的基础合同，画面字段另见接口参考 |
-| [会话状态示例.json](会话状态示例.json) | 基础会话字段，查询还可附带 visual |
-| [连接错误示例.json](连接错误示例.json) | 控制连接公开错误示例 |
+| [节点查询示例.json](节点查询示例.json) | 节点查询的实际响应结构；演示受管理资源 ONLINE、READY／FREE |
+| [会话状态示例.json](会话状态示例.json) | 会话查询的实际响应结构；演示浏览器连接 ACTIVE，尚未释放 |
+| [连接错误示例.json](连接错误示例.json) | Node 控制连接的 error 消息；不是 SDK 异常或 HTTP 错误的通用格式 |
 
-JSON 中的 ID、时间和端点是演示值。Node 本机浏览器配置格式在 Node 项目维护。
+这些文件只描述格式，ID、地址、机器信息与时间均为演示值，不是一次真实运行证据。查询、会话和错误描述不同时间点，不能当作同一任务连续日志。不要拿这些文件当部署配置、凭据或实际服务结果。
