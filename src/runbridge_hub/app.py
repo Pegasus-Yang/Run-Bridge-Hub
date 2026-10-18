@@ -10,6 +10,9 @@ from fastapi.responses import JSONResponse
 from runbridge_hub import __version__
 
 from runbridge_hub.api import router as management_router
+from runbridge_hub.api import execution_router
+from runbridge_hub.commands import CommandService, router as commands_router
+from runbridge_hub.body_limit import RequestSizeLimit
 from runbridge_hub.gateway import router as gateway_router
 from runbridge_hub.service import NodeService, ServiceError
 from runbridge_hub.sessions import SessionService
@@ -41,6 +44,12 @@ def create_app(*, settings: HubSettings) -> FastAPI:
         sessions.on_close = visual.close
         service.on_disconnect = sessions.interrupt_node
         await sessions.start()
+        commands = CommandService(sessions=sessions)
+        app.state.commands = commands
+        await commands.start()
+        async def close_session(*, session_id: str, reason: str):
+            await asyncio.gather(visual.close(session_id=session_id, reason=reason), commands.closed(session_id=session_id, reason=reason))
+        sessions.on_close = close_session
         await visual.start()
         browsers = None
         try:
@@ -48,14 +57,9 @@ def create_app(*, settings: HubSettings) -> FastAPI:
                 if mcp is not None:
                     from runbridge_hub.browser import BrowserService
 
-                    browsers = BrowserService(sessions=sessions, native_url=settings.mcp_native_url, visual=visual)
+                    browsers = BrowserService(sessions=sessions, commands=commands, visual=visual)
                     app.state.browsers = browsers
 
-                    async def close_extensions(*, session_id: str, reason: str) -> None:
-                        """同一次关闭同时释放画面订阅和 MCP 对象。"""
-                        await asyncio.gather(visual.close(session_id=session_id, reason=reason), browsers.discard(session_id=session_id, reason=reason))
-
-                    sessions.on_close = close_extensions
                     await browsers.start()
                     await stack.enter_async_context(mcp.session_manager.run())
                 yield
@@ -63,12 +67,16 @@ def create_app(*, settings: HubSettings) -> FastAPI:
             if browsers is not None:
                 await browsers.shutdown()
             await sessions.shutdown()
+            await commands.shutdown()
             await visual.shutdown()
             await service.close()
             await store.close()
 
     app = FastAPI(title="RunBridge Hub", version=__version__, lifespan=lifespan)
+    app.add_middleware(RequestSizeLimit)
     app.include_router(management_router)
+    app.include_router(execution_router)
+    app.include_router(commands_router)
     app.include_router(gateway_router)
     app.include_router(native_router)
     app.include_router(visual_router)
@@ -79,7 +87,7 @@ def create_app(*, settings: HubSettings) -> FastAPI:
 
         :returns: 健康状态。
         """
-        return {"status": "ok", "protocol_version": 1}
+        return {"status": "ok", "protocol_version": 2}
 
     @app.exception_handler(ServiceError)
     async def service_error(request: Request, error: ServiceError):

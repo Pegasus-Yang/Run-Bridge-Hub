@@ -1,3 +1,5 @@
+> 历史方案：描述 0.5.x 或更早阶段，保留当时决策语境。当前 0.6.0 已改用 Python worker；请从[当前文档导航](../README.md)操作，不照本文旧命令部署。
+
 # RunBridge 的 Python 3.14 技术栈可行性
 
 [文档导航](../README.md) · [依赖核验记录](../reference/Python依赖核验记录.json)

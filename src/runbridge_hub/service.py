@@ -197,6 +197,13 @@ class NodeService:
                 raise ServiceError(status=409, code="CAPABILITIES_REQUIRED")
             now = datetime.now(UTC)
             if isinstance(message, CapabilityReport):
+                previous = connection.capabilities
+                if previous is None:
+                    stored = await self.store.node(node_id=connection.node_id)
+                    previous = CapabilitySnapshot.model_validate_json(stored["capabilities"]) if stored["capabilities"] else None
+                bound = {item.resource_id: item.tool for item in previous.resources} if previous else {}
+                if any(item.resource_id in bound and bound[item.resource_id] != item.tool for item in message.capabilities.resources):
+                    raise ServiceError(status=409, code="RESOURCE_TOOL_REBIND_FORBIDDEN")
                 await self.store.snapshot(node_id=connection.node_id, generation=connection.generation, capabilities=message.capabilities.model_dump_json(), observed_at=now.isoformat())
                 connection.capabilities = message.capabilities
                 connection.capabilities_observed_at = now

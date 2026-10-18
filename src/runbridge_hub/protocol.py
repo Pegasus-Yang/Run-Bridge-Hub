@@ -1,4 +1,4 @@
-"""RunBridge v1 控制合同，独立于执行工具的原生载荷。"""
+"""RunBridge v2 工具会话合同；登记和访问凭据仍沿用 v1。"""
 
 from typing import Annotated, Literal
 
@@ -34,6 +34,9 @@ class ResourceCapability(Model):
     readiness: Literal["NEEDS_PROBE", "NEEDS_AUTHORIZATION", "READY", "UNAVAILABLE"] = "NEEDS_PROBE"
     occupancy: Literal["FREE", "BUSY", "UNKNOWN"] = "UNKNOWN"
     authorization_scope: Literal["BROWSER_INSTANCE"] | None = None
+    tool: Identifier = "playwright"
+    tool_api_version: int = 1
+    methods: list[str] = Field(default_factory=list, max_length=256)
 
 
 class CapabilitySnapshot(Model):
@@ -113,26 +116,29 @@ class NodeView(Model):
 
 
 class SessionCreate(Model):
-    """申请一个浏览器资源，版本来自调用方 SDK。"""
+    """申请工具资源，不要求调用方安装执行库。"""
 
     resource_id: Identifier
-    client_version: str = Field(pattern=r"^\d+\.\d+\.\d+$")
+    tool: Identifier = "playwright"
+    request_id: Identifier | None = None
     lease_seconds: float = Field(default=300, ge=1, le=3600)
 
 
 class SessionView(Model):
     """会话元数据，不保存原生协议帧、启动秘密或本机端点。"""
 
-    protocol_version: Literal[1] = 1
+    protocol_version: Literal[1, 2] = 2
     session_id: Identifier
     node_id: Identifier
     resource_id: Identifier
     grant_id: Identifier
     connection_generation: int
-    backend: Literal["playwright", "chrome-cdp"] = "playwright"
+    backend: str = "playwright"
     runtime_version: str
-    client_version: str | None = None
-    native_protocol: Literal["playwright", "cdp"] = "playwright"
+    tool: Identifier = "playwright"
+    tool_api_version: int = 1
+    request_id: Identifier | None = None
+    objects: dict = Field(default_factory=dict)
     authorization_scope: Literal["BROWSER_INSTANCE"] | None = None
     state: Literal["PREPARING", "READY", "ACTIVE", "CLOSING", "CLOSED", "FAILED", "INTERRUPTED"]
     cleanup: Literal["PENDING", "COMPLETE", "UNKNOWN"] = "PENDING"
@@ -142,13 +148,17 @@ class SessionView(Model):
     expires_at: AwareDatetime
     close_reason: str | None = None
     error_code: str | None = None
-    native_path: str | None = None
+
+    @classmethod
+    def from_record(cls, record: dict):
+        """历史记录保持旧协议标记，读取时仅投影公开字段。"""
+        return cls.model_validate({key: value for key, value in record.items() if key in cls.model_fields})
 
 
 class Message(Model):
     """所有控制消息携带合同版本。"""
 
-    protocol_version: Literal[1] = 1
+    protocol_version: Literal[2] = 2
 
 
 class Welcome(Message):
@@ -187,13 +197,8 @@ class SessionOpen(Message):
     connection_generation: int
     session_id: Identifier
     resource_id: Identifier
-
-
-class SessionConnect(Message):
-    type: Literal["session_connect"] = "session_connect"
-    connection_generation: int
-    session_id: Identifier
-    headers: dict[str, str]
+    tool: Identifier = "playwright"
+    tool_api_version: int = 1
 
 
 class SessionStop(Message):
@@ -208,6 +213,7 @@ class SessionPrepared(Message):
     connection_generation: int
     session_id: Identifier
     runtime_version: str | None = None
+    objects: dict = Field(default_factory=dict)
     error_code: str | None = None
 
 
@@ -227,5 +233,5 @@ class SessionAcknowledgement(Message):
 
 IncomingMessage = Annotated[Heartbeat | CapabilityReport | SessionPrepared | SessionClosed, Field(discriminator="type")]
 IncomingAdapter = TypeAdapter(IncomingMessage)
-OutgoingMessage = Annotated[Acknowledgement | SessionAcknowledgement | SessionOpen | SessionConnect | SessionStop | ControlError, Field(discriminator="type")]
+OutgoingMessage = Annotated[Acknowledgement | SessionAcknowledgement | SessionOpen | SessionStop | ControlError, Field(discriminator="type")]
 OutgoingAdapter = TypeAdapter(OutgoingMessage)

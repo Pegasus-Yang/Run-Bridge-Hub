@@ -1,47 +1,72 @@
 {
   "protocol_version": 1,
-  "node_id": "node_example_01",
-  "name": "office-node",
+  "node_id": "node_example",
+  "name": "示意节点",
   "connection_status": "ONLINE",
-  "connection_generation": 7,
+  "connection_generation": 1,
   "heartbeat_count": 2,
-  "last_seen_at": "2030-01-01T00:00:30Z",
+  "last_seen_at": "2030-01-01T00:00:00Z",
   "capabilities_observed_at": "2030-01-01T00:00:00Z",
-  "observation_age_ms": 30000,
+  "observation_age_ms": 0,
   "capabilities_stale": false,
   "capabilities": {
-    "host": {
-      "hostname": "example-node",
-      "platform": "Linux",
-      "machine": "aarch64",
-      "python_version": "3.14.0",
-      "client_version": "0.5.0"
-    },
+    "host": {},
     "backends": [
       {
         "name": "playwright",
-        "installed": true,
         "runtime_version": "1.63.0",
-        "version_status": "DETECTED",
+        "coverage_status": "SUPPORTED",
         "declared_protocols": [
-          "playwright"
-        ],
-        "coverage_status": "SUPPORTED"
+          "runbridge-execution-v2",
+          "runbridge-visual-v1"
+        ]
       }
     ],
     "resources": [
       {
         "resource_id": "chromium",
+        "tool": "playwright",
+        "tool_api_version": 1,
         "backend": "playwright",
         "kind": "MANAGED_CHROMIUM",
         "readiness": "READY",
         "occupancy": "FREE",
-        "authorization_scope": null
+        "methods": [
+          "browser.contexts",
+          "browser.new_context",
+          "context.pages",
+          "context.new_page",
+          "context.close",
+          "page.goto",
+          "page.go_back",
+          "page.title",
+          "page.url",
+          "page.frames",
+          "page.close",
+          "page.aria_snapshot",
+          "page.screenshot",
+          "page.set_viewport_size",
+          "page.keyboard.press",
+          "page.mouse.wheel",
+          "locator.fill",
+          "locator.click",
+          "locator.press",
+          "locator.hover",
+          "locator.select_option",
+          "locator.set_checked",
+          "locator.drag_to",
+          "locator.inner_text",
+          "locator.input_value",
+          "locator.wait_for",
+          "locator.set_input_files",
+          "runbridge.inspect_dom",
+          "runbridge.capture",
+          "runbridge.wait_for",
+          "runbridge.tabs",
+          "runbridge.dialog_policy",
+          "runbridge.session_state"
+        ]
       }
     ]
-  },
-  "visual": {
-    "supported": false,
-    "streams": []
   }
 }

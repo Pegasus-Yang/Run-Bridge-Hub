@@ -1,0 +1,131 @@
+{
+  "tool": "playwright",
+  "tool_api_version": 1,
+  "samples": [
+    {
+      "request": {
+        "request_id": "goto_1",
+        "method": "page.goto",
+        "target": {
+          "type": "page",
+          "id": "page_a"
+        },
+        "params": {
+          "url": "https://example.com"
+        }
+      },
+      "normalized_params": {
+        "timeout": 10000,
+        "url": "https://example.com",
+        "wait_until": "domcontentloaded"
+      },
+      "fingerprint": "09c2b645293659984d38e0e3c74593e6d4e524a3a5a435bb7e4165f0fdace1e8"
+    },
+    {
+      "request": {
+        "request_id": "fill_1",
+        "method": "locator.fill",
+        "target": {
+          "type": "page",
+          "id": "page_a",
+          "locator": [
+            {
+              "method": "get_by_label",
+              "params": {
+                "text": "用户名",
+                "exact": true
+              }
+            }
+          ]
+        },
+        "params": {
+          "value": "测试"
+        }
+      },
+      "normalized_params": {
+        "timeout": 10000,
+        "value": "测试"
+      },
+      "fingerprint": "369b2e42340199b450aa36a16837fedb8d374addeb1abf32dedbcba333fa452b"
+    },
+    {
+      "request": {
+        "request_id": "screenshot_1",
+        "method": "page.screenshot",
+        "target": {
+          "type": "page",
+          "id": "page_a"
+        }
+      },
+      "normalized_params": {
+        "timeout": 10000,
+        "full_page": false
+      },
+      "fingerprint": "c4d2862dd416a31da98db44e6c1ebdf5ee22d95854d44baf027c07c654682d6f"
+    },
+    {
+      "request": {
+        "request_id": "tabs_1",
+        "method": "runbridge.tabs",
+        "target": {
+          "type": "session",
+          "id": "session_a"
+        },
+        "params": {
+          "action": "new"
+        }
+      },
+      "normalized_params": {
+        "timeout": 10000,
+        "action": "new",
+        "page_id": null
+      },
+      "fingerprint": "b834284187e718893670b9ebfa759893932fd75d1125ea23383f8fecd8458e1a"
+    },
+    {
+      "request": {
+        "request_id": "context_1",
+        "method": "browser.new_context",
+        "target": {
+          "type": "browser",
+          "id": "browser_a"
+        }
+      },
+      "normalized_params": {
+        "timeout": 10000,
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "locale": "zh-CN"
+      },
+      "fingerprint": "15392ea87300a58a85337557a95613658e08f0db539228eeeed2c5121941d51b"
+    },
+    {
+      "request": {
+        "request_id": "upload_1",
+        "method": "locator.set_input_files",
+        "target": {
+          "type": "page",
+          "id": "page_a",
+          "locator": [
+            {
+              "method": "locator",
+              "params": {
+                "selector": "#files"
+              }
+            }
+          ]
+        },
+        "params": {
+          "files": []
+        }
+      },
+      "normalized_params": {
+        "timeout": 10000,
+        "files": []
+      },
+      "fingerprint": "c6f8a22f873e570da2d0a030f2c8a5d2cfcab1c3109010afc294089e962f9455"
+    }
+  ]
+}

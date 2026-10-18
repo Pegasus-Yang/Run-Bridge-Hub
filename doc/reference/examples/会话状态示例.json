@@ -1,38 +1,43 @@
 {
-  "protocol_version": 1,
-  "session_id": "session_example_01",
-  "node_id": "node_example_01",
+  "protocol_version": 2,
+  "session_id": "session_example",
+  "node_id": "node_example",
   "resource_id": "chromium",
-  "grant_id": "grant_example_01",
-  "connection_generation": 7,
+  "grant_id": "grant_example",
+  "connection_generation": 1,
   "backend": "playwright",
   "runtime_version": "1.63.0",
-  "client_version": "1.63.0",
-  "native_protocol": "playwright",
-  "authorization_scope": null,
-  "state": "ACTIVE",
+  "tool": "playwright",
+  "tool_api_version": 1,
+  "request_id": "open_example",
+  "objects": {
+    "root": {
+      "type": "browser",
+      "id": "browser_example"
+    },
+    "contexts": [
+      {
+        "type": "context",
+        "id": "context_example"
+      }
+    ],
+    "pages": [
+      {
+        "type": "page",
+        "id": "page_example",
+        "page_id": "page_example",
+        "context_id": "context_example",
+        "url": "about:blank"
+      }
+    ],
+    "default_page_id": "page_example",
+    "ownership": "managed",
+    "last_dialog": {}
+  },
+  "state": "READY",
   "cleanup": "PENDING",
-  "execution_outcome": "NOT_TRACKED",
+  "execution_outcome": "NOT_STARTED",
   "created_at": "2030-01-01T00:00:00Z",
-  "updated_at": "2030-01-01T00:00:01Z",
-  "expires_at": "2030-01-01T00:05:00Z",
-  "close_reason": null,
-  "error_code": null,
-  "native_path": "/v1/sessions/session_example_01/playwright",
-  "visual": {
-    "supported": false,
-    "state": "UNAVAILABLE",
-    "visual_protocol_version": 1,
-    "transport": "websocket",
-    "content_type": "image/png",
-    "stream_path": null,
-    "target_id": null,
-    "targets": [],
-    "stream_id": null,
-    "last_frame_id": null,
-    "capture_started_at": null,
-    "frame_age_ms": null,
-    "reason_code": "UNSUPPORTED_BACKEND",
-    "selection": null
-  }
+  "updated_at": "2030-01-01T00:00:00Z",
+  "expires_at": "2030-01-01T00:05:00Z"
 }

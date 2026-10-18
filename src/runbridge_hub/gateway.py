@@ -14,7 +14,7 @@ router = APIRouter()
 CONTROL_MAX_BYTES = 65_536
 
 
-@router.websocket("/v1/nodes/{node_id}/control")
+@router.websocket("/v2/nodes/{node_id}/control")
 async def control(websocket: WebSocket, node_id: str):
     """验证节点身份，接收能力与心跳。
 

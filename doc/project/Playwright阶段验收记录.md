@@ -1,3 +1,5 @@
+> 历史验收记录：仅证明原记录版本及当时环境，不代表 0.6.0 的当前部署。现行手册见[文档导航](../README.md)。
+
 # RunBridge Playwright 阶段验收记录
 
 [文档导航](../README.md) · [当前架构](../architecture/Playwright执行与会话管理.md) · [完整调用](../user-guide/调用方对接与使用.md)

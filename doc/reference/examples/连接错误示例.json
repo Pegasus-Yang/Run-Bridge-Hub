@@ -1,5 +1,4 @@
 {
-  "protocol_version": 1,
-  "type": "error",
-  "code": "INVALID_CONTROL_MESSAGE"
+  "code": "NATIVE_API_RETIRED",
+  "message": "请使用项目 /v2 指令或 MCP"
 }

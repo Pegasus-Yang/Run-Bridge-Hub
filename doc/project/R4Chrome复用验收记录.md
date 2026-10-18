@@ -1,3 +1,5 @@
+> 历史验收记录：仅证明原记录版本及当时环境，不代表 0.6.0 的当前部署。现行手册见[文档导航](../README.md)。
+
 # RunBridge R4 Chrome 复用验收记录
 
 [文档导航](../README.md) · [复用架构](../architecture/Chrome复用与授权清理.md) · [调用指南](../user-guide/调用方对接与使用.md)

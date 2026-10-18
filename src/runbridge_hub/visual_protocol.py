@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import InvalidVersion
-from pydantic import AwareDatetime, Field, SecretStr, TypeAdapter, field_validator
+from pydantic import AwareDatetime, Field, SecretStr, TypeAdapter, model_validator
 
 from runbridge_hub.protocol import Identifier, Model, NodeView, SessionView
 
@@ -109,18 +109,21 @@ class VisualHello(Model):
 
     type: Literal["hello"] = "hello"
     visual_protocol_version: Literal[1] = 1
-    browscreen_version: str = "0.3.1"
+    capture_backend: Literal["browscreen", "python-playwright"] = "browscreen"
+    browscreen_version: str | None = "0.3.1"
+    runtime_version: str | None = None
 
-    @field_validator("browscreen_version")
-    @classmethod
-    def validate_browscreen_version(cls, value: str) -> str:
+    @model_validator(mode="after")
+    def validate_backend(self):
         """接受范围内版本，不能将任意版本降格为协议 v1。
 
         :returns: 实际上报且受支持的版本。
         """
-        if not supported_browscreen_version(value=value):
+        if self.capture_backend == "browscreen" and not supported_browscreen_version(value=self.browscreen_version):
             raise ValueError(f"Browscreen 版本必须满足 {BROWSCREEN_VERSION_RANGE}，不接受预发布版")
-        return value
+        if self.capture_backend == "python-playwright" and (self.browscreen_version is not None or not self.runtime_version):
+            raise ValueError("Python 画面需要实际运行时版本，不能伪装 Browscreen")
+        return self
 
 
 class VisualTargets(Model):

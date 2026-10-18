@@ -1,100 +1,167 @@
-"""仅使用公开 HTTP 接口和官方 SDK，执行后释放会话。"""
+"""只用 Python 标准库调用 RunBridge HTTP，不导入浏览器 SDK。"""
 
 import argparse
-import asyncio
+import base64
 import json
-import sys
-from importlib.metadata import version
+import time
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+from uuid import uuid4
 
-import httpx
-from playwright.async_api import Error, async_playwright
 
+def run(
+    *,
+    access_file: Path,
+    resource_id: str,
+    url: str,
+    screenshot: Path,
+    page_url: str | None = None,
+) -> dict:
+    """创建会话、读取真实页面、保存图片，并确认释放。
 
-def websocket_url(*, hub_url: str, path: str) -> str:
-    """保留 Hub 部署前缀，将 HTTP 基址转为 WebSocket。
-
-    :returns: 不包含凭据的连接地址。
+    :param access_file: Node 所有者交付的访问 JSON。
+    :param resource_id: 所有者交付说明中的资源 ID。
+    :param url: 目标业务网页地址。
+    :param screenshot: 调用方本机的截图输出文件。
+    :param page_url: 借用模式有多个页面时用于唯一选页的精确 URL。
+    :returns: 无秘密的验证结果。
     """
-    address = urlsplit(hub_url.rstrip("/"))
-    return urlunsplit(("wss" if address.scheme == "https" else "ws", address.netloc, address.path + path, "", ""))
+    access = json.loads(access_file.read_text(encoding="utf-8"))
 
-
-async def execute(*, args) -> None:
-    """申请资源，根据返回协议选择官方连接方式。
-
-    :param args: CLI 参数；已有 Chrome 模式只读取指定原页面。
-    """
-    access = json.loads(args.access_file.read_text(encoding="utf-8"))
-    hub = access["hub_url"].rstrip("/")
-    headers = {"Authorization": f"Bearer {access['access_token']}"}
-    async with httpx.AsyncClient(timeout=40) as client:
-        created = await client.post(url=f"{hub}/v1/nodes/{access['node_id']}/sessions", headers=headers,
-                                    json={"resource_id": args.resource_id, "client_version": version(distribution_name="playwright"), "lease_seconds": args.lease_seconds})
-        created.raise_for_status()
-        session = created.json()
-        session_url = f"{hub}/v1/sessions/{session['session_id']}"
-        print(json.dumps({"session_id": session["session_id"], "state": session["state"], "native_protocol": session["native_protocol"]}, ensure_ascii=False), flush=True)
+    def request(*, method, path, body=None):
+        data = json.dumps(body).encode() if body is not None else None
+        headers = {
+            "Authorization": f"Bearer {access['access_token']}",
+            "Content-Type": "application/json",
+        }
         try:
-            async with async_playwright() as playwright:
-                endpoint = websocket_url(hub_url=hub, path=session["native_path"])
-                if session["native_protocol"] == "cdp":
-                    if not args.page_url:
-                        raise ValueError("已有 Chrome 模式需要 --page-url")
-                    browser = await playwright.chromium.connect_over_cdp(endpoint_url=endpoint, headers=headers, no_defaults=True, timeout=10000)
-                elif session["native_protocol"] == "playwright":
-                    browser = await playwright.chromium.connect(endpoint=endpoint, headers=headers, timeout=10000)
-                else:
-                    raise ValueError("不支持的执行协议")
-                try:
-                    if session["native_protocol"] == "cdp":
-                        pages = [page for context in browser.contexts for page in context.pages if page.url == args.page_url]
-                        if len(pages) != 1:
-                            raise ValueError("已有页面没有唯一匹配")
-                        page = pages[0]
-                    else:
-                        page = await browser.new_page()
-                        await page.goto(url=args.url, wait_until="domcontentloaded")
-                    if args.screenshot is not None:
-                        args.screenshot.parent.mkdir(parents=True, exist_ok=True)
-                        await page.screenshot(path=args.screenshot, full_page=True)
-                    response = await client.get(url=session_url, headers=headers)
-                    response.raise_for_status()
-                    view = response.json()
-                    print(json.dumps({"session_id": session["session_id"], "state": view["state"], "title": await page.title(), "visual": view.get("visual")}, ensure_ascii=False), flush=True)
-                    # 实际业务动作与断言放在这里，直接使用官方 Page/Locator API。
-                    if args.hold_seconds:
-                        await asyncio.sleep(delay=args.hold_seconds)
-                finally:
-                    await browser.close()
-        finally:
-            released = await client.delete(url=session_url, headers=headers)
-            released.raise_for_status()
-            result = released.json()
-            print(json.dumps({"session_id": session["session_id"], "state": result["state"], "cleanup": result["cleanup"]}, ensure_ascii=False), flush=True)
-            if result["cleanup"] != "COMPLETE":
-                raise RuntimeError("清理尚未确认，请查询会话")
+            with urlopen(
+                Request(
+                    url=access["hub_url"].rstrip("/") + path,
+                    data=data,
+                    headers=headers,
+                    method=method,
+                ),
+                timeout=40,
+            ) as response:
+                return json.load(response)
+        except HTTPError as error:
+            value = json.load(error)
+            raise RuntimeError(
+                f"HTTP_{error.code}:{value.get('code', 'REQUEST_FAILED')}"
+            ) from None
 
-
-def main() -> None:
-    """运行独立调用示例，不读取 Node 身份文件。"""
-    parser = argparse.ArgumentParser(description="RunBridge 官方 SDK 执行示例")
-    parser.add_argument("--access-file", type=Path, required=True)
-    parser.add_argument("--resource-id", required=True)
-    parser.add_argument("--page-url", help="已有 Chrome 中唯一匹配的原页面 URL")
-    parser.add_argument("--url", default="data:text/html,<meta charset=utf-8><title>RunBridge</title><h1>Playwright connected</h1>", help="受管理模式中新页面的地址")
-    parser.add_argument("--screenshot", type=Path)
-    parser.add_argument("--hold-seconds", type=float, default=0, help="保持 ACTIVE，供另一终端订阅画面")
-    parser.add_argument("--lease-seconds", type=float, default=300)
-    args = parser.parse_args()
-    if not 1 <= args.lease_seconds <= 3600 or not 0 <= args.hold_seconds < args.lease_seconds:
-        parser.error("租期须为 1–3600 秒，保持时长须小于租期且不小于 0")
+    open_id = f"open_{uuid4().hex}"
     try:
-        asyncio.run(execute(args=args))
-    except (Error, httpx.HTTPError, OSError, ValueError, KeyError, RuntimeError, KeyboardInterrupt):
-        print("调用结束或失败；请检查会话状态与 cleanup，未自动重放动作", file=sys.stderr)
-        raise SystemExit(1) from None
+        session = request(
+            method="POST",
+            path=f"/v2/nodes/{access['node_id']}/sessions",
+            body={
+                "resource_id": resource_id,
+                "tool": "playwright",
+                "request_id": open_id,
+                "lease_seconds": 120,
+            },
+        )
+    except Exception:
+        raise RuntimeError(
+            f"创建结果未确认；可用相同创建 request_id 查询分配：{open_id}"
+        ) from None
+    sid = session["session_id"]
+
+    def command(*, method, target, params=None):
+        request_id = f"cmd_{uuid4().hex}"
+        try:
+            value = request(
+                method="POST",
+                path=f"/v2/sessions/{sid}/commands",
+                body={
+                    "request_id": request_id,
+                    "method": method,
+                    "target": target,
+                    "params": params or {},
+                },
+            )
+            deadline = time.monotonic() + 35
+            while (
+                value["status"] not in {"SUCCEEDED", "FAILED", "UNKNOWN"}
+                and time.monotonic() < deadline
+            ):
+                time.sleep(0.1)
+                value = request(
+                    method="GET", path=f"/v2/sessions/{sid}/commands/{request_id}"
+                )
+            if value["status"] != "SUCCEEDED" or value.get("result") is None:
+                code = (value.get("error") or {}).get("code", "REQUEST_IN_PROGRESS")
+                raise RuntimeError(code)
+            return value["result"]
+        except Exception:
+            raise RuntimeError(
+                f"动作结果需查询，不得盲目重试：session_id={sid}, request_id={request_id}"
+            ) from None
+
+    try:
+        if session["state"] not in {"READY", "ACTIVE"}:
+            raise RuntimeError("SESSION_NOT_ACTIVE")
+        pages = session["objects"]["pages"]
+        candidates = (
+            [page for page in pages if page["url"] == page_url]
+            if page_url is not None
+            else [
+                page
+                for page in pages
+                if page["id"] == session["objects"]["default_page_id"]
+            ]
+        )
+        if len(candidates) != 1:
+            raise RuntimeError("需要所有者提供可唯一确认的 --page-url")
+        target = {"type": "page", "id": candidates[0]["id"]}
+        navigation = command(method="page.goto", target=target, params={"url": url})[
+            "value"
+        ]
+        title = command(method="page.title", target=target)["value"]
+        image = command(method="page.screenshot", target=target)
+        png = base64.b64decode(image["data"], validate=True)
+        if len(png) != image["size"] or not png.startswith(b"\x89PNG\r\n\x1a\n"):
+            raise RuntimeError("INVALID_SCREENSHOT")
+        screenshot.write_bytes(png)
+    finally:
+        closed = request(method="DELETE", path=f"/v2/sessions/{sid}")
+        if closed["cleanup"] != "COMPLETE":
+            raise RuntimeError(
+                f"清理未确认：session_id={sid}, cleanup={closed['cleanup']}"
+            )
+    return {
+        "session_id": sid,
+        "request_id": open_id,
+        "url": navigation["url"],
+        "title": title,
+        "screenshot": str(screenshot),
+        "state": closed["state"],
+        "cleanup": closed["cleanup"],
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description="RunBridge 项目 HTTP 调用示例")
+    parser.add_argument("--access-file", type=Path, required=True)
+    parser.add_argument("--resource-id", default="chromium")
+    parser.add_argument("--url", required=True)
+    parser.add_argument("--page-url")
+    parser.add_argument("--screenshot", type=Path, default=Path("page.png"))
+    args = parser.parse_args()
+    try:
+        value = run(
+            access_file=args.access_file,
+            resource_id=args.resource_id,
+            url=args.url,
+            screenshot=args.screenshot,
+            page_url=args.page_url,
+        )
+    except Exception as error:
+        parser.exit(status=1, message=f"示例未完成：{error}\n")
+    print(json.dumps(value, ensure_ascii=False))
 
 
 if __name__ == "__main__":

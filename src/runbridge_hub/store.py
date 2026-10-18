@@ -20,13 +20,13 @@ class Store:
         self.lock = asyncio.Lock()
 
     async def open(self) -> None:
-        """创建或迁移到版本 3，追加无凭据的 MCP 请求元数据。"""
+        """迁移至版本 4，保留旧会话并增加无载荷的指令记录。"""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.connection = await aiosqlite.connect(database=str(self.path))
         self.connection.row_factory = aiosqlite.Row
         async with self.connection.execute("PRAGMA user_version") as cursor:
             version = (await cursor.fetchone())[0]
-        if version not in {0, 1, 2, 3}:
+        if version not in {0, 1, 2, 3, 4}:
             await self.connection.close()
             raise RuntimeError("数据库版本不受支持")
         await self.connection.executescript("""
@@ -54,7 +54,15 @@ class Store:
                 error_code TEXT, execution_outcome TEXT,
                 PRIMARY KEY (grant_id, node_id, request_id)
             );
-            PRAGMA user_version = 3;
+            CREATE TABLE IF NOT EXISTS commands (
+                grant_id TEXT NOT NULL REFERENCES grants(grant_id),
+                session_id TEXT NOT NULL REFERENCES sessions(session_id), request_id TEXT NOT NULL,
+                digest TEXT NOT NULL, method TEXT NOT NULL, status TEXT NOT NULL,
+                execution_outcome TEXT NOT NULL, error_code TEXT,
+                created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+                PRIMARY KEY (grant_id, session_id, request_id)
+            );
+            PRAGMA user_version = 4;
         """)
         await self.connection.commit()
 
@@ -253,6 +261,40 @@ class Store:
         async with self.lock:
             async with self.connection.execute("SELECT record FROM sessions WHERE json_extract(record, '$.state') IN ('PREPARING', 'READY', 'ACTIVE', 'CLOSING')") as cursor:
                 return [json.loads(row[0]) for row in await cursor.fetchall()]
+
+    async def begin_command(self, *, key: tuple[str, str, str], digest: str, method: str) -> tuple[dict | None, bool]:
+        """下发之前保留请求摘要；不保存参数、文件或结果内容。"""
+        async with self.lock:
+            async with self.connection.execute("SELECT * FROM commands WHERE grant_id=? AND session_id=? AND request_id=?", key) as cursor:
+                row = await cursor.fetchone()
+            if row is not None:
+                return dict(row), False
+            await self.connection.execute("DELETE FROM commands WHERE session_id IN (SELECT session_id FROM sessions WHERE json_extract(record,'$.state') IN ('CLOSED','FAILED','INTERRUPTED')) AND julianday(updated_at) < julianday('now','-1 day')")
+            async with self.connection.execute("SELECT COUNT(*) FROM commands WHERE session_id=?", (key[1],)) as cursor:
+                count = (await cursor.fetchone())[0]
+            if count >= 10000:
+                await self.connection.commit()
+                return None, False
+            now = datetime.now(UTC).isoformat()
+            await self.connection.execute("INSERT INTO commands VALUES (?,?,?,?,?,'DISPATCHED','OUTCOME_UNKNOWN',NULL,?,?)", (*key, digest, method, now, now))
+            await self.connection.commit()
+            return {"grant_id": key[0], "session_id": key[1], "request_id": key[2], "digest": digest, "method": method, "status": "DISPATCHED", "execution_outcome": "OUTCOME_UNKNOWN", "error_code": None}, True
+
+    async def command(self, *, key: tuple[str, str, str]) -> dict | None:
+        async with self.lock:
+            async with self.connection.execute("SELECT * FROM commands WHERE grant_id=? AND session_id=? AND request_id=?", key) as cursor:
+                row = await cursor.fetchone()
+                return dict(row) if row is not None else None
+
+    async def finish_command(self, *, key, status, outcome="OUTCOME_UNKNOWN", code=None):
+        async with self.lock:
+            await self.connection.execute("UPDATE commands SET status=?,execution_outcome=?,error_code=?,updated_at=? WHERE grant_id=? AND session_id=? AND request_id=?", (status, outcome, code, datetime.now(UTC).isoformat(), *key))
+            await self.connection.commit()
+
+    async def interrupt_commands(self):
+        async with self.lock:
+            await self.connection.execute("UPDATE commands SET status='UNKNOWN',execution_outcome='OUTCOME_UNKNOWN',error_code='RESULT_UNKNOWN' WHERE status IN ('DISPATCHED','ACCEPTED','RUNNING')")
+            await self.connection.commit()
 
     @staticmethod
     def _grant(*, row) -> dict:

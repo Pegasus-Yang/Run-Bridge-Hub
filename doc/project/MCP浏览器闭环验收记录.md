@@ -1,3 +1,5 @@
+> 历史验收记录：仅证明原记录版本及当时环境，不代表 0.6.0 的当前部署。现行手册见[文档导航](../README.md)。
+
 # MCP 浏览器闭环验收记录
 
 [文档导航](../README.md) · [MCP 接入](../user-guide/MCP浏览器接入.md) · [当前时序](../architecture/MCP授权与浏览器生命周期.md) · [脱敏运行证据](../reference/MCP浏览器运行核验记录.json)

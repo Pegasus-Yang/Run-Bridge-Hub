@@ -9,7 +9,7 @@ import uvicorn
 from pydantic import ValidationError
 
 from runbridge_hub.app import create_app
-from runbridge_hub.sessions import NATIVE_MAX_BYTES
+from runbridge_hub.tool_contract import MAX_MESSAGE
 from runbridge_hub.security import generate_token_file
 from runbridge_hub.settings import HubSettings
 
@@ -28,7 +28,6 @@ def main() -> None:
     serve.add_argument("--heartbeat-interval", type=float, default=30)
     serve.add_argument("--heartbeat-timeout", type=float, default=90)
     serve.add_argument("--enable-mcp", action="store_true", help="启用需要 mcp 可选依赖的 /mcp 工具入口")
-    serve.add_argument("--mcp-native-url", help="当前 Hub 的内部可达根地址，默认使用监听地址与端口")
     serve.add_argument("--mcp-allowed-host", action="append", help="额外允许的 MCP Host，可重复，端口可用 :*")
     serve.add_argument("--mcp-allowed-origin", action="append", help="允许的浏览器 Origin，可重复")
     args = parser.parse_args()
@@ -40,11 +39,8 @@ def main() -> None:
         token = args.enrollment_token_file.read_text(encoding="utf-8").strip() if args.enrollment_token_file is not None else os.environ.get("RUNBRIDGE_ENROLLMENT_TOKEN")
         if not token:
             raise ValueError("请提供 --enrollment-token-file 或 RUNBRIDGE_ENROLLMENT_TOKEN")
-        native_host = {"0.0.0.0": "127.0.0.1", "::": "::1"}.get(args.host, args.host)
-        if ":" in native_host and not native_host.startswith("["):
-            native_host = f"[{native_host}]"
         settings = HubSettings(database_path=args.db_path, enrollment_token=token, heartbeat_interval_seconds=args.heartbeat_interval, heartbeat_timeout_seconds=args.heartbeat_timeout,
-                               mcp_enabled=args.enable_mcp, mcp_native_url=args.mcp_native_url or f"http://{native_host}:{args.port}",
+                               mcp_enabled=args.enable_mcp,
                                mcp_allowed_origins=args.mcp_allowed_origin or [])
         settings.mcp_allowed_hosts.extend(args.mcp_allowed_host or [])
         settings = HubSettings.model_validate(settings.model_dump())
@@ -56,4 +52,4 @@ def main() -> None:
     except (OSError, ValueError) as error:
         print(f"配置失败：{error}", file=sys.stderr)
         raise SystemExit(2) from None
-    uvicorn.run(app=app, host=args.host, port=args.port, workers=1, loop="asyncio", ws="websockets", ws_max_size=NATIVE_MAX_BYTES, ws_max_queue=4)
+    uvicorn.run(app=app, host=args.host, port=args.port, workers=1, loop="asyncio", ws="websockets", ws_max_size=MAX_MESSAGE, ws_max_queue=4)
