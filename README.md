@@ -18,11 +18,11 @@ RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，�
 调用方 HTTP / Agent MCP → Hub 鉴权与路由 ⇄ Node → Python Playwright → 浏览器
 ```
 
-当前版本 **0.6.0**，与 Node **0.6.0** 配套。提供项目自己的 Playwright 风格调用规则：33 项方法、27 个 MCP 工具。支持范围见[方法表](doc/reference/Playwright方法表.md)；官方 Playwright SDK 的直连接口已退役。
+当前版本 **0.7.0**，与 Node **0.7.0** 配套。提供项目自己的 Playwright 风格调用规则：33 项方法、27 个 MCP 工具。支持范围见[方法表](doc/reference/Playwright方法表.md)；官方 Playwright SDK 的直连接口已退役。
 
 ## 快速部署
 
-在 **Hub 机器**上操作。前提是已有 Python **3.14.x**、全局 [uv](https://docs.astral.sh/uv/getting-started/installation/)，并从发布负责人取得 `runbridge_hub-0.6.0-py3-none-any.whl`，保存到 `~/Downloads/`。基础工具准备参考官网；源码构建见开发文档。
+在 **Hub 机器**上操作。前提是已有 Python **3.14.x**、全局 [uv](https://docs.astral.sh/uv/getting-started/installation/)，并从发布负责人取得 `runbridge_hub-0.7.0-py3-none-any.whl`，保存到 `~/Downloads/`。基础工具准备参考官网；源码构建见开发文档。
 
 创建独立部署目录、安装并生成登记文件：
 
@@ -30,7 +30,7 @@ RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，�
 mkdir -p ~/runbridge-hub
 cd ~/runbridge-hub
 uv venv --python 3.14 .venv
-uv pip install --python .venv/bin/python ~/Downloads/runbridge_hub-0.6.0-py3-none-any.whl -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+uv pip install --python .venv/bin/python ~/Downloads/runbridge_hub-0.7.0-py3-none-any.whl -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 .venv/bin/runbridge-hub generate-token --output .runbridge/enrollment.token
 ```
 

@@ -1,6 +1,6 @@
 # Hub 文档导航
 
-当前操作手册适用于 Hub/Node **0.6.0**。
+当前操作手册适用于 Hub/Node **0.7.0**。
 
 | 阅读目的 | 文档 |
 | --- | --- |
@@ -13,6 +13,7 @@
 | 当前架构与生命周期 | [执行架构](architecture/Playwright执行与会话管理.md)、[MCP 授权](architecture/MCP授权与浏览器生命周期.md) |
 | 源码模块、状态和依赖边界 | [代码结构](architecture/代码结构与执行流程.md)、[当前依赖与实现边界](reference/当前依赖与实现边界.md) |
 | 故障、备份和升级 | [运行与排障](deployment/运行与排障.md) |
+| 版本与本地 tag | [版本发布记录](project/版本发布记录.md) |
 | 开发与验证 | [本地开发与联调](development/本地开发与联调.md)、[示例](reference/examples/README.md) |
 | 改造决策 | [工具指令架构方案](design/工具指令执行架构改造方案.md)、[协议设计](design/工具调用协议草案.md) |
 
