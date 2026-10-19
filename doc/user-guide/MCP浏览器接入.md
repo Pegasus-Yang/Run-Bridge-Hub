@@ -19,6 +19,8 @@ uv pip install --python .venv/bin/python 'mcp==2.3.0' -i http://mirrors.aliyun.c
 
 先 `node_inspect(node_id)`；再 `browser_start(node_id, resource_id, request_id, lease_seconds)`，保存返回的 session_id/page_id。启动 request_id 可自行给唯一标识，同 ID 找回同一分配；`browser_sessions(node_id, request_id)` 可查询启动结果。默认 lease_seconds=300，范围 1～3600，受许可期限限制。
 
+启动结果中的会话 ID 位于 `session.session_id`，页面 ID 位于顶层 `page_id`；后续页面工具使用这两个真实值。`browser_stop` 的关闭结果也在 `session` 中，检查 `session.state=CLOSED` 和 `session.cleanup=COMPLETE`，不要从顶层读取这些字段。
+
 所有涉及页面的工具传 session_id/page_id。元素 target 格式为 `{"by":"role","value":"button","name":"保存"}`；by 可为 role/label/text/test_id/css，匹配采用唯一目标，role 的 name 和标签/文本采用精确匹配。iframe 加 `frame_selector`，例如 `{"by":"label","value":"用户名","frame_selector":"#login-frame"}`。定位不唯一会返回 AMBIGUOUS_TARGET。
 
 | 工具 | 用途与关键参数 |

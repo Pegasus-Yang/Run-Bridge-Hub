@@ -9,6 +9,7 @@ dependencies = [
     "fastapi>=0.115,<1",
     "packaging>=25",
     "pydantic>=2.12,<3",
+    "PyYAML>=6.0,<7",
     "uvicorn>=0.35,<1",
     "websockets>=15,<18",
 ]

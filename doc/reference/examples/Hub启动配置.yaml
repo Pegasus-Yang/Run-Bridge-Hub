@@ -1,0 +1,20 @@
+# Hub 0.6.0；UTF-8 YAML，使用空格缩进。
+# 启动：.venv/bin/runbridge-hub serve --settings hub.yaml
+# --settings 不能与其他启动参数混用。
+# 相对本地路径以本文件目录为准；不展开 ~、$HOME 或 shell 表达式。
+config_version: 1  # Hub YAML 格式版本，只支持 1；默认 1，可省略。
+host: 0.0.0.0  # 默认 127.0.0.1；本例允许远程 Node；仅本机访问时可删除此行。
+# port: 8787  # 默认 8787，范围 1～65535；冲突时修改并同步交付 URL。
+# database_path: .runbridge/hub.sqlite3  # 默认此路径，首次自动创建；已有部署保留原数据库。
+enrollment_token_file: .runbridge/enrollment.token  # 默认不设；generate-token 生成的单行登记文件。
+# 未指定令牌文件时读取 RUNBRIDGE_ENROLLMENT_TOKEN；两者都有时文件优先。
+# 显式文件缺失或内容无效时直接报错，不回退到环境变量。
+# heartbeat_interval_seconds: 30  # 默认 30 秒，必须大于 0。
+# heartbeat_timeout_seconds: 90  # 默认 90 秒，必须大于心跳间隔。
+# mcp_enabled: false  # 默认 false；Agent/MCP 需要 true 以及本环境的 [mcp] extra。
+# mcp_allowed_hosts:  # 默认 []，只追加；localhost、127.0.0.1、[::1] 含各端口已内置允许。
+#   - "hub.example:8787"  # 远程 MCP URL 的主机名或 IP 加端口，不含协议和路径。
+#   - "hub.example:*"  # 可允许同一名称的任意端口；不能使用单独 * 或网段通配符。
+# 本机 MCP 使用 localhost/127.0.0.1 时无需上面的额外 Host。
+# mcp_allowed_origins:  # 默认 []；不带 Origin 的普通 MCP 请求无需配置。
+#   - "https://console.example"  # 若请求携带 Origin，应填写实际协议、主机与端口，不含路径。
