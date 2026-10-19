@@ -4,6 +4,8 @@
 
 每项均接受 timeout（毫秒），默认 10000，范围 1～30000，排队计入预算；列中只列其他参数。涉及定位的 target 使用 Page 引用加非空 locator，定位必须唯一。viewport 限制也适用于 new_context。
 
+borrowed 的鼠标、键盘和表单输入会先激活所指定 Page，以免后台页暂停动画帧导致操作等待；只读查询和画面订阅不激活页面。Page 引用必须由调用方确认，同 URL 不表示同一页面。
+
 | method | target | 其他参数及默认值 | JSON value / binary 结果 |
 | --- | --- | --- | --- |
 | `browser.contexts` | browser | 无额外参数 | Context 引用数组 |

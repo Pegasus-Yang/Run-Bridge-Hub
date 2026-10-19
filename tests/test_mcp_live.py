@@ -1274,6 +1274,33 @@ async def test_http_context_page_references_and_closed_objects(runtime, website)
         page = await command("context.new_page", context)
         assert len(await command("context.pages", context)) == 1
         await command("page.goto", page, {"url": website["url"]})
+        assert (
+            await command(
+                "locator.wait_for",
+                {
+                    **page,
+                    "locator": [
+                        {
+                            "method": "get_by_label",
+                            "params": {"text": "用户名", "exact": True},
+                        }
+                    ],
+                },
+                {"state": "visible"},
+            )
+        )["completed"]
+        assert (
+            await command(
+                "locator.wait_for",
+                {
+                    **page,
+                    "locator": [
+                        {"method": "locator", "params": {"selector": "#absent"}}
+                    ],
+                },
+                {"state": "hidden"},
+            )
+        )["completed"]
         assert await command("page.title", page) == "MCP 联调"
         assert await command("page.url", page) == website["url"] + "/"
         assert (await command("page.close", page))["completed"]

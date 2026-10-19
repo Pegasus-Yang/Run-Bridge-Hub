@@ -294,6 +294,6 @@ sequenceDiagram
 | 会话申请、原生接入、撤销与释放 | [Hub sessions.py](../../src/runbridge_hub/sessions.py) 的 `create`、`attach_caller`、`release`、`revoke` |
 | Hub 原生转发与连接断开处理 | [Hub native.py](../../src/runbridge_hub/native.py) 的 `tunnel`、`execute` |
 | 浏览器启动、执行隧道与清理报告 | [Node executor.py](../../../runbridge-node/src/runbridge_node/executor.py) 的 `_serve` |
-| 进程与专用临时目录回收 | [Node runtime.py](../../../runbridge-node/src/runbridge_node/runtime.py)、[server.mjs](../../../runbridge-node/src/runbridge_node/playwright_runtime/server.mjs) |
+| 进程与专用临时目录回收 | [Node runtime.py](../../../runbridge-node/src/runbridge_node/runtime.py)、历史 `playwright_runtime/server.mjs`（0.6.0 已移除，原内容见 Git 历史） |
 
 本次按本地源码核对时序并补充方案说明，没有启动服务、修改运行代码或执行浏览器验收。

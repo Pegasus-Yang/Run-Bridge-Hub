@@ -42,7 +42,7 @@
 | 原生连接独占调用方位置，且 Hub 直接转发原生帧 | [sessions.py](../../src/runbridge_hub/sessions.py) 第 215–255 行；[native.py](../../src/runbridge_hub/native.py) 第 29–52 行 | 观看者不能占用原生调用连接，画面不能混入原生协议 |
 | 当前已有节点、节点能力与会话查询接口 | [api.py](../../src/runbridge_hub/api.py) 第 55–80 行；[protocol.py](../../src/runbridge_hub/protocol.py) 第 99–145 行 | 在查询响应中附带画面入口与状态，扩展查询模型并同步客户端解析 |
 | 控制合同使用 `extra="forbid"`，控制消息限制 64 KiB | [protocol.py](../../src/runbridge_hub/protocol.py) 第 11–14 行；[gateway.py](../../src/runbridge_hub/gateway.py) 第 14–44 行 | 不能随意给旧模型追加字段，也不能在控制消息中传图片 |
-| 受管理模式提供 `launchServer().wsEndpoint()` | [server.mjs](../../../runbridge-node/src/runbridge_node/playwright_runtime/server.mjs)、[runtime.py](../../../runbridge-node/src/runbridge_node/runtime.py) 第 90–107 行 | 这是 Playwright 端点，不能直接交给 Chrome CDP 适配器 |
+| 受管理模式提供 `launchServer().wsEndpoint()` | 历史 `playwright_runtime/server.mjs`（0.6.0 已移除）、`runtime.py` 当时第 90–107 行，原内容见 Git 历史 | 这是当时的 Playwright 端点，不能直接交给 Chrome CDP 适配器 |
 
 以上是源码、当前环境和公开元数据核对。依赖声明的范围可以对齐，但新 extra 的锁定、wheel 安装、CDP 双连接共存、查询扩展和数据流消费尚未实测。
 

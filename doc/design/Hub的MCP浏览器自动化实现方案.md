@@ -33,7 +33,7 @@
 | 资源发现 | `NodeService.query()` 按许可过滤资源，返回在线状态、新鲜度和占用 | 可自动发现唯一获授权的受管理资源 |
 | 浏览器会话 | [`sessions.py`](../../src/runbridge_hub/sessions.py) 的 `create()`、`query()`、`release()` | 复用资源独占、租期、状态与清理报告 |
 | 原生接入 | [`native.py`](../../src/runbridge_hub/native.py) 提供 `/v1/sessions/{session_id}/playwright` | MCP 层可作为正式 Playwright 调用方接入 |
-| Node 启动 Chromium | [`executor.py`](../../../runbridge-node/src/runbridge_node/executor.py)、[`runtime.py`](../../../runbridge-node/src/runbridge_node/runtime.py)、[`server.mjs`](../../../runbridge-node/src/runbridge_node/playwright_runtime/server.mjs) | Node 已通过 `chromium.launchServer()` 启动并清理自建浏览器 |
+| Node 启动 Chromium | 历史 `executor.py`、`runtime.py`、`playwright_runtime/server.mjs`，原内容见 Git 历史；最后一项已在 0.6.0 移除 | 当时 Node 已通过 `chromium.launchServer()` 启动并清理自建浏览器 |
 | 原生操作与截图 | [`test_playwright.py`](../../../runbridge-node/tests/test_playwright.py) 已有页面、输入、弹窗、新窗口、截图和文件传输测试 | 是后续复用的回归依据，不能等同于 MCP 已验收 |
 | 挂载位置 | [`app.py`](../../src/runbridge_hub/app.py) 统一创建 FastAPI、服务对象和 lifespan | 可在现有进程内挂载 MCP ASGI 应用 |
 | 可选画面流 | 现有受管理模式说明（由 RunBridge Node 项目维护） 明确不支持独立画面流 | 首期采用 Playwright 单次截图，无需引入 Browscreen |
