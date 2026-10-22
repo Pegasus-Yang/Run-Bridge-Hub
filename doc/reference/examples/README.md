@@ -1,6 +1,6 @@
 # Hub 调用示例
 
-当前 0.7.0：
+适用于 Hub 0.8.0 / Node 0.7.0：
 
 - [Hub启动配置.yaml](Hub启动配置.yaml)：带默认值和场景注释的服务端启动配置，使用 `serve --settings`。
 

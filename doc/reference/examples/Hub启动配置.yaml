@@ -1,4 +1,4 @@
-# Hub 0.7.0；UTF-8 YAML，使用空格缩进。
+# Hub 0.8.0；UTF-8 YAML，使用空格缩进。
 # 启动：.venv/bin/runbridge-hub serve --settings hub.yaml
 # --settings 不能与其他启动参数混用。
 # 相对本地路径以本文件目录为准；不展开 ~、$HOME 或 shell 表达式。
@@ -7,6 +7,11 @@ host: 0.0.0.0  # 默认 127.0.0.1；本例允许远程 Node；仅本机访问时
 # port: 8787  # 默认 8787，范围 1～65535；冲突时修改并同步交付 URL。
 # database_path: .runbridge/hub.sqlite3  # 默认此路径，首次自动创建；已有部署保留原数据库。
 enrollment_token_file: .runbridge/enrollment.token  # 默认不设；generate-token 生成的单行登记文件。
+# web_enabled: true  # 默认 true；同端口 /dashboard。false 同时关闭页面、资源和总览接口。
+# web_token_file: .runbridge/dashboard.token  # 独立单行只读口令，不能复用登记令牌。
+# 未指定只读文件时优先读取 RUNBRIDGE_WEB_TOKEN；均未提供时在数据库同目录生成/复用 web.token（600）。
+# 启动成功后日志输出只读口令和带 token 参数的 Dashboard URL，点击即可访问，刷新无需再填写。
+# 显式文件缺失、为空或格式无效直接失败；关闭 Web 时不读取或生成只读口令。
 # 未指定令牌文件时读取 RUNBRIDGE_ENROLLMENT_TOKEN；两者都有时文件优先。
 # 显式文件缺失或内容无效时直接报错，不回退到环境变量。
 # heartbeat_interval_seconds: 30  # 默认 30 秒，必须大于 0。

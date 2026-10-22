@@ -3,6 +3,7 @@
 import asyncio
 import json
 import secrets
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -36,6 +37,7 @@ class Connection:
     capabilities: CapabilitySnapshot | None = None
     capabilities_observed_at: datetime | None = None
     send_lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+    control_rtt: Callable[[], dict] | None = None
 
     async def send(self, *, message) -> None:
         """串行发送控制消息，避免确认和执行命令交错。
@@ -137,29 +139,50 @@ class NodeService:
         now = datetime.now(UTC)
         node = await self.store.node(node_id=node_id)
         async with self.lock:
-            live = self.connections.get(node_id)
-            capabilities = live.capabilities.model_copy(deep=True) if live is not None and live.capabilities is not None else (CapabilitySnapshot.model_validate_json(node["capabilities"]) if node["capabilities"] is not None else None)
-            observed = live.capabilities_observed_at if live is not None and live.capabilities_observed_at is not None else (datetime.fromisoformat(node["capabilities_observed_at"]) if node["capabilities_observed_at"] is not None else None)
-            online = live is not None and (now - live.last_seen_at).total_seconds() < self.settings.heartbeat_timeout_seconds
-            status = ("ONLINE" if live.capabilities is not None else "PREPARING") if online else "OFFLINE"
-            if capabilities is not None:
-                for resource in capabilities.resources:
-                    if (node_id, resource.resource_id) in self.reservations:
-                        resource.occupancy = "BUSY"
-            if capabilities is not None and grant["resource_ids"] is not None:
+            view = self._node_view(node=node, now=now)
+            if view.capabilities is not None and grant["resource_ids"] is not None:
                 allowed = set(grant["resource_ids"])
-                capabilities.resources = [item for item in capabilities.resources if item.resource_id in allowed]
-                backends = {item.backend for item in capabilities.resources}
-                capabilities.backends = [item for item in capabilities.backends if item.name in backends]
-            return NodeView(
-                node_id=node_id, name=node["name"], connection_status=status,
-                connection_generation=live.generation if live is not None else node["generation"],
-                heartbeat_count=live.heartbeat_count if live is not None else 0,
-                last_seen_at=live.last_seen_at if live is not None else node["last_seen_at"],
-                capabilities_observed_at=observed,
-                observation_age_ms=max(0, int((now - observed).total_seconds() * 1000)) if observed is not None else None,
-                capabilities_stale=status != "ONLINE", capabilities=capabilities,
-            )
+                view.capabilities.resources = [item for item in view.capabilities.resources if item.resource_id in allowed]
+                backends = {item.backend for item in view.capabilities.resources}
+                view.capabilities.backends = [item for item in view.capabilities.backends if item.name in backends]
+            return view
+
+    async def overview(self) -> list[NodeView]:
+        """读取全局只读视图，调用方负责总览鉴权。
+
+        :returns: 与调用接口采用相同占用及连接判断的节点列表。
+        """
+        records = await self.store.nodes()
+        async with self.lock:
+            now = datetime.now(UTC)
+            return [self._node_view(node=node, now=now) for node in records]
+
+    def _node_view(self, *, node: dict, now: datetime) -> NodeView:
+        """在持有状态锁时投影连接、快照与 Hub 的资源预留。
+
+        :param node: 持久节点记录。
+        :param now: 本次查询时间。
+        :returns: 不含身份秘密的节点视图。
+        """
+        node_id = node["node_id"]
+        live = self.connections.get(node_id)
+        capabilities = live.capabilities.model_copy(deep=True) if live is not None and live.capabilities is not None else (CapabilitySnapshot.model_validate_json(node["capabilities"]) if node["capabilities"] is not None else None)
+        observed = live.capabilities_observed_at if live is not None and live.capabilities_observed_at is not None else (datetime.fromisoformat(node["capabilities_observed_at"]) if node["capabilities_observed_at"] is not None else None)
+        online = live is not None and (now - live.last_seen_at).total_seconds() < self.settings.heartbeat_timeout_seconds
+        status = ("ONLINE" if live.capabilities is not None else "PREPARING") if online else "OFFLINE"
+        if capabilities is not None:
+            for resource in capabilities.resources:
+                if (node_id, resource.resource_id) in self.reservations:
+                    resource.occupancy = "BUSY"
+        return NodeView(
+            node_id=node_id, name=node["name"], connection_status=status,
+            connection_generation=live.generation if live is not None else node["generation"],
+            heartbeat_count=live.heartbeat_count if live is not None else 0,
+            last_seen_at=live.last_seen_at if live is not None else node["last_seen_at"],
+            capabilities_observed_at=observed,
+            observation_age_ms=max(0, int((now - observed).total_seconds() * 1000)) if observed is not None else None,
+            capabilities_stale=status != "ONLINE", capabilities=capabilities,
+        )
 
     async def attach(self, *, node_id: str, websocket: WebSocket) -> Connection:
         """替换旧连接，新代次不被迟到的旧连接清理覆盖。
@@ -171,7 +194,10 @@ class NodeService:
         async with self.lock:
             now = datetime.now(UTC)
             generation = await self.store.next_generation(node_id=node_id, observed_at=now.isoformat())
-            current = Connection(node_id=node_id, generation=generation, websocket=websocket, last_seen_at=now)
+            current = Connection(
+                node_id=node_id, generation=generation, websocket=websocket, last_seen_at=now,
+                control_rtt=websocket.scope.get("extensions", {}).get("runbridge.control_rtt"),
+            )
             previous = self.connections.get(node_id)
             self.connections[node_id] = current
         if previous is not None:

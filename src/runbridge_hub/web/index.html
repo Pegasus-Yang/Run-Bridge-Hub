@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>节点总览 · RunBridge Hub</title>
+  <link rel="icon" href="/dashboard/assets/icons/arrows-clockwise.svg">
+  <link rel="stylesheet" href="/dashboard/assets/dashboard.css">
+  <script src="/dashboard/assets/dashboard.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span>RunBridge</span><span class="brand-role">/ Hub</span></div>
+    <span id="hub-status" class="hub-status"><span class="dot"></span><span>等待验证</span></span>
+    <div class="top-actions">
+      <span id="updated" class="updated">节点监控</span>
+      <button id="refresh" class="button refresh" type="button" hidden><span class="icon icon-refresh" aria-hidden="true"></span><span>刷新</span></button>
+      <span class="access"><span class="icon icon-lock" aria-hidden="true"></span>只读访问<span class="read-only">只读</span></span>
+      <button id="logout" class="icon-button" type="button" aria-label="退出只读访问" title="退出只读访问" hidden><span class="icon icon-logout" aria-hidden="true"></span></button>
+    </div>
+  </header>
+
+  <main>
+    <section id="login" class="login" aria-labelledby="login-title">
+      <div class="eyebrow">RUNBRIDGE HUB</div>
+      <h1 id="login-title">连接，一目了然。</h1>
+      <p class="intro">查看节点连接、资源占用与实时链路质量。</p>
+      <form id="login-form">
+        <label for="token">总览只读口令</label>
+        <input id="token" type="password" autocomplete="off" required placeholder="输入独立的只读口令" maxlength="256" aria-describedby="login-help login-error">
+        <p id="login-help" class="help">点击 Hub 启动日志中的 Dashboard URL 可直接进入，也可在此输入日志中的只读口令。</p>
+        <button id="login-button" class="button primary" type="submit">查看节点总览<span class="icon icon-arrow" aria-hidden="true"></span></button>
+        <p id="login-error" class="error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <section id="overview" aria-labelledby="page-title" hidden>
+      <div class="page-heading">
+        <h1 id="page-title">节点总览</h1>
+        <p class="intro">查看连接、资源与能力，一目了然。</p>
+      </div>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div class="statistics" aria-label="全局状态统计">
+        <div class="stat"><div class="stat-label">在线节点</div><div class="stat-number green"><span id="count-online">—</span><span class="stat-total"> / <span id="count-total">—</span></span></div></div>
+        <div class="stat"><div class="stat-label">可用资源</div><div id="count-free" class="stat-number green">—</div></div>
+        <div class="stat"><div class="stat-label">已占用资源</div><div id="count-busy" class="stat-number amber">—</div></div>
+        <div class="stat"><div class="stat-label">离线节点</div><div id="count-offline" class="stat-number muted">—</div></div>
+      </div>
+      <div class="toolbar">
+        <div id="filters" class="filters" role="group" aria-label="按连接状态筛选">
+          <button class="filter active" data-status="ALL" aria-pressed="true" type="button">全部 <span id="filter-all">0</span></button>
+          <button class="filter" data-status="ONLINE" aria-pressed="false" type="button">在线 <span id="filter-online">0</span></button>
+          <button class="filter" data-status="PREPARING" aria-pressed="false" type="button">准备中 <span id="filter-preparing">0</span></button>
+          <button class="filter" data-status="OFFLINE" aria-pressed="false" type="button">离线 <span id="filter-offline">0</span></button>
+        </div>
+        <label class="search"><span class="icon icon-search" aria-hidden="true"></span><input id="search" type="search" aria-label="搜索节点" placeholder="搜索名称、ID 或主机…" autocomplete="off"></label>
+      </div>
+      <div class="table-wrap">
+        <table aria-label="节点连接与资源情况">
+          <colgroup><col class="col-node"><col class="col-status"><col class="col-resource"><col class="col-capability"><col class="col-latency"><col class="col-heartbeat"><col class="col-action"></colgroup>
+          <thead><tr><th scope="col">节点</th><th scope="col">连接状态</th><th scope="col">资源占用</th><th scope="col">支持能力</th><th scope="col"><abbr title="Hub 与 Node 控制连接的 WebSocket Ping/Pong 往返耗时">控制通道 RTT</abbr></th><th scope="col">最近心跳</th><th scope="col"><span class="sr-only">节点详情</span></th></tr></thead>
+          <tbody id="node-list"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty" hidden><h2 id="empty-title">尚无节点接入</h2><p id="empty-text">Node 登记并连接此 Hub 后，会自动出现在这里。</p><button id="clear-filter" class="button" type="button" hidden>清除筛选</button></div>
+      <footer class="page-footer"><span>占用以资源为单位 · 离线信息为历史快照</span><span id="freshness">每 5 秒自动更新 · RTT 实测</span></footer>
+    </section>
+  </main>
+
+  <dialog id="detail" aria-labelledby="detail-title">
+    <div class="detail-header"><div><div class="eyebrow">NODE DETAILS</div><h2 id="detail-title"></h2></div><button id="close-detail" class="icon-button" type="button" aria-label="关闭节点详情"><span class="icon icon-close" aria-hidden="true"></span></button></div>
+    <div id="detail-content"></div>
+  </dialog>
+</body>
+</html>

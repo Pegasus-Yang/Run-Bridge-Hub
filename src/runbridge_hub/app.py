@@ -6,6 +6,7 @@ from contextlib import AsyncExitStack, asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.staticfiles import StaticFiles
 
 from runbridge_hub import __version__
 
@@ -18,9 +19,11 @@ from runbridge_hub.service import NodeService, ServiceError
 from runbridge_hub.sessions import SessionService
 from runbridge_hub.native import router as native_router
 from runbridge_hub.settings import HubSettings
+from runbridge_hub.security import token_hash
 from runbridge_hub.store import Store
 from runbridge_hub.visual import VisualService
 from runbridge_hub.visual_api import router as visual_router
+from runbridge_hub.dashboard import ASSET_DIRECTORY, initialize_access, router as dashboard_router
 
 
 def create_app(*, settings: HubSettings) -> FastAPI:
@@ -33,6 +36,9 @@ def create_app(*, settings: HubSettings) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        if settings.web_enabled:
+            app.state.web_token = initialize_access(settings=settings)
+            app.state.web_token_digest = token_hash(token=app.state.web_token.get_secret_value())
         store = Store(path=settings.database_path)
         await store.open()
         service = NodeService(store=store, settings=settings)
@@ -80,6 +86,23 @@ def create_app(*, settings: HubSettings) -> FastAPI:
     app.include_router(gateway_router)
     app.include_router(native_router)
     app.include_router(visual_router)
+    if settings.web_enabled:
+        app.include_router(dashboard_router)
+        app.mount(path="/dashboard/assets", app=StaticFiles(directory=ASSET_DIRECTORY), name="dashboard-assets")
+    elif settings.mcp_enabled:
+        # MCP 的根挂载会鉴权未知路径；关闭总览时保持整个前缀为 404。
+        async def disabled_dashboard(request: Request):
+            """阻止已关闭的总览路径落入 MCP 的鉴权入口。
+
+            :returns: 路径不存在的响应。
+            """
+            return JSONResponse(status_code=404, content={"detail": "Not Found"})
+
+        for path in ("/dashboard", "/dashboard/{path:path}"):
+            app.add_route(
+                path=path, route=disabled_dashboard,
+                methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+            )
 
     @app.get("/health")
     async def health():

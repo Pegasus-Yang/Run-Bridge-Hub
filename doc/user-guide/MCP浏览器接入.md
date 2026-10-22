@@ -1,6 +1,6 @@
 # MCP 浏览器接入
 
-适用于 Hub/Node 0.7.0，在 Agent 或调用方机器操作。Hub 已启用 `/mcp`，Node 提供 READY/FREE 的 managed 资源，所有者已交付真实 `access.json` 和资源 ID。borrowed 资源通过项目 HTTP 操作。
+适用于 Hub 0.8.0 / Node 0.7.0，在 Agent 或调用方机器操作。Hub 已启用 `/mcp`，Node 提供 READY/FREE 的 managed 资源，所有者已交付真实 `access.json` 和资源 ID。borrowed 资源通过项目 HTTP 操作。
 
 ## 连接信息
 

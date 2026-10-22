@@ -82,6 +82,19 @@ class Store:
                 row = await cursor.fetchone()
                 return dict(row) if row is not None else None
 
+    async def nodes(self) -> list[dict]:
+        """读取总览需要的节点元数据，不返回身份凭据摘要。
+
+        :returns: 按名称和 ID 排序的节点记录。
+        """
+        async with self.lock:
+            async with self.connection.execute(
+                "SELECT node_id, name, generation, capabilities, "
+                "capabilities_observed_at, last_seen_at FROM nodes "
+                "ORDER BY name COLLATE NOCASE, node_id"
+            ) as cursor:
+                return [dict(row) for row in await cursor.fetchall()]
+
     async def register(self, *, node_id: str, name: str, token_digest: str) -> tuple[dict, bool]:
         """登记新身份或返回已有身份，已有凭据不能被覆盖。
 

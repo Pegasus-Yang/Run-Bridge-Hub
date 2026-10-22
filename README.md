@@ -4,7 +4,7 @@
 
 RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，分配浏览器会话，把结构化指令路由给 Node 并返回结果。浏览器在 Node 设备上运行；Hub 无需安装 Playwright、Node.js 或浏览器。
 
-[快速开始](doc/user-guide/快速开始.md) · [部署手册](doc/deployment/部署与运行.md) · [参数详解](doc/reference/参数详解.md) · [完整文档](doc/README.md)
+[快速开始](doc/user-guide/快速开始.md) · [部署手册](doc/deployment/部署与运行.md) · [参数详解](doc/reference/参数详解.md) · [完整文档](doc/README.md) · [更新日志](doc/project/版本发布记录.md)
 
 ## 能做什么
 
@@ -13,16 +13,17 @@ RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，�
 - **明确授权范围**：节点身份与调用许可分离，可按资源签发独立许可、设置期限和撤销访问。
 - **可查询的执行结果**：使用请求 ID 跟踪动作，重复请求去重；断线后可以查询原结果。
 - **浏览器画面**：接收 Node 的页面截图流，供调用方观察；浏览器采集仍在 Node 完成。
+- **节点总览**：默认提供同端口只读页面，查看真实连接、资源占用、支持能力、最近心跳和实测控制通道 RTT；支持筛选、搜索与节点详情，适配桌面和手机。
 
 ```text
 调用方 HTTP / Agent MCP → Hub 鉴权与路由 ⇄ Node → Python Playwright → 浏览器
 ```
 
-当前版本 **0.7.0**，与 Node **0.7.0** 配套。提供项目自己的 Playwright 风格调用规则：33 项方法、27 个 MCP 工具。支持范围见[方法表](doc/reference/Playwright方法表.md)；官方 Playwright SDK 的直连接口已退役。
+当前版本 **0.8.0**，兼容 Node **0.7.0**。提供项目自己的 Playwright 风格调用规则：33 项方法、27 个 MCP 工具。支持范围见[方法表](doc/reference/Playwright方法表.md)；官方 Playwright SDK 的直连接口已退役。
 
 ## 快速部署
 
-在 **Hub 机器**上操作。前提是已有 Python **3.14.x**、全局 [uv](https://docs.astral.sh/uv/getting-started/installation/)，并从发布负责人取得 `runbridge_hub-0.7.0-py3-none-any.whl`，保存到 `~/Downloads/`。基础工具准备参考官网；源码构建见开发文档。
+在 **Hub 机器**上操作。前提是已有 Python **3.14.x**、全局 [uv](https://docs.astral.sh/uv/getting-started/installation/)，并从发布负责人取得 `runbridge_hub-0.8.0-py3-none-any.whl`，保存到 `~/Downloads/`。基础工具准备参考官网；源码构建见开发文档。
 
 创建独立部署目录、安装并生成登记文件：
 
@@ -30,7 +31,7 @@ RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，�
 mkdir -p ~/runbridge-hub
 cd ~/runbridge-hub
 uv venv --python 3.14 .venv
-uv pip install --python .venv/bin/python ~/Downloads/runbridge_hub-0.7.0-py3-none-any.whl -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+uv pip install --python .venv/bin/python ~/Downloads/runbridge_hub-0.8.0-py3-none-any.whl -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 .venv/bin/runbridge-hub generate-token --output .runbridge/enrollment.token
 ```
 
@@ -57,6 +58,8 @@ curl --fail http://127.0.0.1:8787/health
 
 需要 Agent/MCP 时，按[快速开始的 MCP 小节](doc/user-guide/快速开始.md#启用-mcp按需)安装 `[mcp]` 并启用。MCP 客户端在 Hub 本机时，无需配置 `mcp_allowed_hosts`。
 
+启动成功后，点击日志中已附带只读口令的 `Dashboard URL` 即可查看节点总览，刷新页面也可直接进入。日志同时输出口令，支持手动输入；默认文件为数据库同目录的 `.runbridge/web.token`，与登记令牌分开使用。配置、开关及数据含义见[节点总览](doc/user-guide/节点总览.md)。
+
 ## 验证一次浏览器操作
 
 Node 所有者交付 `access.json` 后，可用[标准库 HTTP 示例](doc/reference/examples/执行会话调用.py)完成“打开 Hub 健康页 → 读取页面 → 保存 PNG → 释放会话”。[快速开始](doc/user-guide/快速开始.md#验证一次完整调用node-接入后)使用本部署的健康页，不依赖外部网站；成功时截图显示健康检查 JSON，清理结果为 `COMPLETE`。
@@ -72,6 +75,7 @@ Agent 通过 Streamable HTTP 连接 `/mcp`，使用访问文件中的令牌；�
 | 保存 YAML、查询默认值和适用场景 | [参数详解](doc/reference/参数详解.md)、[带注释 YAML](doc/reference/examples/Hub启动配置.yaml) |
 | 编写调用程序、理解对象和请求 ID | [调用方教程](doc/user-guide/调用方对接与使用.md)、[工具调用协议](doc/reference/工具调用协议.md) |
 | 观察浏览器画面 | [画面流接入](doc/user-guide/浏览器画面流接入.md) |
+| 查看全部节点、占用、能力与延迟 | [节点总览](doc/user-guide/节点总览.md) |
 | 排查断线、许可、会话与升级问题 | [运行与排障](doc/deployment/运行与排障.md) |
 
 ## 开发

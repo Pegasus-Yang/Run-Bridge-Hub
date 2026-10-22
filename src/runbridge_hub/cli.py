@@ -10,16 +10,17 @@ from pydantic import ValidationError
 from runbridge_hub.app import create_app
 from runbridge_hub.tool_contract import MAX_MESSAGE
 from runbridge_hub.security import generate_token_file
+from runbridge_hub.server import HubServer
 from runbridge_hub.startup import ServeSettings
 
 
 def main() -> None:
-    """执行 Hub 命令，凭据值不放进命令行或输出。"""
+    """执行 Hub 命令，启动成功后输出总览只读口令和访问链接。"""
     parser = argparse.ArgumentParser(
         prog="runbridge-hub", description="RunBridge 节点管理与连接网关"
     )
     commands = parser.add_subparsers(dest="command", required=True)
-    generate = commands.add_parser("generate-token", help="生成首次登记凭据文件")
+    generate = commands.add_parser("generate-token", help="生成独立随机凭据文件，可用于登记或总览只读访问")
     generate.add_argument("--output", type=Path, required=True)
     serve = commands.add_parser(
         "serve", help="启动单 Worker Hub", argument_default=argparse.SUPPRESS
@@ -36,6 +37,14 @@ def main() -> None:
         help="SQLite 路径，默认 .runbridge/hub.sqlite3",
     )
     serve.add_argument("--enrollment-token-file", type=Path)
+    serve.add_argument(
+        "--disable-web", dest="web_enabled", action="store_false",
+        help="关闭默认启用的节点总览页面、静态资源和只读状态接口",
+    )
+    serve.add_argument(
+        "--web-token-file", type=Path,
+        help="独立的总览只读口令文件；未配置时使用环境变量或自动生成 web.token",
+    )
     serve.add_argument(
         "--heartbeat-interval",
         dest="heartbeat_interval_seconds",
@@ -70,7 +79,7 @@ def main() -> None:
     try:
         if args.command == "generate-token":
             generate_token_file(path=args.output)
-            print(f"登记凭据已保存：{args.output}")
+            print(f"凭据文件已保存：{args.output}")
             return
         options = {
             key: value
@@ -103,13 +112,27 @@ def main() -> None:
     except (OSError, ValueError) as error:
         print(f"配置失败：{error}", file=sys.stderr)
         raise SystemExit(2) from None
-    uvicorn.run(
+    websocket_protocol = "websockets"
+    if settings.web_enabled:
+        from runbridge_hub.transport import ControlWebSocketProtocol
+
+        websocket_protocol = ControlWebSocketProtocol
+
+    config = uvicorn.Config(
         app=app,
         host=startup.host,
         port=startup.port,
         workers=1,
         loop="asyncio",
-        ws="websockets",
+        ws=websocket_protocol,
         ws_max_size=MAX_MESSAGE,
         ws_max_queue=4,
     )
+    server = HubServer(config=config)
+    try:
+        server.run()
+    except KeyboardInterrupt:
+        pass
+    if not server.started:
+        # 沿用 Uvicorn 单 Worker 启动失败的退出码。
+        raise SystemExit(3)

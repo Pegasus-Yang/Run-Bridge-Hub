@@ -6,13 +6,15 @@ from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 
 class HubSettings(BaseModel):
-    """保存登记秘密和心跳配置，秘密在 repr 中遮蔽。"""
+    """保存登记、只读总览与心跳配置，秘密在 repr 中遮蔽。"""
 
     model_config = ConfigDict(extra="forbid")
     database_path: Path = Path(".runbridge/hub.sqlite3")
     enrollment_token: SecretStr = Field(min_length=32, max_length=256)
     heartbeat_interval_seconds: float = Field(default=30, gt=0)
     heartbeat_timeout_seconds: float = Field(default=90, gt=0)
+    web_enabled: bool = True
+    web_token: SecretStr | None = Field(default=None, min_length=32, max_length=256)
     mcp_enabled: bool = False
     mcp_allowed_hosts: list[str] = Field(default_factory=lambda: ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*", "[::1]", "[::1]:*"])
     mcp_allowed_origins: list[str] = Field(default_factory=list)
@@ -25,6 +27,8 @@ class HubSettings(BaseModel):
         """
         if self.heartbeat_timeout_seconds <= self.heartbeat_interval_seconds:
             raise ValueError("心跳超时必须长于发送间隔")
+        if self.web_token is not None and self.web_token == self.enrollment_token:
+            raise ValueError("总览只读口令必须与登记凭据不同")
         if self.mcp_enabled:
             if not self.mcp_allowed_hosts or "*" in self.mcp_allowed_hosts or "*" in self.mcp_allowed_origins:
                 raise ValueError("MCP Host 和 Origin 必须显式允许，不能使用全局通配符")

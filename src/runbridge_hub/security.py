@@ -39,7 +39,7 @@ def bearer_token(*, header: str | None) -> str | None:
 
 
 def generate_token_file(*, path: Path) -> None:
-    """生成登记凭据文件，拒绝覆盖现有文件。
+    """生成独立随机凭据文件，拒绝覆盖现有文件。
 
     :param path: 输出路径。
     """

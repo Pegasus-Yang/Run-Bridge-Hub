@@ -35,7 +35,9 @@ mcp_allowed_origins: [https://console.example]
     create = Mock(return_value=object())
     run = Mock()
     monkeypatch.setattr("runbridge_hub.cli.create_app", create)
-    monkeypatch.setattr("runbridge_hub.cli.uvicorn.run", run)
+    monkeypatch.setattr("runbridge_hub.cli.uvicorn.Config", run)
+    server = Mock()
+    monkeypatch.setattr("runbridge_hub.cli.HubServer", server)
     monkeypatch.setattr("sys.argv", ["runbridge-hub", "serve", "--settings", str(path)])
     main()
     settings = create.call_args.kwargs["settings"]
@@ -50,6 +52,8 @@ mcp_allowed_origins: [https://console.example]
     assert run.call_args.kwargs["host"] == "0.0.0.0"
     assert run.call_args.kwargs["port"] == 9000
     assert run.call_args.kwargs["workers"] == 1
+    server.assert_called_once_with(config=run.return_value)
+    server.return_value.run.assert_called_once_with()
     assert not settings.database_path.exists()
 
 
@@ -58,7 +62,8 @@ def test_cli_retains_defaults_and_repeated_hosts(monkeypatch):
     create = Mock()
     run = Mock()
     monkeypatch.setattr("runbridge_hub.cli.create_app", create)
-    monkeypatch.setattr("runbridge_hub.cli.uvicorn.run", run)
+    monkeypatch.setattr("runbridge_hub.cli.uvicorn.Config", run)
+    monkeypatch.setattr("runbridge_hub.cli.HubServer", Mock())
     monkeypatch.setattr(
         "sys.argv",
         [
@@ -159,7 +164,8 @@ def test_legacy_cli_file_and_custom_parameters_are_preserved(
     create = Mock()
     run = Mock()
     monkeypatch.setattr("runbridge_hub.cli.create_app", create)
-    monkeypatch.setattr("runbridge_hub.cli.uvicorn.run", run)
+    monkeypatch.setattr("runbridge_hub.cli.uvicorn.Config", run)
+    monkeypatch.setattr("runbridge_hub.cli.HubServer", Mock())
     monkeypatch.setattr(
         "sys.argv",
         [
@@ -188,3 +194,43 @@ def test_legacy_cli_file_and_custom_parameters_are_preserved(
     assert settings.mcp_enabled is False
     assert run.call_args.kwargs["host"] == "0.0.0.0"
     assert run.call_args.kwargs["port"] == port
+
+
+def test_cli_web_switch_and_independent_token_file(tmp_path, monkeypatch):
+    """默认启用实测传输，显式关闭时保留原 Hub 传输。"""
+    monkeypatch.setenv("RUNBRIDGE_ENROLLMENT_TOKEN", "e" * 64)
+    web_file = tmp_path / "readonly.token"
+    web_file.write_text("w" * 64, encoding="utf-8")
+    create = Mock()
+    run = Mock()
+    monkeypatch.setattr("runbridge_hub.cli.create_app", create)
+    monkeypatch.setattr("runbridge_hub.cli.uvicorn.Config", run)
+    monkeypatch.setattr("runbridge_hub.cli.HubServer", Mock())
+    monkeypatch.setattr("sys.argv", ["runbridge-hub", "serve", "--web-token-file", str(web_file)])
+    main()
+    assert create.call_args.kwargs["settings"].web_enabled is True
+    assert create.call_args.kwargs["settings"].web_token.get_secret_value() == "w" * 64
+    assert run.call_args.kwargs["ws"].__name__ == "ControlWebSocketProtocol"
+    monkeypatch.setattr("sys.argv", ["runbridge-hub", "serve", "--disable-web"])
+    main()
+    assert create.call_args.kwargs["settings"].web_enabled is False
+    assert run.call_args.kwargs["ws"] == "websockets"
+
+
+@pytest.mark.parametrize("started,interrupted", [(True, True), (False, True), (False, False)])
+def test_cli_preserves_interrupt_and_startup_failure_exit(monkeypatch, started, interrupted):
+    """启动日志扩展保留 Ctrl+C 和启动失败的原退出语义。"""
+    monkeypatch.setenv("RUNBRIDGE_ENROLLMENT_TOKEN", "e" * 64)
+    monkeypatch.setattr("sys.argv", ["runbridge-hub", "serve"])
+    monkeypatch.setattr("runbridge_hub.cli.create_app", Mock())
+    monkeypatch.setattr("runbridge_hub.cli.uvicorn.Config", Mock())
+    server = Mock(started=started)
+    if interrupted:
+        server.run.side_effect = KeyboardInterrupt
+    monkeypatch.setattr("runbridge_hub.cli.HubServer", Mock(return_value=server))
+    if started:
+        main()
+    else:
+        with pytest.raises(SystemExit) as error:
+            main()
+        assert error.value.code == 3
