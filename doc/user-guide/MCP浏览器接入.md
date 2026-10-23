@@ -1,6 +1,6 @@
 # MCP 浏览器接入
 
-适用于 Hub 0.9.0 / Node 0.8.0，在 Agent 或调用方机器操作。Hub 已启用 `/mcp`，Node 提供 READY/FREE 的 managed 资源，调用方已从 Hub 领取 Node 并保存真实 `access.json`，资源 ID 来自能力目录。borrowed 资源通过项目 HTTP 操作。
+适用于 Hub 0.9.1 / Node 0.8.1，在 Agent 或调用方机器操作。Hub 已启用 `/mcp`，Node 提供 READY/FREE 的 managed 资源，调用方已从 Hub 领取 Node 并保存真实 `access.json`，资源 ID 来自能力目录。borrowed 资源通过项目 HTTP 操作。
 
 使用 DSH 测试插件时，按 [DSH-Test-Plugin 对接指南](DSH-Test-Plugin对接指南.md)获取访问文件参数、完成插件读取与连接检测，再运行自动化用例。
 

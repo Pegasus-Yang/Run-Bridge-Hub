@@ -93,9 +93,6 @@ class LeaseService:
 
     async def claim(self, *, node_id, token, request: GrantRequest):
         self.authorize_hub(token=token)
-        seconds = self.duration(seconds=request.lease_seconds)
-        if self.settings.public_url is None:
-            raise ServiceError(status=503, code="PUBLIC_URL_REQUIRED")
         digest = hashlib.sha256(json.dumps(request.model_dump(exclude={"request_id"}), sort_keys=True).encode()).hexdigest()
         async with self.nodes.lock:
             old = await self.store.claim_request(node_id=node_id, request_id=request.request_id)
@@ -103,6 +100,9 @@ class LeaseService:
                 if old["request_digest"] != digest:
                     raise ServiceError(status=409, code="REQUEST_ID_CONFLICT")
                 return {"grant_id": old["grant_id"], "node_id": node_id, "state": old["state"], "token_available": False}, False
+            seconds = self.duration(seconds=request.lease_seconds)
+            if self.settings.public_url is None:
+                raise ServiceError(status=503, code="PUBLIC_URL_REQUIRED")
             node = await self.store.node(node_id=node_id)
             if node is None:
                 raise ServiceError(status=404, code="NODE_NOT_FOUND")

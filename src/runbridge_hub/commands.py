@@ -207,10 +207,11 @@ class CommandService:
                     session.view.execution_outcome = "NOT_TRACKED"
                     await self.sessions.save(view=session.view)
                     await self.store.finish_command(key=key, status="DISPATCHED")
-                    await self.sessions.nodes.leases.activity_started(
-                        grant_id=key[0], key=key,
-                        deadline=datetime.now(UTC) + timedelta(milliseconds=remaining + 500),
-                    )
+                    if request.method != "runbridge.session_state":
+                        await self.sessions.nodes.leases.activity_started(
+                            grant_id=key[0], key=key,
+                            deadline=datetime.now(UTC) + timedelta(milliseconds=remaining + 500),
+                        )
                     await session.send(value=envelope.model_dump(mode="json"))
                 future = self.pending.get(key)
                 if future is not None:

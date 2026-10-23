@@ -1,6 +1,6 @@
 # Node 使用权租约接口
 
-适用版本：Hub 0.9.0、Node 0.8.0。
+适用版本：Hub 0.9.1、Node 0.8.1。
 
 Hub 不维护用户。`hub_token` 用于查看资源池和申请整个 Node；每次领取产生独立的 `access_token`，只有其持有者可以执行、续租和释放这份使用权。所有令牌放在 `Authorization: Bearer ...`，不得放在 URL。
 

@@ -1,6 +1,6 @@
 # DSH-Test-Plugin 对接指南
 
-适用于 Hub 0.9.0、Node 0.8.0 和 DSH-Test-Plugin 0.15.0。插件通过 Hub 的 MCP 在 Node 上执行浏览器测试，无需在 DSH 宿主安装远程浏览器或 Python Playwright。
+适用于 Hub 0.9.1、Node 0.8.1 和 DSH-Test-Plugin 0.15.0。插件通过 Hub 的 MCP 在 Node 上执行浏览器测试，无需在 DSH 宿主安装远程浏览器或 Python Playwright。
 
 推荐流程：**Hub 配置独立申请凭据 → Node 登记并上报能力 → 插件读取 Hub 认证文件、准备和审核计划 → 自动领取 Node → 整批执行 → 关闭浏览器并交还 Node → 封存报告**。Hub 不维护用户身份；持有申请凭据即可申请未占用的 Node，领取后的操作必须使用本次租约令牌。
 
@@ -8,8 +8,8 @@
 
 | 角色 | 准备工作 | 交付内容 |
 | --- | --- | --- |
-| Hub 部署者 | 安装0.9.0，启用MCP，配置实际Host、public_url与独立hub_token_file | 给Node维护者登记附件；给调用方Hub基址和独立申请凭据，两者分开 |
-| Node 维护者 | 安装0.8.0，配置tools.playwright的managed资源并保持在线，实际探测通过 | node_id、resource_id、模式及设备版本；不签发访问文件 |
+| Hub 部署者 | 安装0.9.1，启用MCP，配置实际Host、public_url与独立hub_token_file | 给Node维护者登记附件；给调用方Hub基址和独立申请凭据，两者分开 |
+| Node 维护者 | 安装0.8.1，配置tools.playwright的managed资源并保持在线，实际探测通过 | node_id、resource_id、模式及设备版本；不签发访问文件 |
 | DSH 使用者 | 在实际DSH宿主保存私有认证文件，安装0.15.0插件，在对应profile设置浏览器连接 | 配置、用例、预期、运行报告和清理结果 |
 
 Hub启动配置示例（在Hub机器）：

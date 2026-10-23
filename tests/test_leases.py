@@ -214,3 +214,33 @@ def test_claim_checks_all_resources_of_exclusive_node(tmp_path):
                                             "resources": [{"resource_id": resource, "backend": "playwright", "kind": "MANAGED_CHROMIUM", "readiness": "READY", "occupancy": occupancy, "methods": ["page.title"]} for resource, occupancy in [("chromium", "FREE"), ("other", "UNKNOWN")]]}})
         assert control.receive_json()["type"] == "capabilities_ack"
         assert claim(client=client).json()["code"] == "NODE_NOT_READY"
+
+
+def test_worker_session_state_query_does_not_refresh_idle(tmp_path):
+    with TestClient(app=create_app(settings=settings(tmp_path=tmp_path))) as client, ThreadPoolExecutor(max_workers=1) as pool:
+        register(client=client)
+        access = grant(client=client)
+        with live_session(client=client, access=access) as (view, _, execution, _):
+            before = status(client=client, access=access)
+            request = {"request_id": "state_poll", "method": "runbridge.session_state", "target": {"type": "session", "id": view["session_id"]}, "params": {}}
+            result = pool.submit(client.post, url=f"/v2/sessions/{view['session_id']}/commands", headers=auth(token=access["access_token"]), json=request)
+            message = execution.receive_json()
+            pending = status(client=client, access=access)
+            assert pending["last_activity_at"] == before["last_activity_at"] and not pending["inflight"]
+            execution.send_json({"protocol_version": 2, "type": "result", "session_id": view["session_id"], "connection_generation": view["connection_generation"], "request_id": message["request_id"], "status": "SUCCEEDED", "execution_outcome": "COMPLETED", "result": {"kind": "json", "value": view["objects"]}})
+            assert result.result(timeout=3).status_code == 200
+            after = status(client=client, access=access)
+            assert after["last_activity_at"] == before["last_activity_at"] and after["idle_deadline_at"] == before["idle_deadline_at"]
+
+
+def test_claim_retry_keeps_original_record_when_new_claim_policy_changes(tmp_path):
+    config = settings(tmp_path=tmp_path)
+    with TestClient(app=create_app(settings=config)) as client, ready(client=client):
+        access = claim(client=client, lease_seconds=1000).json()
+    changed = config.model_copy(update={"grant_max_lease_seconds": 100, "public_url": None})
+    with TestClient(app=create_app(settings=changed)) as client:
+        repeated = claim(client=client, lease_seconds=1000)
+        assert repeated.status_code == 200 and repeated.json()["token_available"] is False
+        assert repeated.json()["grant_id"] == access["grant_id"]
+        assert status(client=client, access=access)["expires_at"] == access["expires_at"]
+        assert client.post(url=f"/v1/grants/{access['grant_id']}/renew", headers=auth(token=access["access_token"]), json={"lease_seconds":1000}).json()["code"] == "LEASE_TOO_LONG"

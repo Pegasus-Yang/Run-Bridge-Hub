@@ -1,6 +1,6 @@
 # MCP 授权与浏览器生命周期
 
-当前 Hub 0.9.0 的 MCP 是项目方法适配层。每次 HTTP 请求从 Bearer 访问令牌解析许可，检查期限和撤销；不共享上一调用方的传输身份。Host/Origin 与请求体大小由 MCP 入口检查。
+当前 Hub 0.9.1 的 MCP 是项目方法适配层。每次 HTTP 请求从 Bearer 访问令牌解析许可，检查期限和撤销；不共享上一调用方的传输身份。Host/Origin 与请求体大小由 MCP 入口检查。
 
 browser_start 选择许可内 managed 资源，复用 SessionService 的创建去重，并执行只读 session_state 激活会话；返回 session_id/page_id/request_id。其他工具只把参数转为统一 CommandService 调用，Locator、固定 DOM 读取、文件解码和截图都由 Node 执行。
 

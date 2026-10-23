@@ -1,4 +1,4 @@
-# Hub 0.9.0；UTF-8 YAML，使用空格缩进。
+# Hub 0.9.1；UTF-8 YAML，使用空格缩进。
 # 启动：.venv/bin/runbridge-hub serve --settings hub.yaml
 # --settings 不能与其他启动参数混用。
 # 相对本地路径以本文件目录为准；不展开 ~、$HOME 或 shell 表达式。
