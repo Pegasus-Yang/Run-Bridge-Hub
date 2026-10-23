@@ -11,6 +11,8 @@ from runbridge_hub.app import create_app
 from runbridge_hub.settings import HubSettings
 from runbridge_hub.startup import ServeSettings
 from runbridge_hub.transport import ControlWebSocketProtocol
+from test_r1 import HUB
+from test_sessions import publish as publish_execution
 
 
 ENROLLMENT = "test-enrollment-" + "e" * 48
@@ -23,7 +25,7 @@ def configuration(*, tmp_path, **values):
 
     :returns: 当前测试的 Hub 配置。
     """
-    return HubSettings(database_path=tmp_path / "hub.sqlite3", enrollment_token=ENROLLMENT, web_token=WEB, **values)
+    return HubSettings(database_path=tmp_path / "hub.sqlite3", enrollment_token=ENROLLMENT, web_token=WEB, hub_token=HUB, public_url="http://hub.test", **values)
 
 
 def auth(*, token=WEB):
@@ -108,7 +110,9 @@ def test_disabling_web_removes_every_web_route(tmp_path, path):
 def test_only_web_token_can_read_all_nodes_and_it_cannot_write(tmp_path):
     with TestClient(app=create_app(settings=configuration(tmp_path=tmp_path))) as client:
         register(client=client, name="<script>should-not-run</script>")
-        grant = client.post(url="/v1/nodes/node_a/grants", headers=auth(token=IDENTITY), json={}).json()
+        with client.websocket_connect(url="/v2/nodes/node_a/control", headers=auth(token=IDENTITY)) as control:
+            publish_execution(websocket=control)
+            grant = client.post(url="/v1/nodes/node_a/grants", headers=auth(token=HUB), json={"request_id": "dashboard_claim"}).json()
         for token in [None, "wrong", ENROLLMENT, IDENTITY, grant["access_token"]]:
             response = client.get(url="/dashboard/api/nodes", headers=auth(token=token) if token else {})
             assert response.status_code == 401
@@ -119,7 +123,7 @@ def test_only_web_token_can_read_all_nodes_and_it_cannot_write(tmp_path):
         for secret in [ENROLLMENT, IDENTITY, WEB, grant["access_token"], "token_hash", "grant_id"]:
             assert secret not in serialized
         assert client.post(url="/v1/nodes/register", headers=auth(), json={"node_id": "node_b", "name": "B", "node_token": IDENTITY}).status_code == 401
-        assert client.post(url="/v1/nodes/node_a/grants", headers=auth(), json={}).status_code == 401
+        assert client.post(url="/v1/nodes/node_a/grants", headers=auth(), json={"request_id": "forbidden"}).status_code == 401
         assert client.post(url="/v2/nodes/node_a/sessions", headers=auth(), json={"resource_id": "free"}).status_code == 401
         assert client.post(url="/dashboard/api/nodes", headers=auth()).status_code == 405
 

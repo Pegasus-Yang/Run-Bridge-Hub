@@ -3,6 +3,7 @@
 import sqlite3
 import time
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,6 +15,7 @@ from runbridge_hub.settings import HubSettings
 
 ENROLLMENT = "test-enrollment-" + "e" * 40
 IDENTITY = "test-identity-" + "n" * 40
+HUB = "test-pool-" + "h" * 40
 
 
 def auth(*, token: str) -> dict:
@@ -32,6 +34,8 @@ def settings(*, tmp_path: Path, timeout: float = 3) -> HubSettings:
     return HubSettings(
         database_path=tmp_path / "hub.sqlite3",
         enrollment_token=ENROLLMENT,
+        hub_token=HUB,
+        public_url="http://hub.test/runbridge",
         heartbeat_interval_seconds=0.025,
         heartbeat_timeout_seconds=timeout,
     )
@@ -56,13 +60,23 @@ def register(
 def grant(
     *, client: TestClient, node_id: str = "node_a", body: dict | None = None
 ) -> dict:
-    """签发测试查询许可。
+    """用临时模拟设备领取组件测试租约，非真机就绪证据。
 
     :returns: 新许可。
     """
-    response = client.post(
-        url=f"/v1/nodes/{node_id}/grants", headers=auth(token=IDENTITY), json=body or {}
-    )
+    # 旧组件测试需要先取得许可再建立其专用执行连接；真实租约 API 另行覆盖。
+    occupied = client.portal.call(client.app.state.service.store.active_grants)
+    if any(item["node_id"] == node_id for item in occupied):
+        node_id = f"other_{uuid4().hex}"
+        register(client=client, node_id=node_id)
+    with client.websocket_connect(url=f"/v2/nodes/{node_id}/control", headers=auth(token=IDENTITY)) as control:
+        welcome = control.receive_json()
+        control.send_json({"protocol_version": 2, "type": "capabilities", "connection_generation": welcome["connection_generation"],
+                           "capabilities": {"backends": [{"name": "playwright", "runtime_version": "1.63.0", "coverage_status": "SUPPORTED"}],
+                                            "resources": [{"resource_id": "lease_fixture", "backend": "playwright", "kind": "MANAGED_CHROMIUM", "readiness": "READY", "occupancy": "FREE", "methods": ["runbridge.session_state"]}]}})
+        assert control.receive_json()["type"] == "capabilities_ack"
+        response = client.post(url=f"/v1/nodes/{node_id}/grants", headers=auth(token=HUB),
+                               json={"request_id": f"claim_{uuid4().hex}", **(body or {})})
     assert response.status_code == 201
     return response.json()
 
@@ -171,14 +185,14 @@ def test_identity_and_caller_grants_have_separate_roles(tmp_path):
             client.post(
                 url="/v1/nodes/node_a/grants",
                 headers=auth(token=permit["access_token"]),
-                json={},
+                json={"request_id": "wrong_credential"},
             ).status_code
             == 401
         )
-        listed = client.get(
+        retired = client.get(
             url="/v1/nodes/node_a/grants", headers=auth(token=IDENTITY)
-        ).json()
-        assert "access_token" not in listed[0] and "token_hash" not in listed[0]
+        )
+        assert retired.status_code == 410
         with pytest.raises(WebSocketDisconnect):
             with client.websocket_connect(
                 url="/v2/nodes/node_a/control",
@@ -187,10 +201,10 @@ def test_identity_and_caller_grants_have_separate_roles(tmp_path):
                 pass
 
 
-def test_resource_scope_filters_capabilities(tmp_path):
+def test_whole_node_grant_preserves_all_capabilities(tmp_path):
     with TestClient(app=create_app(settings=settings(tmp_path=tmp_path))) as client:
         register(client=client)
-        permit = grant(client=client, body={"resource_ids": ["browser_a"]})
+        permit = grant(client=client)
         with client.websocket_connect(
             url="/v2/nodes/node_a/control", headers=auth(token=IDENTITY)
         ) as websocket:
@@ -207,15 +221,15 @@ def test_resource_scope_filters_capabilities(tmp_path):
             ).json()
             assert [
                 item["resource_id"] for item in view["capabilities"]["resources"]
-            ] == ["browser_a"]
+            ] == ["browser_a", "browser_b"]
             assert view["capabilities"]["resources"][0]["readiness"] == "NEEDS_PROBE"
 
 
 def test_grant_expiry_is_enforced(tmp_path):
     with TestClient(app=create_app(settings=settings(tmp_path=tmp_path))) as client:
         register(client=client)
-        permit = grant(client=client, body={"expires_in_seconds": 0.05})
-        time.sleep(0.08)
+        permit = grant(client=client, body={"lease_seconds": 1})
+        time.sleep(1.05)
         assert (
             client.get(
                 url="/v1/nodes/node_a", headers=auth(token=permit["access_token"])
@@ -280,10 +294,10 @@ def test_revocation_survives_restart(tmp_path):
         permit = grant(client=client)
         assert (
             client.delete(
-                url=f"/v1/nodes/node_a/grants/{permit['grant_id']}",
-                headers=auth(token=IDENTITY),
+                url=f"/v1/grants/{permit['grant_id']}",
+                headers=auth(token=permit["access_token"]),
             ).status_code
-            == 204
+            == 200
         )
         assert (
             client.get(

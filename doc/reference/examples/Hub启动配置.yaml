@@ -1,4 +1,4 @@
-# Hub 0.8.1；UTF-8 YAML，使用空格缩进。
+# Hub 0.9.0；UTF-8 YAML，使用空格缩进。
 # 启动：.venv/bin/runbridge-hub serve --settings hub.yaml
 # --settings 不能与其他启动参数混用。
 # 相对本地路径以本文件目录为准；不展开 ~、$HOME 或 shell 表达式。
@@ -6,7 +6,15 @@ config_version: 1  # Hub YAML 格式版本，只支持 1；默认 1，可省略�
 host: 0.0.0.0  # 默认 127.0.0.1；本例允许远程 Node；仅本机访问时可删除此行。
 # port: 8787  # 默认 8787，范围 1～65535；冲突时修改并同步交付 URL。
 # database_path: .runbridge/hub.sqlite3  # 默认此路径，首次自动创建；已有部署保留原数据库。
-enrollment_token_file: .runbridge/enrollment.token  # 默认不设；generate-token 生成的单行登记文件。
+enrollment_token_file: .runbridge/enrollment.token  # generate-token 生成，交付 Node 登记。
+hub_token_file: .runbridge/hub.token  # 单独执行 generate-token，交付调用方领取 Node；不可复用登记或总览凭据。
+public_url: http://hub.example:8787  # 改为实际基址，可含代理前缀，如 https://hub.example/runbridge。
+grant_max_lease_seconds: 86400  # 新申请及续租的时长上限，正整数；默认一天，可调整。
+grant_idle_timeout_seconds: 600  # 新租约的空闲策略快照，正整数；默认十分钟。
+# 每次领取/续租省略 lease_seconds 时取 min(3600, 上限)；显式超限拒绝。
+# 更改后重启生效，不缩短已有 expires_at、不更换已有空闲策略；续租不会刷新空闲。
+# 未指定 hub_token_file 时读取 RUNBRIDGE_HUB_TOKEN；均不提供时资源池 API 返回503。
+# 未配置 public_url 时不允许领取，避免从请求Host推导错误的导出地址。
 # web_enabled: true  # 默认 true；同端口 /dashboard。false 同时关闭页面、资源和总览接口。
 # web_token_file: .runbridge/dashboard.token  # 独立单行只读口令，不能复用登记令牌。
 # 未指定只读文件时优先读取 RUNBRIDGE_WEB_TOKEN；均未提供时在数据库同目录生成/复用 web.token（600）。

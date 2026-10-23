@@ -3,8 +3,9 @@
 from fastapi import APIRouter, Header, Request, Response
 from fastapi.responses import JSONResponse
 
-from runbridge_hub.protocol import GrantCreated, GrantRequest, GrantView, Registration, RegistrationResult, SessionCreate, SessionView
+from runbridge_hub.protocol import GrantRequest, GrantRenew, GrantView, Registration, RegistrationResult, SessionCreate, SessionView
 from runbridge_hub.security import bearer_token
+from runbridge_hub.service import ServiceError
 from runbridge_hub.visual_protocol import NodeQueryView, SessionQueryView
 from runbridge_hub.tool_contract import CommandInput, catalog
 
@@ -24,35 +25,58 @@ async def register(body: Registration, request: Request, response: Response, aut
     return result
 
 
-@router.post("/nodes/{node_id}/grants", response_model=GrantCreated, status_code=201)
+@router.get("/pool/nodes")
+async def pool_nodes(request: Request, authorization: str | None = Header(default=None)):
+    """持有 Hub 凭据即可读取资源池，不产生设备占用。"""
+    return await request.app.state.leases.pool(token=bearer_token(header=authorization))
+
+
+@router.get("/pool/nodes/{node_id}/tools")
+async def pool_tools(node_id: str, request: Request, authorization: str | None = Header(default=None)):
+    """与 MCP tools/list 复用定义，领取前即可准备计划。"""
+    pool = await request.app.state.leases.pool(token=bearer_token(header=authorization))
+    node = next((item for item in pool["nodes"] if item["node_id"] == node_id), None)
+    if node is None:
+        raise ServiceError(status=404, code="NODE_NOT_FOUND")
+    mcp = request.app.state.mcp
+    if mcp is None:
+        raise ServiceError(status=503, code="MCP_DISABLED")
+    return {"node": node, "tools": [tool.model_dump(mode="json", by_alias=True, exclude_none=True) for tool in await mcp.list_tools()]}
+
+
+@router.post("/nodes/{node_id}/grants")
 async def create_grant(node_id: str, body: GrantRequest, request: Request, authorization: str | None = Header(default=None)):
-    """为节点签发访问许可。
-
-    :returns: 包含一次性交付凭据的许可。
-    """
-    return await request.app.state.service.create_grant(node_id=node_id, token=bearer_token(header=authorization), request=body)
+    """用 Hub 凭据原子领取整个 Node，秘密仅首次响应交付。"""
+    result, created = await request.app.state.leases.claim(node_id=node_id, token=bearer_token(header=authorization), request=body)
+    return JSONResponse(status_code=201 if created else 200, content=result.model_dump(mode="json") if created else result, headers={"Cache-Control": "no-store"})
 
 
-@router.get("/nodes/{node_id}/grants", response_model=list[GrantView])
-async def list_grants(node_id: str, request: Request, authorization: str | None = Header(default=None)):
-    """节点所有者查询许可元数据。
-
-    :returns: 不含凭据的许可列表。
-    """
-    service = request.app.state.service
-    await service.authorize_owner(node_id=node_id, token=bearer_token(header=authorization))
-    records = await service.store.grants(node_id=node_id)
-    return [GrantView.model_validate(obj={field: record[field] for field in GrantView.model_fields}) for record in records]
+@router.get("/nodes/{node_id}/grants", status_code=410)
+@router.delete("/nodes/{node_id}/grants/{grant_id}", status_code=410)
+async def retired_owner_grants():
+    """旧所有者入口不能成为绕过 Hub 分配的旁路。"""
+    return {"code": "NODE_GRANT_MANAGEMENT_RETIRED", "guidance": "请使用 Hub 凭据领取，使用原 access_token 经 /v1/grants/{grant_id} 释放"}
 
 
-@router.delete("/nodes/{node_id}/grants/{grant_id}", status_code=204)
-async def revoke_grant(node_id: str, grant_id: str, request: Request, authorization: str | None = Header(default=None)):
-    """节点所有者撤销许可。
+@router.get("/grants/{grant_id}", response_model=GrantView)
+async def grant_status(grant_id: str, request: Request, response: Response, authorization: str | None = Header(default=None)):
+    """旧令牌也可查询原租约的实际回收结果。"""
+    response.headers["Cache-Control"] = "no-store"
+    return await request.app.state.leases.status(grant_id=grant_id, token=bearer_token(header=authorization))
 
-    :returns: 空响应。
-    """
-    await request.app.state.sessions.revoke(node_id=node_id, grant_id=grant_id, token=bearer_token(header=authorization))
-    return Response(status_code=204)
+
+@router.post("/grants/{grant_id}/renew", response_model=GrantView)
+async def renew_grant(grant_id: str, body: GrantRenew, request: Request, response: Response, authorization: str | None = Header(default=None)):
+    """有效持有者续租，不刷新空闲期限。"""
+    response.headers["Cache-Control"] = "no-store"
+    return await request.app.state.leases.renew(grant_id=grant_id, token=bearer_token(header=authorization), seconds=body.lease_seconds)
+
+
+@router.delete("/grants/{grant_id}")
+async def release_grant(grant_id: str, request: Request, authorization: str | None = Header(default=None)):
+    """幂等释放原租约，回收中返回 202。"""
+    result = await request.app.state.leases.release(grant_id=grant_id, token=bearer_token(header=authorization))
+    return JSONResponse(status_code=202 if result.state == "RELEASING" else 200, content=result.model_dump(mode="json"), headers={"Cache-Control": "no-store"})
 
 
 @router.get("/nodes/{node_id}", response_model=NodeQueryView)

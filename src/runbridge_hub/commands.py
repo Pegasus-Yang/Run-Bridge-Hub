@@ -3,7 +3,7 @@
 import asyncio
 import json
 from collections import OrderedDict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from time import monotonic
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -191,10 +191,6 @@ class CommandService:
                     return
                 if session.view.state not in {"READY", "ACTIVE"}:
                     raise ServiceError(status=409, code="SESSION_NOT_ACTIVE")
-                session.view.state = "ACTIVE"
-                session.view.execution_outcome = "NOT_TRACKED"
-                await self.sessions.save(view=session.view)
-                await self.store.finish_command(key=key, status="DISPATCHED")
                 envelope = Execute(
                     **request.model_dump(),
                     session_id=view.session_id,
@@ -203,10 +199,22 @@ class CommandService:
                     tool_api_version=view.tool_api_version,
                     remaining_ms=remaining,
                 )
-                await session.send(value=envelope.model_dump(mode="json"))
+                async with self.sessions.nodes.lock:
+                    await self.sessions.nodes.resolve_access(token=token)
+                    if key not in self.pending or session.view.state not in {"READY", "ACTIVE"}:
+                        raise ServiceError(status=409, code="SESSION_NOT_ACTIVE")
+                    session.view.state = "ACTIVE"
+                    session.view.execution_outcome = "NOT_TRACKED"
+                    await self.sessions.save(view=session.view)
+                    await self.store.finish_command(key=key, status="DISPATCHED")
+                    await self.sessions.nodes.leases.activity_started(
+                        grant_id=key[0], key=key,
+                        deadline=datetime.now(UTC) + timedelta(milliseconds=remaining + 500),
+                    )
+                    await session.send(value=envelope.model_dump(mode="json"))
                 future = self.pending.get(key)
                 if future is not None:
-                    await asyncio.shield(future)
+                    await asyncio.wait_for(asyncio.shield(future), timeout=remaining / 1000 + 0.5)
         except ServiceError as error:
             await self.finish(
                 key=key,
@@ -230,6 +238,7 @@ class CommandService:
                     status="UNKNOWN",
                 ),
             )
+            await self.sessions.close(session=session, reason="COMMAND_OUTCOME_UNKNOWN", terminal_state="INTERRUPTED")
 
     @staticmethod
     def failure(*, request_id, session_id, generation, code, outcome, status="FAILED"):
@@ -261,6 +270,7 @@ class CommandService:
         )
         self.cache_result(key=key, value=value)
         self.pending.pop(key, None)
+        await self.sessions.nodes.leases.activity_finished(grant_id=key[0], key=key, success=value["status"] != "UNKNOWN")
         if not future.done():
             future.set_result(value)
 

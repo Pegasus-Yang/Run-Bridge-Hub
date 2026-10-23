@@ -52,6 +52,7 @@ class DashboardNode(NodeView):
 
     latency: LatencyView
     resources: ResourceCounts
+    lease: dict
 
 
 class Overview(BaseModel):
@@ -85,8 +86,8 @@ def initialize_access(*, settings: HubSettings) -> SecretStr:
         logger.info("节点总览已启用：/dashboard；只读口令文件：%s", path.resolve())
     if not 32 <= len(token) <= 256:
         raise ValueError("总览只读口令长度必须为 32～256 字符")
-    if token == settings.enrollment_token.get_secret_value():
-        raise ValueError("总览只读口令必须与登记凭据不同")
+    if token == settings.enrollment_token.get_secret_value() or (settings.hub_token and token == settings.hub_token.get_secret_value()):
+        raise ValueError("总览只读口令必须与登记及 Hub 申请凭据不同")
     return SecretStr(secret_value=token)
 
 
@@ -128,6 +129,7 @@ async def nodes(request: Request, response: Response, authorization: str | None 
         raise ServiceError(status=401, code="INVALID_WEB_TOKEN")
     service = request.app.state.service
     views = await service.overview()
+    leases = {item["node_id"]: item for item in await service.store.active_grants()}
     result = []
     totals = ResourceCounts()
     for view in views:
@@ -152,7 +154,9 @@ async def nodes(request: Request, response: Response, authorization: str | None 
             latency = LatencyView.model_validate(connection.control_rtt())
         else:
             latency = LatencyView(status="UNAVAILABLE")
-        result.append(DashboardNode(**view.model_dump(), latency=latency, resources=counts))
+        lease = leases.get(view.node_id)
+        result.append(DashboardNode(**view.model_dump(), latency=latency, resources=counts,
+                                    lease={"state": lease["state"] if lease else "UNCLAIMED"}))
     return Overview(
         snapshot_at=datetime.now(UTC), hub_version=__version__, nodes=result,
         total=len(result), online=sum(node.connection_status == "ONLINE" for node in result),

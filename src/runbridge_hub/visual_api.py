@@ -21,7 +21,7 @@ async def support(node_id: str, request: Request, authorization: str | None = He
 
     :returns: 画面版本和消息限制，不包含页面信息。
     """
-    await request.app.state.service.authorize_owner(node_id=node_id, token=bearer_token(header=authorization))
+    await request.app.state.service.authorize_device(node_id=node_id, token=bearer_token(header=authorization))
     return {"visual_protocol_version": 1, "header_max_bytes": HEADER_MAX_BYTES, "png_max_bytes": PNG_MAX_BYTES}
 
 
@@ -48,14 +48,14 @@ async def upload(websocket: WebSocket, node_id: str, session_id: str):
         if raw is None or len(raw.encode()) > STATE_MAX_BYTES:
             raise ValueError("缺少画面握手")
         VisualHello.model_validate_json(raw)
-        service.check_upload(channel=channel, websocket=websocket)
+        await service.check_upload(channel=channel, websocket=websocket)
         channel.hello = True
         service.publish(channel=channel)
         while True:
             event = await websocket.receive()
             if event["type"] == "websocket.disconnect":
                 break
-            service.check_upload(channel=channel, websocket=websocket)
+            await service.check_upload(channel=channel, websocket=websocket)
             if event.get("bytes") is not None:
                 data = event["bytes"]
                 metadata, _ = unpack_frame(data=data)
@@ -127,6 +127,7 @@ async def stream(websocket: WebSocket, session_id: str):
                 value, data = await queue.get()
                 if not service.active(session=channel.session):
                     return
+                await service.check_lease(session=channel.session)
                 async with asyncio.timeout(delay=2):
                     await websocket.send_json({"type": "state", "visual": value.model_dump(mode="json")})
                     if (data is not None and service.active(session=channel.session) and channel.packet is not None

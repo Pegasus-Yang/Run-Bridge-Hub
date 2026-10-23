@@ -2,15 +2,14 @@
 
 import asyncio
 import json
-import secrets
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from datetime import UTC, datetime
 
 from fastapi import WebSocket, WebSocketDisconnect
+from anyio import BrokenResourceError, ClosedResourceError
 
-from runbridge_hub.protocol import Acknowledgement, CapabilityReport, CapabilitySnapshot, GrantCreated, GrantRequest, Heartbeat, NodeView, Registration, RegistrationResult
+from runbridge_hub.protocol import Acknowledgement, CapabilityReport, CapabilitySnapshot, Heartbeat, NodeView, Registration, RegistrationResult
 from runbridge_hub.security import matches, token_hash
 from runbridge_hub.settings import HubSettings
 from runbridge_hub.store import Store
@@ -58,6 +57,7 @@ class NodeService:
         self.lock = asyncio.Lock()
         self.reservations: dict[tuple[str, str], str] = {}
         self.on_disconnect = None
+        self.leases = None
         self.enrollment_digest = token_hash(token=settings.enrollment_token.get_secret_value())
 
     async def register(self, *, request: Registration, token: str | None) -> RegistrationResult:
@@ -74,8 +74,8 @@ class NodeService:
             raise ServiceError(status=409, code="NODE_IDENTITY_CONFLICT")
         return RegistrationResult(node_id=request.node_id, created=created)
 
-    async def authorize_owner(self, *, node_id: str, token: str | None) -> dict:
-        """验证节点身份，用于控制连接及许可管理。
+    async def authorize_device(self, *, node_id: str, token: str | None) -> dict:
+        """验证节点身份，仅用于控制、执行连接及画面上传。
 
         :param node_id: 节点 ID。
         :param token: 节点身份凭据。
@@ -86,37 +86,9 @@ class NodeService:
             raise ServiceError(status=401, code="INVALID_NODE_TOKEN")
         return node
 
-    async def create_grant(self, *, node_id: str, token: str | None, request: GrantRequest) -> GrantCreated:
-        """节点所有者签发单独的调用许可。
-
-        :param node_id: 节点 ID。
-        :param token: 节点身份凭据。
-        :param request: 许可范围与期限。
-        :returns: 一次性交付的访问凭据。
-        """
-        await self.authorize_owner(node_id=node_id, token=token)
-        now = datetime.now(UTC)
-        expires = now + timedelta(seconds=request.expires_in_seconds) if request.expires_in_seconds is not None else None
-        access_token = secrets.token_urlsafe(48)
-        view = GrantCreated(grant_id=f"grant_{uuid4().hex}", node_id=node_id, resource_ids=request.resource_ids, created_at=now, expires_at=expires, revoked_at=None, access_token=access_token)
-        await self.store.create_grant(values={
-            "grant_id": view.grant_id, "node_id": node_id,
-            "token_hash": token_hash(token=access_token),
-            "resource_ids": json.dumps(request.resource_ids) if request.resource_ids is not None else None,
-            "created_at": now.isoformat(), "expires_at": expires.isoformat() if expires is not None else None,
-        })
-        return view
-
     async def resolve_access(self, *, token: str | None) -> dict:
-        """验证调用凭据的有效性，不把节点身份凭据当作访问许可。
-
-        :returns: 有效许可记录。
-        """
-        grant = await self.store.grant_by_token(token_digest=token_hash(token=token)) if token is not None else None
-        now = datetime.now(UTC)
-        if grant is None or grant["revoked_at"] is not None or (grant["expires_at"] is not None and datetime.fromisoformat(grant["expires_at"]) <= now):
-            raise ServiceError(status=401, code="INVALID_ACCESS_TOKEN")
-        return grant
+        """委托租约服务逐请求验证调用能力。"""
+        return await self.leases.resolve(token=token)
 
     async def authorize_access(self, *, node_id: str, token: str | None) -> dict:
         """验证调用凭据及节点范围，执行前需在短临界区中复核。
@@ -135,16 +107,11 @@ class NodeService:
         :param token: 对接凭据。
         :returns: 当前连接与能力信息。
         """
-        grant = await self.authorize_access(node_id=node_id, token=token)
         now = datetime.now(UTC)
         node = await self.store.node(node_id=node_id)
         async with self.lock:
+            await self.authorize_access(node_id=node_id, token=token)
             view = self._node_view(node=node, now=now)
-            if view.capabilities is not None and grant["resource_ids"] is not None:
-                allowed = set(grant["resource_ids"])
-                view.capabilities.resources = [item for item in view.capabilities.resources if item.resource_id in allowed]
-                backends = {item.backend for item in view.capabilities.resources}
-                view.capabilities.backends = [item for item in view.capabilities.backends if item.name in backends]
             return view
 
     async def overview(self) -> list[NodeView]:
@@ -205,7 +172,7 @@ class NodeService:
                 await self.on_disconnect(node_id=node_id, generation=previous.generation)
             try:
                 await previous.websocket.close(code=4001, reason="connection_replaced")
-            except (WebSocketDisconnect, RuntimeError):
+            except (WebSocketDisconnect, RuntimeError, BrokenResourceError, ClosedResourceError):
                 pass
         return current
 
@@ -267,5 +234,6 @@ class NodeService:
         for connection in list(self.connections.values()):
             try:
                 await connection.websocket.close(code=1012, reason="service_restart")
-            except (WebSocketDisconnect, RuntimeError):
+            except (WebSocketDisconnect, RuntimeError, BrokenResourceError, ClosedResourceError):
                 pass
+            await self.detach(connection=connection)

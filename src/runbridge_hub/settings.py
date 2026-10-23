@@ -1,16 +1,21 @@
 """Hub 的单进程运行配置。"""
 
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 
 class HubSettings(BaseModel):
-    """保存登记、只读总览与心跳配置，秘密在 repr 中遮蔽。"""
+    """保存设备登记、租约、只读总览与心跳配置，秘密在 repr 中遮蔽。"""
 
     model_config = ConfigDict(extra="forbid")
     database_path: Path = Path(".runbridge/hub.sqlite3")
     enrollment_token: SecretStr = Field(min_length=32, max_length=256)
+    hub_token: SecretStr | None = Field(default=None, min_length=32, max_length=256)
+    public_url: str | None = None
+    grant_max_lease_seconds: int = Field(default=86400, gt=0, strict=True)
+    grant_idle_timeout_seconds: int = Field(default=600, gt=0, strict=True)
     heartbeat_interval_seconds: float = Field(default=30, gt=0)
     heartbeat_timeout_seconds: float = Field(default=90, gt=0)
     web_enabled: bool = True
@@ -29,6 +34,13 @@ class HubSettings(BaseModel):
             raise ValueError("心跳超时必须长于发送间隔")
         if self.web_token is not None and self.web_token == self.enrollment_token:
             raise ValueError("总览只读口令必须与登记凭据不同")
+        if self.hub_token is not None and self.hub_token in {self.enrollment_token, self.web_token}:
+            raise ValueError("Hub 申请凭据必须与登记及总览凭据不同")
+        if self.public_url is not None:
+            parts = urlsplit(self.public_url)
+            if parts.scheme not in {"http", "https"} or not parts.hostname or parts.username or parts.password or parts.query or parts.fragment:
+                raise ValueError("public_url 必须是无凭据、查询及片段的 HTTP(S) 基址")
+            self.public_url = self.public_url.rstrip("/")
         if self.mcp_enabled:
             if not self.mcp_allowed_hosts or "*" in self.mcp_allowed_hosts or "*" in self.mcp_allowed_origins:
                 raise ValueError("MCP Host 和 Origin 必须显式允许，不能使用全局通配符")

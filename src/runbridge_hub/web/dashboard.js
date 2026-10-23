@@ -6,6 +6,7 @@ const stateNames = {ONLINE: "在线", PREPARING: "准备中", OFFLINE: "离线"}
 const backendNames = {playwright: "Playwright", "chrome-cdp": "Chrome CDP"};
 const readinessNames = {READY: "已就绪", NEEDS_PROBE: "待探测", NEEDS_AUTHORIZATION: "待授权", UNAVAILABLE: "不可用"};
 const coverageNames = {SUPPORTED: "已支持", REQUIRES_VERIFICATION: "待验证", NOT_IMPLEMENTED: "未实现"};
+const leaseNames = {UNCLAIMED: "未领取", HELD: "已领取", RELEASING: "回收中", QUARANTINED: "待核查"};
 let token = "";
 let snapshot = null;
 let receivedAt = 0;
@@ -106,6 +107,7 @@ function resourceCell(node) {
   text.append(document.createTextNode(label));
   const note = node.connection_status === "OFFLINE" ? "历史快照" : node.connection_status === "PREPARING" ? "等待能力上报" : occupancyLabel(node);
   if (note !== label) text.append(element("div", `resource-note${counts.busy ? " busy" : ""}`, note));
+  text.append(element("div", "resource-note", `Node 使用权：${leaseNames[node.lease?.state] || "未知"}`));
   group.append(text);
   return group;
 }

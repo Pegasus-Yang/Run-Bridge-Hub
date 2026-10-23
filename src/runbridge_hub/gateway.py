@@ -23,7 +23,7 @@ async def control(websocket: WebSocket, node_id: str):
     """
     service = websocket.app.state.service
     try:
-        await service.authorize_owner(node_id=node_id, token=bearer_token(header=websocket.headers.get("authorization")))
+        await service.authorize_device(node_id=node_id, token=bearer_token(header=websocket.headers.get("authorization")))
     except ServiceError:
         await websocket.close(code=1008)
         return

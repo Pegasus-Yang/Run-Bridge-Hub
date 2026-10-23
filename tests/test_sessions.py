@@ -1,6 +1,8 @@
 """会话独占、对象目录、权限与执行通道的合同测试。"""
 
 import sqlite3
+import asyncio
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 
@@ -211,7 +213,7 @@ def test_schema_one_migrates_without_losing_identity(tmp_path):
         register(client=client)
         assert register(client=client)["created"] is False
     with sqlite3.connect(database=configuration.database_path) as database:
-        assert database.execute("PRAGMA user_version").fetchone()[0] == 4
+        assert database.execute("PRAGMA user_version").fetchone()[0] == 5
         assert database.execute("SELECT COUNT(*) FROM nodes").fetchone()[0] == 1
         assert database.execute("SELECT COUNT(*) FROM commands").fetchone()[0] == 0
 
@@ -318,8 +320,10 @@ def test_historical_v1_session_keeps_original_version_and_metadata(tmp_path):
         response = client.get(
             url="/v2/sessions/session_old", headers=auth(token=access["access_token"])
         )
-        assert response.status_code == 200
-        view = response.json()
+        assert response.status_code == 401
+        async def original():
+            return await client.app.state.service.store.session(session_id="session_old")
+        view = client.portal.call(original)
         assert (
             view["protocol_version"] == 1
             and view["state"] == "INTERRUPTED"
@@ -333,3 +337,39 @@ def test_historical_v1_session_keeps_original_version_and_metadata(tmp_path):
         )
     assert stored["protocol_version"] == 1 and stored["client_version"] == "1.63.0"
     assert stored["native_protocol"] == "playwright" and stored["native_path"] is None
+
+
+def test_prepared_response_waits_until_ready_is_persisted(tmp_path, monkeypatch):
+    """首条指令紧随创建返回时不能读到 PREPARING。"""
+    with TestClient(app=create_app(settings=settings(tmp_path=tmp_path))) as client, ThreadPoolExecutor(max_workers=2) as pool:
+        register(client=client)
+        access = grant(client=client)
+        entered, resume = threading.Event(), asyncio.Event()
+        service = client.app.state.sessions
+        original = service.save
+
+        async def delayed(*, view, request_id=None):
+            if view.state == "READY":
+                entered.set()
+                await resume.wait()
+            await original(view=view, request_id=request_id)
+
+        monkeypatch.setattr(service, "save", delayed)
+        with client.websocket_connect(url="/v2/nodes/node_a/control", headers=auth(token=IDENTITY)) as control:
+            generation = publish(websocket=control)
+            creating = pool.submit(client.post, url="/v2/nodes/node_a/sessions", headers=auth(token=access["access_token"]), json={"resource_id": "chromium"})
+            sid = control.receive_json()["session_id"]
+            with client.websocket_connect(url=f"/v2/nodes/node_a/sessions/{sid}/execution", headers={**auth(token=IDENTITY), "x-runbridge-generation": str(generation)}):
+                control.send_json({"type": "session_prepared", "connection_generation": generation, "session_id": sid, "runtime_version": "1.63.0", "objects": objects()})
+                assert entered.wait(timeout=2)
+                try:
+                    assert not creating.done()
+                finally:
+                    client.portal.call(resume.set)
+                assert control.receive_json()["type"] == "session_ack"
+                assert creating.result(timeout=3).json()["state"] == "READY"
+                assert client.get(url=f"/v2/sessions/{sid}", headers=auth(token=access["access_token"])).json()["state"] == "READY"
+                closing = pool.submit(client.delete, url=f"/v2/sessions/{sid}", headers=auth(token=access["access_token"]))
+                assert control.receive_json()["type"] == "session_stop"
+                report(control=control, generation=generation, session_id=sid, type="session_closed", cleanup="COMPLETE")
+                assert closing.result(timeout=3).json()["cleanup"] == "COMPLETE"

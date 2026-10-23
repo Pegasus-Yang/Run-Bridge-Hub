@@ -15,6 +15,7 @@ import threading
 import time
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from uuid import uuid4
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -35,7 +36,8 @@ pytestmark = [
         reason="真实浏览器验收需显式设置 RUNBRIDGE_RUN_BROWSER_TESTS=1",
     ),
 ]
-HUB = Path(sys.executable).parents[2]
+SOURCE = Path(__file__).resolve().parents[1]
+HUB = Path(os.environ.get("RUNBRIDGE_HUB_ENV", Path(sys.executable).parents[2]))
 NODE = Path(os.environ.get("RUNBRIDGE_NODE_ENV", HUB.parent / "node"))
 BROWSERS = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
 
@@ -68,6 +70,11 @@ class Runtime:
         self.enrollment_file = directory / "enrollment.token"
         self.enrollment_file.write_text(self.enrollment)
         self.enrollment_file.chmod(0o600)
+        self.hub_token = secrets.token_urlsafe(48)
+        self.credentials.append(self.hub_token)
+        self.hub_token_file = directory / "hub.token"
+        self.hub_token_file.write_text(self.hub_token)
+        self.hub_token_file.chmod(0o600)
 
     def executable(self, *, project: Path, name: str) -> str:
         return str(
@@ -102,6 +109,10 @@ class Runtime:
                 str(self.directory / "hub.sqlite3"),
                 "--enrollment-token-file",
                 str(self.enrollment_file),
+                "--hub-token-file",
+                str(self.hub_token_file),
+                "--public-url",
+                self.url,
                 "--heartbeat-interval",
                 "0.1",
                 "--heartbeat-timeout",
@@ -139,7 +150,6 @@ class Runtime:
         )
         self.identity = json.loads(config.read_text())
         self.credentials.append(self.identity["node_token"])
-        self.access = self.grant()
         settings_file = self.directory / "node.yaml"
         settings_file.write_text(
             json.dumps(
@@ -161,6 +171,7 @@ class Runtime:
             args=["run", "--settings", str(settings_file)],
         )
         self.wait_free()
+        self.access = self.grant()
 
     def command(self, *, args: list[str]):
         completed = subprocess.run(
@@ -173,17 +184,29 @@ class Runtime:
         if completed.returncode != 0:
             raise AssertionError("隔离 Node CLI 操作失败，未回显可能包含秘密的输入")
 
-    def grant(
-        self, *, expires: float | None = None, resources: list[str] | None = None
-    ) -> dict:
+    def grant(self, *, expires: int | None = None) -> dict:
+        if hasattr(self, "access"):
+            path = f"{self.url}/v1/grants/{self.access['grant_id']}"
+            headers = {"Authorization": f"Bearer {self.access['access_token']}"}
+            self.http.delete(url=path, headers=headers)
+            deadline = time.monotonic() + 15
+            while time.monotonic() < deadline:
+                state = self.http.get(url=path, headers=headers).json()["state"]
+                if state == "RELEASED":
+                    break
+                assert state != "QUARANTINED", "隔离设备清理未知，禁止继续领取"
+                time.sleep(0.03)
+            else:
+                raise AssertionError("隔离设备租约未完成释放")
         response = self.http.post(
             url=f"{self.url}/v1/nodes/{self.identity['node_id']}/grants",
-            headers={"Authorization": f"Bearer {self.identity['node_token']}"},
-            json={"expires_in_seconds": expires, "resource_ids": resources},
+            headers={"Authorization": f"Bearer {self.hub_token}"},
+            json={"request_id": f"claim_{uuid4().hex}", **({"lease_seconds": expires} if expires is not None else {})},
         )
         assert response.status_code == 201
         access = response.json()
         self.credentials.append(access["access_token"])
+        self.access = access
         return access
 
     def query(self, *, session_id: str | None = None, access: dict | None = None):
@@ -201,9 +224,9 @@ class Runtime:
     def wait_free(self):
         deadline = time.monotonic() + 15
         while time.monotonic() < deadline:
-            response = self.query()
+            response = self.http.get(url=f"{self.url}/v1/pool/nodes", headers={"Authorization": f"Bearer {self.hub_token}"})
             if response.status_code == 200:
-                view = response.json()
+                view = next(item for item in response.json()["nodes"] if item["node_id"] == self.identity["node_id"])
                 resources = (view.get("capabilities") or {}).get("resources", [])
                 if (
                     view["connection_status"] == "ONLINE"
@@ -284,6 +307,13 @@ def runtime(tmp_path_factory):
         yield context
     finally:
         context.close()
+
+
+@pytest.fixture(autouse=True)
+def ensure_current_lease(runtime):
+    value = runtime.http.get(url=f"{runtime.url}/v1/grants/{runtime.access['grant_id']}", headers={"Authorization": f"Bearer {runtime.access['access_token']}"}).json()
+    if value["state"] != "HELD":
+        runtime.grant()
 
 
 @pytest.fixture(scope="module")
@@ -562,6 +592,9 @@ async def test_mcp_request_replay_upload_boundary_and_cleanup(runtime, website, 
         pids = runtime.browser_pids()
         assert os.name != "posix" or pids
         try:
+            lease_headers = {"Authorization": f"Bearer {runtime.access['access_token']}"}
+            lease_url = f"{runtime.url}/v1/grants/{runtime.access['grant_id']}"
+            activity = runtime.http.get(url=lease_url, headers=lease_headers).json()["last_activity_at"]
             repeated = await invoke(
                 client=client, name="browser_start", arguments=start
             )
@@ -569,6 +602,7 @@ async def test_mcp_request_replay_upload_boundary_and_cleanup(runtime, website, 
                 repeated["session"]["session_id"] == ids["session_id"]
                 and repeated["page_id"] == ids["page_id"]
             )
+            assert runtime.http.get(url=lease_url, headers=lease_headers).json()["last_activity_at"] == activity
             status = await invoke(
                 client=client, name="browser_sessions", arguments=start
             )
@@ -716,102 +750,43 @@ async def test_mcp_request_replay_upload_boundary_and_cleanup(runtime, website, 
 
 
 @pytest.mark.asyncio
-async def test_mcp_grant_isolation_revocation_and_inflight_interrupt(runtime, website):
-    access = runtime.grant()
-    other = runtime.grant()
-    restricted = runtime.grant(resources=["other_resource"])
-    async with (
-        agent(runtime=runtime, access=access) as first,
-        agent(runtime=runtime, access=other) as second,
-        agent(runtime=runtime, access=restricted) as limited,
-    ):
-        denied = await limited.call_tool(
-            name="browser_start",
-            arguments={
-                "node_id": runtime.identity["node_id"],
-                "resource_id": "chromium",
-            },
-        )
-        assert (
-            denied.is_error
-            and denied.structured_content["code"] == "RESOURCE_OUTSIDE_GRANT"
-        )
-        started = await invoke(
-            client=first,
-            name="browser_start",
-            arguments={"node_id": runtime.identity["node_id"]},
-        )
-        ids = {
-            "session_id": started["session"]["session_id"],
-            "page_id": started["page_id"],
-        }
+async def test_mcp_grant_isolation_release_and_inflight_interrupt(runtime, website):
+    access = runtime.access
+    denied = runtime.http.post(
+        url=f"{runtime.url}/v1/nodes/{runtime.identity['node_id']}/grants",
+        headers={"Authorization": f"Bearer {runtime.hub_token}"},
+        json={"request_id": "second_holder"},
+    )
+    assert denied.status_code == 409 and denied.json()["code"] == "NODE_LEASE_BUSY"
+    async with agent(runtime=runtime, access=access) as first:
+        started = await invoke(client=first, name="browser_start", arguments={"node_id": runtime.identity["node_id"]})
+        ids = {"session_id": started["session"]["session_id"], "page_id": started["page_id"]}
         pids = runtime.browser_pids()
-        for name in ["browser_status", "browser_stop", "browser_snapshot"]:
-            rejected = await second.call_tool(
-                name=name,
-                arguments=ids
-                if name == "browser_snapshot"
-                else {"session_id": ids["session_id"]},
-            )
-            assert (
-                rejected.is_error
-                and rejected.structured_content["code"] == "SESSION_OUTSIDE_GRANT"
-            )
-        assert (
-            await invoke(
-                client=second,
-                name="browser_sessions",
-                arguments={"node_id": runtime.identity["node_id"]},
-            )
-        )["sessions"] == []
-        await invoke(
-            client=first,
-            name="browser_navigate",
-            arguments={**ids, "url": website["url"]},
-        )
-        waiting = asyncio.create_task(
-            first.call_tool(
-                name="browser_wait_for",
-                arguments={
-                    **ids,
-                    "target": {"by": "text", "value": "不会出现"},
-                    "timeout_ms": 30000,
-                },
-            )
-        )
+        await invoke(client=first, name="browser_navigate", arguments={**ids, "url": website["url"]})
+        waiting = asyncio.create_task(first.call_tool(name="browser_wait_for", arguments={**ids, "target": {"by": "text", "value": "不会出现"}, "timeout_ms": 30000}))
         await asyncio.sleep(0.2)
         before = time.monotonic()
-        response = await asyncio.to_thread(
-            runtime.http.delete,
-            url=f"{runtime.url}/v1/nodes/{runtime.identity['node_id']}/grants/{access['grant_id']}",
-            headers={"Authorization": f"Bearer {runtime.identity['node_token']}"},
-        )
-        assert response.status_code == 204
+        response = await asyncio.to_thread(runtime.http.delete,
+            url=f"{runtime.url}/v1/grants/{access['grant_id']}",
+            headers={"Authorization": f"Bearer {access['access_token']}"})
+        assert response.status_code in {200, 202}
         interrupted = await asyncio.wait_for(waiting, timeout=5)
-        assert (
-            interrupted.is_error
-            and interrupted.structured_content["code"] == "OPERATION_INTERRUPTED"
-        )
+        assert interrupted.is_error and interrupted.structured_content["code"] == "OPERATION_INTERRUPTED"
         assert time.monotonic() - before < 5
-        assert (
-            runtime.http.post(
-                url=f"{runtime.url}/mcp",
-                headers={"Authorization": f"Bearer {access['access_token']}"},
-            ).status_code
-            == 401
-        )
+        assert runtime.http.post(url=f"{runtime.url}/mcp", headers={"Authorization": f"Bearer {access['access_token']}"}).status_code == 401
     runtime.wait_free()
     runtime.check_exited(pids=pids)
-    evidence(
-        name="mcp_permissions_and_revoke",
-        facts={
-            "other_grant_denied": True,
-            "resource_scope_checked": True,
-            "pending_operation_interrupted": True,
-            "revoked_http_status": 401,
-            "resource": "FREE",
-        },
-    )
+    next_access = runtime.grant()
+    async with agent(runtime=runtime, access=next_access) as second:
+        rejected = await second.call_tool(name="browser_status", arguments={"session_id": ids["session_id"]})
+        assert rejected.is_error and rejected.structured_content["code"] == "SESSION_OUTSIDE_GRANT"
+        started = await invoke(client=second, name="browser_start", arguments={"node_id": runtime.identity["node_id"]})
+        assert started["session"]["session_id"] != ids["session_id"]
+        stopped = await invoke(client=second, name="browser_stop", arguments={"session_id": started["session"]["session_id"]})
+        assert stopped["session"]["cleanup"] == "COMPLETE"
+    assert runtime.http.delete(url=f"{runtime.url}/v1/grants/{access['grant_id']}", headers={"Authorization": f"Bearer {access['access_token']}"}).json()["state"] == "RELEASED"
+    assert runtime.query(access=next_access).status_code == 200
+    evidence(name="mcp_exclusive_lease_handoff", facts={"concurrent_claim_denied": True, "pending_operation_interrupted": True, "cleanup": "COMPLETE", "next_holder_new_session": True, "old_token_cannot_affect_next_holder": True})
 
 
 @pytest.mark.asyncio
@@ -923,7 +898,7 @@ async def test_mcp_stop_during_wait_and_grant_expiry_limit(runtime):
 @pytest.mark.asyncio
 async def test_documented_mcp_client_example(runtime, website):
     access_file = runtime.directory / "example-access.json"
-    access_file.write_text(json.dumps({**runtime.access, "hub_url": runtime.url}))
+    access_file.write_text(json.dumps(runtime.access["access_config"]))
     access_file.chmod(0o600)
     screenshot = runtime.directory / "example.png"
     completed = await asyncio.to_thread(
@@ -967,6 +942,35 @@ async def test_documented_mcp_client_example(runtime, website):
             "resource": "FREE",
         },
     )
+
+
+def test_documented_node_lease_example(runtime):
+    """文档脚本真实领取并等待交还，严格保存五字段私有文件。"""
+    path = f"{runtime.url}/v1/grants/{runtime.access['grant_id']}"
+    headers = {"Authorization": f"Bearer {runtime.access['access_token']}"}
+    runtime.http.delete(url=path, headers=headers)
+    deadline = time.monotonic() + 15
+    while runtime.http.get(url=path, headers=headers).json()["state"] != "RELEASED":
+        assert time.monotonic() < deadline
+        time.sleep(0.03)
+    hub_auth = runtime.directory / "documented-hub-auth.json"
+    hub_auth.write_text(json.dumps({"hub_url": runtime.url, "hub_token": runtime.hub_token}))
+    hub_auth.chmod(0o600)
+    access_file = runtime.directory / "documented-lease-access.json"
+    script = SOURCE / "doc/reference/examples/node_lease.py"
+
+    def run(*args):
+        completed = subprocess.run([runtime.executable(project=HUB, name="python"), str(script), *args], cwd=runtime.directory, env=runtime.environment, capture_output=True, text=True, timeout=40)
+        assert completed.returncode == 0, "文档租约示例失败，输入输出可能含凭据，未回显"
+        return completed.stdout
+
+    run("claim", "--hub-auth", str(hub_auth), "--node-id", runtime.identity["node_id"], "--output", str(access_file))
+    access = json.loads(access_file.read_text())
+    runtime.credentials.append(access["access_token"])
+    assert set(access) == {"hub_url", "node_id", "grant_id", "access_token", "expires_at"}
+    assert os.name != "posix" or access_file.stat().st_mode & 0o777 == 0o600
+    assert json.loads(run("status", "--access-file", str(access_file)))["state"] == "HELD"
+    assert json.loads(run("release", "--access-file", str(access_file)))["state"] == "RELEASED"
 
 
 @pytest.fixture

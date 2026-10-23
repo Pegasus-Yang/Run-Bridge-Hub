@@ -316,7 +316,7 @@ def test_queries_discover_stream_and_scope_grant(tmp_path):
                 url="/v1/nodes/node_a", headers=auth(token=other["access_token"])
             ).json()
             assert own["visual"]["streams"][0]["stream_path"] == path
-            assert foreign["visual"]["supported"] and foreign["visual"]["streams"] == []
+            assert foreign["code"] == "NODE_OUTSIDE_GRANT"
             for token, status in (("wrong", 401), (other["access_token"], 403)):
                 with pytest.raises(WebSocketDenialResponse) as denied:
                     with client.websocket_connect(url=path, headers=auth(token=token)):
@@ -593,10 +593,10 @@ def test_revocation_closes_subscriptions_and_clears_cache(tmp_path):
                 ) as subscriber:
                     assert read_frame(subscriber=subscriber) == data
                     response = client.delete(
-                        url=f"/v1/nodes/node_a/grants/{access['grant_id']}",
-                        headers=auth(token=IDENTITY),
+                        url=f"/v1/grants/{access['grant_id']}",
+                        headers=auth(token=access["access_token"]),
                     )
-                    assert response.status_code == 204
+                    assert response.status_code == 202
                     with pytest.raises(WebSocketDisconnect):
                         subscriber.receive_bytes()
                     with pytest.raises(WebSocketDisconnect):
@@ -809,11 +809,10 @@ def test_replaced_control_generation_retires_visual_channel(tmp_path):
                     with pytest.raises(WebSocketDisconnect):
                         upload.receive_bytes()
                     assert sid not in client.app.state.visual.channels
-                    value = client.get(
+                    denied = client.get(
                         url=f"/v2/sessions/{sid}",
                         headers=auth(token=access["access_token"]),
-                    ).json()
-                    assert (
-                        value["cleanup"] == "UNKNOWN"
-                        and value["visual"]["stream_path"] is None
                     )
+                    assert denied.status_code == 401
+                    value = client.get(url=f"/v1/grants/{access['grant_id']}", headers=auth(token=access["access_token"])).json()
+                    assert value["cleanup"] == "UNKNOWN" and value["state"] == "QUARANTINED"

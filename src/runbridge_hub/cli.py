@@ -20,8 +20,13 @@ def main() -> None:
         prog="runbridge-hub", description="RunBridge 节点管理与连接网关"
     )
     commands = parser.add_subparsers(dest="command", required=True)
-    generate = commands.add_parser("generate-token", help="生成独立随机凭据文件，可用于登记或总览只读访问")
+    generate = commands.add_parser("generate-token", help="生成独立凭据文件，分别用于设备登记、Hub申请或总览只读访问")
     generate.add_argument("--output", type=Path, required=True)
+    confirm = commands.add_parser("confirm-cleanup", help="停止 Hub 与相关 Node 后，记录原租约的人工清理核查证据")
+    confirm.add_argument("--db-path", type=Path, required=True)
+    confirm.add_argument("--grant-id", required=True)
+    confirm.add_argument("--evidence-file", type=Path, required=True)
+    confirm.add_argument("--confirm-node-stopped", action="store_true", required=True)
     serve = commands.add_parser(
         "serve", help="启动单 Worker Hub", argument_default=argparse.SUPPRESS
     )
@@ -37,6 +42,10 @@ def main() -> None:
         help="SQLite 路径，默认 .runbridge/hub.sqlite3",
     )
     serve.add_argument("--enrollment-token-file", type=Path)
+    serve.add_argument("--hub-token-file", type=Path, help="独立的 Hub 资源池申请凭据文件")
+    serve.add_argument("--public-url", help="访问文件使用的外部 Hub 基址，支持代理路径前缀")
+    serve.add_argument("--grant-max-lease-seconds", type=int, help="Node 租期上限，默认 86400 秒")
+    serve.add_argument("--grant-idle-timeout-seconds", type=int, help="新 Node 租约空闲回收时间，默认 600 秒")
     serve.add_argument(
         "--disable-web", dest="web_enabled", action="store_false",
         help="关闭默认启用的节点总览页面、静态资源和只读状态接口",
@@ -77,6 +86,11 @@ def main() -> None:
     )
     args = parser.parse_args()
     try:
+        if args.command == "confirm-cleanup":
+            from runbridge_hub.maintenance import confirm_cleanup
+            confirm_cleanup(database_path=args.db_path, grant_id=args.grant_id, evidence_file=args.evidence_file)
+            print(f"原租约清理核查已记录：{args.grant_id}；会话原始状态保持不变")
+            return
         if args.command == "generate-token":
             generate_token_file(path=args.output)
             print(f"凭据文件已保存：{args.output}")
@@ -109,7 +123,7 @@ def main() -> None:
         parser.error(
             "MCP 依赖未安装：请安装 runbridge-hub[mcp] 或执行 uv sync --extra mcp"
         )
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, RuntimeError) as error:
         print(f"配置失败：{error}", file=sys.stderr)
         raise SystemExit(2) from None
     websocket_protocol = "websockets"

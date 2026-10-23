@@ -1,6 +1,8 @@
 # MCP 浏览器接入
 
-适用于 Hub 0.8.1 / Node 0.7.0，在 Agent 或调用方机器操作。Hub 已启用 `/mcp`，Node 提供 READY/FREE 的 managed 资源，所有者已交付真实 `access.json` 和资源 ID。borrowed 资源通过项目 HTTP 操作。
+适用于 Hub 0.9.0 / Node 0.8.0，在 Agent 或调用方机器操作。Hub 已启用 `/mcp`，Node 提供 READY/FREE 的 managed 资源，调用方已从 Hub 领取 Node 并保存真实 `access.json`，资源 ID 来自能力目录。borrowed 资源通过项目 HTTP 操作。
+
+使用 DSH 测试插件时，按 [DSH-Test-Plugin 对接指南](DSH-Test-Plugin对接指南.md)获取访问文件参数、完成插件读取与连接检测，再运行自动化用例。
 
 ## 连接信息
 
@@ -40,12 +42,18 @@ uv pip install --python .venv/bin/python 'mcp==2.3.0' -i http://mirrors.aliyun.c
 
 capture 的 captures 字典每项指定 mode、selector 等，allowed_origins 必须包含读取当时的页面 origin，如 `https://example.com`，不带路径或尾部 `/`。不接受任意脚本。file_upload 每项含 name/mime_type/data（base64），最多 32 项、解码合计 4 MiB，空数组清空。screenshot 返回 MCP 图像内容，PNG 最大 2 MiB。handle_dialog 在点击前设置一次策略，默认拒绝弹窗，策略只消费一次。
 
-示例任务顺序：start → navigate → snapshot/inspect_dom → fill → click → wait_for/read/capture → screenshot → stop。检查表单提交后的真实文本或业务记录。完成后必须检查 `browser_stop` 返回 cleanup=COMPLETE。
+示例任务顺序：start → navigate → snapshot/inspect_dom → fill → click → wait_for/read/capture → screenshot → stop。检查表单提交后的真实文本或业务记录。完成后必须检查 `browser_stop` 返回 cleanup=COMPLETE；整个任务结束还需使用原令牌 DELETE /v1/grants/{grant_id} 并确认 RELEASED。
 
 ## 错误与找回
 
 动作返回 request_id；`isError=true` 时查看 code 和 execution_outcome。OPERATION_TIMEOUT、OPERATION_INTERRUPTED 可能伴随 OUTCOME_UNKNOWN，不能盲目再次提交。REQUEST_IN_PROGRESS 时使用 `tool_request_status` 查询原动作。该工具也能查询 HTTP 提交的指令；截图查询仍返回图像内容。
 
-MCP 客户端断开不会自动结束会话，它持续到显式 stop、租期到期、许可撤销或失联清理。同一许可可重新连接，通过 browser_sessions/status 找回。另一份许可不能接管已有会话。Hub/Node 重启不会恢复旧对象或自动重做动作。
+MCP 客户端断开不会自动结束会话，它持续到显式 stop、租期到期、Node 租约回收或失联清理。同一许可可重新连接，通过 browser_sessions/status 找回。另一份许可不能接管已有会话。Hub/Node 重启不会恢复旧对象或自动重做动作。
 
-HTTP 401 检查访问文件期限和撤销；421 检查 Hub MCP 允许的 Host；403 检查 Origin 与资源范围。Hub 未启用 MCP 时返回 404。以上 Hub 参数由其部署者调整。
+HTTP 401 检查 Node 租期、空闲回收和释放状态；421 检查 Hub MCP 允许的 Host；403 检查 Origin 与节点/会话归属。Hub 未启用 MCP 时返回 404。以上 Hub 参数由其部署者调整。
+
+## 领取前准备和批次边界
+
+只有 hub_token 时，通过 GET /v1/pool/nodes/{node_id}/tools 取得与 tools/list 同源的工具声明，完成计划与审核后再申请；hub_token 本身不能调用 /mcp。DSH 自动模式负责这一流程，已有访问文件模式使用已领取的有限租约。详见[DSH 指南](DSH-Test-Plugin对接指南.md)。
+
+node_inspect 是可选诊断，不是额外授权步骤；状态查询不刷新空闲。browser_start 的 lease_seconds 是浏览器会话租期，不是 Node 租期。逐用例 stop 后可以在同一 Node 租约中开下一条用例；整批完成、取消或失败时单独释放 Node，再封存结果。

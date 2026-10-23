@@ -31,12 +31,6 @@ class BrowserService:
         self, *, node_id, token, resource_id=None, lease_seconds=300, request_id=None
     ):
         grant = await self.sessions.nodes.authorize_access(node_id=node_id, token=token)
-        if (
-            resource_id is not None
-            and grant["resource_ids"] is not None
-            and resource_id not in grant["resource_ids"]
-        ):
-            raise BrowserError(code="RESOURCE_OUTSIDE_GRANT")
         view = await self.sessions.nodes.query(node_id=node_id, token=token)
         resources = [
             item
@@ -61,12 +55,13 @@ class BrowserService:
                 ),
             )
             # 启动完成即通过一条只读项目指令激活，保留 MCP 启动后可观察画面的行为。
-            if session.state in {"READY", "ACTIVE"}:
+            if session.state == "READY":
                 await self.call(
                     session_id=session.session_id,
                     token=token,
                     method="runbridge.session_state",
                     target=Target(type="session", id=session.session_id),
+                    request_id=f"activate_{session.session_id}",
                 )
                 session = await self.sessions.query(
                     session_id=session.session_id, token=token

@@ -20,6 +20,10 @@ class ServeSettings(BaseModel):
     port: int = Field(default=8787, ge=0, le=65535)
     database_path: Path = Path(".runbridge/hub.sqlite3")
     enrollment_token_file: Path | None = None
+    hub_token_file: Path | None = None
+    public_url: str | None = None
+    grant_max_lease_seconds: int = Field(default=86400, gt=0, strict=True)
+    grant_idle_timeout_seconds: int = Field(default=600, gt=0, strict=True)
     web_enabled: bool = True
     web_token_file: Path | None = None
     heartbeat_interval_seconds: float = 30
@@ -45,6 +49,7 @@ class ServeSettings(BaseModel):
         for key, default in (
             ("database_path", ".runbridge/hub.sqlite3"),
             ("enrollment_token_file", None),
+            ("hub_token_file", None),
             ("web_token_file", None),
         ):
             value = values.get(key, default)
@@ -67,6 +72,13 @@ class ServeSettings(BaseModel):
                 "请提供 enrollment_token_file、--enrollment-token-file 或 RUNBRIDGE_ENROLLMENT_TOKEN"
             )
         web_token = None
+        hub_token = (
+            self.hub_token_file.read_text(encoding="utf-8").strip()
+            if self.hub_token_file is not None
+            else os.environ.get("RUNBRIDGE_HUB_TOKEN")
+        )
+        if hub_token == "":
+            raise ValueError("Hub 申请凭据文件或 RUNBRIDGE_HUB_TOKEN 不能为空")
         if self.web_enabled:
             web_token = (
                 self.web_token_file.read_text(encoding="utf-8").strip()
@@ -78,6 +90,10 @@ class ServeSettings(BaseModel):
         values = HubSettings(
             database_path=self.database_path,
             enrollment_token=token,
+            hub_token=hub_token,
+            public_url=self.public_url,
+            grant_max_lease_seconds=self.grant_max_lease_seconds,
+            grant_idle_timeout_seconds=self.grant_idle_timeout_seconds,
             web_enabled=self.web_enabled,
             web_token=web_token,
             heartbeat_interval_seconds=self.heartbeat_interval_seconds,

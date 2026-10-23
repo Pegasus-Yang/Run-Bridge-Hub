@@ -2,6 +2,8 @@
 
 import asyncio
 import json
+import os
+import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -15,18 +17,48 @@ class Store:
     """使用单连接线程与短事务串行维护元数据。"""
 
     def __init__(self, *, path: Path):
-        self.path = path
+        self.path = path.resolve()
         self.connection = None
         self.lock = asyncio.Lock()
+        self.process_lock = None
 
     async def open(self) -> None:
-        """迁移至版本 4，保留旧会话并增加无载荷的指令记录。"""
+        """同一数据库只允许一个 Hub 或离线维护进程。"""
+        self.acquire_process_lock()
+        try:
+            await self.open_database()
+        except BaseException:
+            await self.close()
+            raise
+
+    def acquire_process_lock(self) -> None:
+        """数据库旁的进程锁也供离线清理核查命令使用。"""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        handle = self.path.with_name(f"{self.path.name}.lock").open("a+b")
+        try:
+            if os.name == "nt":
+                import msvcrt
+                if handle.tell() == 0:
+                    handle.write(b"\0")
+                    handle.flush()
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            handle.close()
+            raise RuntimeError("数据库已被 Hub 或维护进程使用；请先停止该 Hub") from None
+        self.process_lock = handle
+
+    async def open_database(self) -> None:
+        """迁移至版本 5；旧许可先排空，备份后整体失效。"""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.connection = await aiosqlite.connect(database=str(self.path))
         self.connection.row_factory = aiosqlite.Row
         async with self.connection.execute("PRAGMA user_version") as cursor:
             version = (await cursor.fetchone())[0]
-        if version not in {0, 1, 2, 3, 4}:
+        if version not in {0, 1, 2, 3, 4, 5}:
             await self.connection.close()
             raise RuntimeError("数据库版本不受支持")
         await self.connection.executescript("""
@@ -62,14 +94,60 @@ class Store:
                 created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
                 PRIMARY KEY (grant_id, session_id, request_id)
             );
-            PRAGMA user_version = 4;
+            CREATE TABLE IF NOT EXISTS grant_resolutions (
+                grant_id TEXT PRIMARY KEY REFERENCES grants(grant_id),
+                recorded_at TEXT NOT NULL, evidence TEXT NOT NULL
+            );
         """)
+        if version < 5:
+            await self.migrate_leases(version=version)
         await self.connection.commit()
+
+    async def migrate_leases(self, *, version: int) -> None:
+        """保留旧历史，不选择多份旧许可中的任意一份继续执行。"""
+        async with self.connection.execute(
+            "SELECT COUNT(*) FROM sessions WHERE ("
+            "json_extract(record,'$.state') IN ('PREPARING','READY','ACTIVE','CLOSING') "
+            "OR COALESCE(json_extract(record,'$.cleanup'),'UNKNOWN') != 'COMPLETE') "
+            "AND NOT EXISTS (SELECT 1 FROM grant_resolutions r WHERE r.grant_id=sessions.grant_id)"
+        ) as cursor:
+            unsafe = (await cursor.fetchone())[0]
+        if unsafe:
+            await self.connection.close()
+            self.connection = None
+            raise RuntimeError("升级租约前必须排空并确认旧会话清理；请按升级文档处理，不能将 UNKNOWN 当作已清理")
+        if version:
+            backup_path = self.path.with_name(f"{self.path.name}.pre-lease-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S%f')}.bak")
+            with sqlite3.connect(database=backup_path) as backup:
+                await self.connection.backup(target=backup)
+        await self.connection.executescript("""
+            BEGIN IMMEDIATE;
+            ALTER TABLE grants ADD COLUMN state TEXT NOT NULL DEFAULT 'RELEASED';
+            ALTER TABLE grants ADD COLUMN request_id TEXT;
+            ALTER TABLE grants ADD COLUMN request_digest TEXT;
+            ALTER TABLE grants ADD COLUMN last_activity_at TEXT;
+            ALTER TABLE grants ADD COLUMN idle_timeout_seconds INTEGER;
+            ALTER TABLE grants ADD COLUMN released_at TEXT;
+            ALTER TABLE grants ADD COLUMN close_reason TEXT;
+            UPDATE grants SET revoked_at=COALESCE(revoked_at, strftime('%Y-%m-%dT%H:%M:%f+00:00','now')),
+                released_at=COALESCE(revoked_at, strftime('%Y-%m-%dT%H:%M:%f+00:00','now')),
+                last_activity_at=created_at, expires_at=COALESCE(expires_at, created_at),
+                idle_timeout_seconds=600, close_reason='LEGACY_MIGRATION';
+            CREATE UNIQUE INDEX one_node_lease ON grants(node_id)
+                WHERE state IN ('HELD','RELEASING','QUARANTINED');
+            CREATE UNIQUE INDEX claim_request ON grants(node_id, request_id) WHERE request_id IS NOT NULL;
+            PRAGMA user_version = 5;
+            COMMIT;
+        """)
 
     async def close(self) -> None:
         """关闭元数据连接。"""
         if self.connection is not None:
             await self.connection.close()
+            self.connection = None
+        if self.process_lock is not None:
+            self.process_lock.close()
+            self.process_lock = None
 
     async def node(self, *, node_id: str) -> dict | None:
         """查询一个登记记录。
@@ -155,8 +233,14 @@ class Store:
         :param values: 不含凭据原值的许可记录。
         """
         async with self.lock:
-            await self.connection.execute("INSERT INTO grants (grant_id, node_id, token_hash, resource_ids, created_at, expires_at) VALUES (:grant_id, :node_id, :token_hash, :resource_ids, :created_at, :expires_at)", values)
-            await self.connection.commit()
+            try:
+                await self.connection.execute(
+                    "INSERT INTO grants (grant_id,node_id,token_hash,created_at,expires_at,state,request_id,request_digest,last_activity_at,idle_timeout_seconds) "
+                    "VALUES (:grant_id,:node_id,:token_hash,:created_at,:expires_at,'HELD',:request_id,:request_digest,:last_activity_at,:idle_timeout_seconds)", values)
+                await self.connection.commit()
+            except BaseException:
+                await self.connection.rollback()
+                raise
 
     async def grant_by_token(self, *, token_digest: str) -> dict | None:
         """通过摘要查找许可。
@@ -169,28 +253,64 @@ class Store:
                 row = await cursor.fetchone()
                 return self._grant(row=row) if row is not None else None
 
-    async def grants(self, *, node_id: str) -> list[dict]:
-        """列出节点许可，不含凭据原值。
-
-        :param node_id: 节点 ID。
-        :returns: 许可记录。
-        """
+    async def grant(self, *, grant_id: str) -> dict | None:
+        """读取原租约，不能仅凭 ID 完成持有者认证。"""
         async with self.lock:
-            async with self.connection.execute("SELECT * FROM grants WHERE node_id = ? ORDER BY created_at", (node_id,)) as cursor:
+            async with self.connection.execute("SELECT * FROM grants WHERE grant_id=?", (grant_id,)) as cursor:
+                row = await cursor.fetchone()
+                return self._grant(row=row) if row is not None else None
+
+    async def claim_request(self, *, node_id: str, request_id: str) -> dict | None:
+        """已结束请求也保留，迟到重试不能重新占用。"""
+        async with self.lock:
+            async with self.connection.execute("SELECT * FROM grants WHERE node_id=? AND request_id=?", (node_id, request_id)) as cursor:
+                row = await cursor.fetchone()
+                return self._grant(row=row) if row is not None else None
+
+    async def active_grants(self) -> list[dict]:
+        """读取仍占用 Node 的租约。"""
+        async with self.lock:
+            async with self.connection.execute("SELECT * FROM grants WHERE state IN ('HELD','RELEASING','QUARANTINED')") as cursor:
                 return [self._grant(row=row) for row in await cursor.fetchall()]
 
-    async def revoke(self, *, node_id: str, grant_id: str, revoked_at: str) -> bool:
-        """撤销指定节点的许可。
-
-        :param node_id: 节点 ID。
-        :param grant_id: 许可 ID。
-        :param revoked_at: 撤销时间。
-        :returns: 许可是否存在。
-        """
+    async def update_grant(self, *, grant_id: str, **values) -> None:
+        """仅更新租约生命周期允许变更的列。"""
+        allowed = {"state", "expires_at", "last_activity_at", "released_at", "close_reason", "revoked_at"}
+        if not values or not values.keys() <= allowed:
+            raise ValueError("不允许的租约字段")
         async with self.lock:
-            cursor = await self.connection.execute("UPDATE grants SET revoked_at = COALESCE(revoked_at, ?) WHERE node_id = ? AND grant_id = ?", (revoked_at, node_id, grant_id))
+            assignments = ",".join(f"{field}=?" for field in values)
+            await self.connection.execute(f"UPDATE grants SET {assignments} WHERE grant_id=?", (*values.values(), grant_id))
             await self.connection.commit()
-            return cursor.rowcount > 0
+
+    async def grant_sessions(self, *, grant_id: str) -> list[dict]:
+        """即使重启后内存为空，也返回原租约的全部清理证据。"""
+        async with self.lock:
+            async with self.connection.execute("SELECT record FROM sessions WHERE grant_id=?", (grant_id,)) as cursor:
+                return [json.loads(row[0]) for row in await cursor.fetchall()]
+
+    async def pending_opens(self, *, grant_id: str) -> bool:
+        """尚未关联会话的启动受理也必须结算后才能交接。"""
+        async with self.lock:
+            async with self.connection.execute("SELECT 1 FROM mcp_requests WHERE grant_id=? AND state='PENDING' LIMIT 1", (grant_id,)) as cursor:
+                return await cursor.fetchone() is not None
+
+    async def node_unclean(self, *, node_id: str) -> bool:
+        """独立检查历史遗留记录，不能仅看当前资源快照。"""
+        async with self.lock:
+            async with self.connection.execute(
+                "SELECT 1 FROM sessions WHERE node_id=? AND (json_extract(record,'$.state') IN ('PREPARING','READY','ACTIVE','CLOSING') "
+                "OR COALESCE(json_extract(record,'$.cleanup'),'UNKNOWN') != 'COMPLETE') "
+                "AND NOT EXISTS (SELECT 1 FROM grant_resolutions r WHERE r.grant_id=sessions.grant_id) LIMIT 1", (node_id,)
+            ) as cursor:
+                return await cursor.fetchone() is not None
+
+    async def grant_resolution(self, *, grant_id: str) -> dict | None:
+        """返回维护核查证据；原会话 UNKNOWN 始终保留。"""
+        async with self.lock:
+            async with self.connection.execute("SELECT recorded_at,evidence FROM grant_resolutions WHERE grant_id=?", (grant_id,)) as cursor:
+                row = await cursor.fetchone()
+                return {"recorded_at": row[0], "evidence": json.loads(row[1])} if row else None
 
     async def save_session(self, *, session_id: str, node_id: str, grant_id: str, record: str, mcp_request_id: str | None = None) -> None:
         """保存会话生命周期元数据，协议帧不落库。

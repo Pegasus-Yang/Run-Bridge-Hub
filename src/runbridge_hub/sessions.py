@@ -158,11 +158,6 @@ class SessionService:
     async def allocate(self, *, node_id, token, request, request_id):
         async with self.nodes.lock:
             grant = await self.nodes.authorize_access(node_id=node_id, token=token)
-            if (
-                grant["resource_ids"] is not None
-                and request.resource_id not in grant["resource_ids"]
-            ):
-                raise ServiceError(status=403, code="RESOURCE_OUTSIDE_GRANT")
             live = self.nodes.connections.get(node_id)
             now = datetime.now(UTC)
             if (
@@ -234,6 +229,7 @@ class SessionService:
             await self.save(view=view, request_id=request_id)
             self.sessions[view.session_id] = session
             self.nodes.reservations[(node_id, request.resource_id)] = view.session_id
+            await self.nodes.leases.activity_started(grant_id=view.grant_id, key=view.session_id, deadline=min(view.expires_at, now + timedelta(seconds=35)))
         try:
             await live.send(
                 message=SessionOpen(
@@ -277,6 +273,7 @@ class SessionService:
             ):
                 raise ServiceError(status=409, code="STALE_SESSION")
             view = session.view
+            was_cleaned = view.cleanup == "COMPLETE"
             if isinstance(message, SessionPrepared):
                 if view.state != "PREPARING":
                     return
@@ -292,8 +289,10 @@ class SessionService:
                 else:
                     view.objects = message.objects or view.objects
                     view.state = "READY"
-                session.prepared.set()
+                await self.nodes.leases.activity_finished(grant_id=view.grant_id, key=view.session_id, success=view.state == "READY")
             else:
+                await self.nodes.leases.activity_finished(grant_id=view.grant_id, key=view.session_id, success=False)
+                await self.nodes.leases.activity_finished(grant_id=view.grant_id, key=("cleanup", view.session_id), success=message.cleanup == "COMPLETE")
                 view.state = session.terminal_state
                 view.cleanup = message.cleanup
                 view.close_reason = view.close_reason or "TOOL_CLOSED"
@@ -306,11 +305,15 @@ class SessionService:
                     )
                 if message.cleanup == "COMPLETE":
                     self.nodes.reservations.pop((view.node_id, view.resource_id), None)
-                session.prepared.set()
-                session.finished.set()
-                session.cleaned.set()
             view.updated_at = datetime.now(UTC)
             await self.save(view=view)
+            # 调用方醒来即可查询 READY；不能先通知，再等待租约和会话落库。
+            session.prepared.set()
+            if isinstance(message, SessionClosed):
+                session.finished.set()
+                session.cleaned.set()
+            if isinstance(message, SessionClosed) and view.state == "CLOSED" and message.cleanup == "COMPLETE" and not was_cleaned:
+                await self.nodes.leases.cleaned(grant_id=view.grant_id)
         if isinstance(message, SessionClosed):
             if self.on_close:
                 await self.on_close(
@@ -321,7 +324,7 @@ class SessionService:
     async def attach_execution(
         self, *, node_id, session_id, generation, token, websocket
     ):
-        await self.nodes.authorize_owner(node_id=node_id, token=token)
+        await self.nodes.authorize_device(node_id=node_id, token=token)
         async with self.nodes.lock:
             session = self.sessions.get(session_id)
             if (
@@ -332,6 +335,9 @@ class SessionService:
                 or session.view.state != "PREPARING"
                 or session.execution is not None
             ):
+                raise ServiceError(status=409, code="INVALID_SESSION_EXECUTION")
+            grant = await self.nodes.store.grant(grant_id=session.view.grant_id)
+            if grant["state"] != "HELD" or await self.nodes.leases.invalid_reason(record=grant):
                 raise ServiceError(status=409, code="INVALID_SESSION_EXECUTION")
             await websocket.accept()
             session.execution = websocket
@@ -347,6 +353,12 @@ class SessionService:
             session.view.state = "CLOSING"
             session.view.close_reason = reason
             session.view.updated_at = datetime.now(UTC)
+            await self.nodes.leases.activity_finished(grant_id=session.view.grant_id, key=session.view.session_id, success=False)
+            if reason == "SESSION_RELEASED":
+                grant = await self.nodes.store.grant(grant_id=session.view.grant_id)
+                if grant["state"] == "HELD":
+                    await self.nodes.leases.activity_started(grant_id=session.view.grant_id, key=("cleanup", session.view.session_id),
+                                                             deadline=min(session.view.expires_at, datetime.now(UTC) + timedelta(seconds=10)), refresh=False)
             await self.save(view=session.view)
             session.prepared.set()
             session.finished.set()
@@ -377,24 +389,6 @@ class SessionService:
                 pass
             return session.view.model_copy(deep=True)
         return view
-
-    async def revoke(self, *, node_id, grant_id, token):
-        await self.nodes.authorize_owner(node_id=node_id, token=token)
-        async with self.nodes.lock:
-            if not await self.nodes.store.revoke(
-                node_id=node_id,
-                grant_id=grant_id,
-                revoked_at=datetime.now(UTC).isoformat(),
-            ):
-                raise ServiceError(status=404, code="GRANT_NOT_FOUND")
-            affected = [
-                item
-                for item in self.sessions.values()
-                if item.view.node_id == node_id and item.view.grant_id == grant_id
-            ]
-        await asyncio.gather(
-            *(self.close(session=item, reason="GRANT_REVOKED") for item in affected)
-        )
 
     async def interrupt_node(self, *, node_id, generation):
         for session in list(self.sessions.values()):

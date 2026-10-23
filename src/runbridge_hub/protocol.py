@@ -76,10 +76,16 @@ class RegistrationResult(Model):
 
 
 class GrantRequest(Model):
-    """节点所有者创建对接许可。"""
+    """持有 Hub 凭据的请求领取整个 Node。"""
 
-    resource_ids: list[Identifier] | None = None
-    expires_in_seconds: float | None = Field(default=None, gt=0, le=31_536_000)
+    request_id: Identifier
+    lease_seconds: int | None = Field(default=None, gt=0, strict=True)
+
+
+class GrantRenew(Model):
+    """续租只改变确定期限，不刷新空闲计时。"""
+
+    lease_seconds: int | None = Field(default=None, gt=0, strict=True)
 
 
 class GrantView(Model):
@@ -87,16 +93,25 @@ class GrantView(Model):
 
     grant_id: Identifier
     node_id: Identifier
-    resource_ids: list[Identifier] | None
+    state: Literal["HELD", "RELEASING", "QUARANTINED", "RELEASED"]
     created_at: AwareDatetime
-    expires_at: AwareDatetime | None
-    revoked_at: AwareDatetime | None
+    expires_at: AwareDatetime
+    last_activity_at: AwareDatetime
+    idle_timeout_seconds: int
+    idle_deadline_at: AwareDatetime | None
+    inflight: bool
+    released_at: AwareDatetime | None
+    close_reason: str | None
+    cleanup: Literal["COMPLETE", "PENDING", "UNKNOWN"]
+    resolution: dict | None = None
 
 
 class GrantCreated(GrantView):
     """新凭据只在创建时交付一次。"""
 
     access_token: str
+    token_available: Literal[True] = True
+    access_config: dict
 
 
 class NodeView(Model):

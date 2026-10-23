@@ -141,13 +141,14 @@ class VisualService:
 
     async def attach(self, *, node_id: str, session_id: str, generation: int, token: str | None, websocket: WebSocket) -> VisualChannel:
         """上传认证独立于执行连接，只允许当前活动会话。"""
-        await self.sessions.nodes.authorize_owner(node_id=node_id, token=token)
+        await self.sessions.nodes.authorize_device(node_id=node_id, token=token)
         async with self.sessions.nodes.lock:
             session = self.sessions.sessions.get(session_id)
             if session is None or session.view.node_id != node_id or session.view.connection_generation != generation:
                 raise ServiceError(status=409, code="STALE_SESSION")
             if not self.active(session=session):
                 raise ServiceError(status=410, code="SESSION_NOT_ACTIVE")
+            await self.check_lease(session=session)
             if not self.supported(view=session.view):
                 raise ServiceError(status=409, code="VISUAL_UNSUPPORTED")
             channel = self.channel(session=session)
@@ -161,10 +162,20 @@ class VisualService:
             channel.view.reason_code = "SCREENSHOT_NOT_READY"
             return channel
 
-    def check_upload(self, *, channel: VisualChannel, websocket: WebSocket) -> None:
+    async def check_lease(self, *, session: Session) -> None:
+        """长连接逐帧复核原租约，画面不会刷新空闲计时。"""
+        record = await self.sessions.nodes.store.grant(grant_id=session.view.grant_id)
+        reason = await self.sessions.nodes.leases.invalid_reason(record=record)
+        if record["state"] != "HELD" or reason:
+            if reason and record["state"] == "HELD":
+                self.sessions.nodes.leases.schedule(grant_id=record["grant_id"], reason=reason)
+            raise ServiceError(status=410, code="INVALID_ACCESS_TOKEN")
+
+    async def check_upload(self, *, channel: VisualChannel, websocket: WebSocket) -> None:
         """每次接收都复核归属，旧上传者不能覆盖新连接。"""
         if channel.uploader is not websocket or not self.active(session=channel.session):
             raise ServiceError(status=409, code="STALE_SESSION")
+        await self.check_lease(session=channel.session)
 
     def targets(self, *, channel: VisualChannel, values: list[VisualTarget]) -> None:
         """目标变更及时移除已关闭页面的旧图。"""

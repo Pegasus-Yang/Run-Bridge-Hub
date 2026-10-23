@@ -13,6 +13,7 @@ from runbridge_hub import __version__
 from runbridge_hub.api import router as management_router
 from runbridge_hub.api import execution_router
 from runbridge_hub.commands import CommandService, router as commands_router
+from runbridge_hub.leases import LeaseService
 from runbridge_hub.body_limit import RequestSizeLimit
 from runbridge_hub.gateway import router as gateway_router
 from runbridge_hub.service import NodeService, ServiceError
@@ -45,6 +46,9 @@ def create_app(*, settings: HubSettings) -> FastAPI:
         app.state.service = service
         sessions = SessionService(nodes=service)
         app.state.sessions = sessions
+        leases = LeaseService(nodes=service, sessions=sessions)
+        service.leases = leases
+        app.state.leases = leases
         visual = VisualService(sessions=sessions)
         app.state.visual = visual
         sessions.on_close = visual.close
@@ -57,6 +61,7 @@ def create_app(*, settings: HubSettings) -> FastAPI:
             await asyncio.gather(visual.close(session_id=session_id, reason=reason), commands.closed(session_id=session_id, reason=reason))
         sessions.on_close = close_session
         await visual.start()
+        await leases.start()
         browsers = None
         try:
             async with AsyncExitStack() as stack:
@@ -75,6 +80,7 @@ def create_app(*, settings: HubSettings) -> FastAPI:
             await sessions.shutdown()
             await commands.shutdown()
             await visual.shutdown()
+            await leases.shutdown()
             await service.close()
             await store.close()
 
@@ -134,5 +140,7 @@ def create_app(*, settings: HubSettings) -> FastAPI:
         mcp, mcp_app = build_mcp(hub=app, settings=settings)
         # SDK 自己拥有 /mcp 路由；挂在末尾，避免重复前缀或覆盖现有 API。
         app.mount(path="/", app=mcp_app)
+
+    app.state.mcp = mcp
 
     return app

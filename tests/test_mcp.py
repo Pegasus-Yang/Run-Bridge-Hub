@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from runbridge_hub.app import create_app
 from runbridge_hub.browser import BrowserService
-from test_r1 import ENROLLMENT, IDENTITY, auth, grant, register, settings
+from test_r1 import ENROLLMENT, HUB, IDENTITY, auth, grant, register, settings
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ def call(*, client, token: str, name: str, arguments: dict, **headers) -> dict:
     return response.json()["result"]
 
 
-@pytest.mark.parametrize("token", [None, "invalid", IDENTITY, ENROLLMENT])
+@pytest.mark.parametrize("token", [None, "invalid", IDENTITY, ENROLLMENT, HUB])
 def test_mcp_rejects_non_access_credentials(mcp_client, token):
     response = rpc(client=mcp_client, token=token)
     assert response.status_code == 401
@@ -139,14 +139,14 @@ def test_revoke_and_expiry_are_checked_on_every_http_request(mcp_client):
     assert rpc(client=mcp_client, token=access["access_token"]).status_code == 200
     assert (
         mcp_client.delete(
-            url=f"/v1/nodes/node_a/grants/{access['grant_id']}",
-            headers=auth(token=IDENTITY),
+            url=f"/v1/grants/{access['grant_id']}",
+            headers=auth(token=access["access_token"]),
         ).status_code
-        == 204
+        == 200
     )
     assert rpc(client=mcp_client, token=access["access_token"]).status_code == 401
-    expired = grant(client=mcp_client, body={"expires_in_seconds": 0.001})
-    time.sleep(0.01)
+    expired = grant(client=mcp_client, body={"lease_seconds": 1})
+    time.sleep(1.05)
     assert rpc(client=mcp_client, token=expired["access_token"]).status_code == 401
 
 
@@ -197,6 +197,16 @@ def test_invalid_parameters_and_page_urls_do_not_execute(mcp_client):
 def test_mcp_defaults_to_disabled(tmp_path):
     with TestClient(app=create_app(settings=settings(tmp_path=tmp_path))) as client:
         assert client.post(url="/mcp").status_code == 404
+
+
+def test_pool_catalog_uses_mcp_definitions_without_claiming(mcp_client):
+    response = mcp_client.get(url="/v1/pool/nodes/node_a/tools", headers=auth(token=HUB))
+    assert response.status_code == 200
+    assert response.json()["node"]["lease"]["state"] == "UNCLAIMED"
+    before = response.json()["tools"]
+    access = grant(client=mcp_client)
+    actual = rpc(client=mcp_client, token=access["access_token"]).json()["result"]["tools"]
+    assert before == actual
 
 
 async def test_failed_start_returns_original_id_for_recovery():
