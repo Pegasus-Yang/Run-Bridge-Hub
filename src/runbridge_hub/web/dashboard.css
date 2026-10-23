@@ -1,12 +1,17 @@
 :root {
   --ink: #101927;
   --muted: #65717e;
-  --line: #e7eced;
+  --line: #e3edf4;
+  --accent: #027bb5;
+  --accent-strong: #0369a1;
+  --accent-soft: #edf8fe;
+  --accent-hover: #dff2fd;
+  --accent-row: #f5fbff;
   --green: #087747;
   --green-soft: #eef8f2;
   --amber: #ad6b00;
   --amber-fill: #f2a41a;
-  --surface: #f7f9fa;
+  --surface: #f7fafd;
   --red: #b42318;
   --radius: 10px;
   font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
@@ -42,7 +47,7 @@ button,input {
 }
 
 button:focus-visible,input:focus-visible {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--accent);
 }
 
 [hidden] {
@@ -99,7 +104,7 @@ button, input {
 }
 
 .brand-role {
-  color: var(--green);
+  color: var(--accent);
   font-weight: 550;
   letter-spacing: -.7px;
 }
@@ -170,8 +175,8 @@ button, input {
 }
 
 .refresh {
-  color: var(--green);
-  background: var(--green-soft);
+  color: var(--accent-strong);
+  background: var(--accent-soft);
   border-color: transparent;
   border-radius: 24px;
   min-height: 38px;
@@ -179,7 +184,7 @@ button, input {
 }
 
 .refresh:hover {
-  background: #e0f2e7;
+  background: var(--accent-hover);
 }
 
 .access {
@@ -192,9 +197,9 @@ button, input {
 }
 
 .read-only {
-  color: var(--green);
+  color: var(--accent-strong);
   font-size: 12px;
-  background: #e8f6ed;
+  background: var(--accent-soft);
   padding: 5px 10px;
   border-radius: 5px;
 }
@@ -311,8 +316,8 @@ h1 {
   letter-spacing: -1px;
 }
 
-.green {
-  color: var(--green);
+.accent {
+  color: var(--accent);
 }
 
 .amber {
@@ -353,13 +358,13 @@ h1 {
 }
 
 .filter:hover {
-  background: #edf3ef;
+  background: var(--accent-soft);
 }
 
 .filter.active {
   color: #fff;
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .search {
@@ -376,7 +381,7 @@ h1 {
 }
 
 .search:focus-within {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -464,11 +469,11 @@ tbody tr {
 }
 
 tbody tr:hover td {
-  background: #f4faf6;
+  background: var(--accent-row);
 }
 
 tbody tr.selected td {
-  background: #eef8f2;
+  background: var(--accent-soft);
 }
 
 .node-name {
@@ -685,7 +690,7 @@ body.stale .hub-status {
   font-size: 11px;
   letter-spacing: 1.8px;
   font-weight: 650;
-  color: var(--green);
+  color: var(--accent-strong);
   margin-bottom: 13px;
 }
 
@@ -723,15 +728,15 @@ body.stale .hub-status {
 }
 
 .primary {
-  background: var(--green);
+  background: var(--accent);
   color: #fff;
-  border-color: var(--green);
+  border-color: var(--accent);
   width: 100%;
   min-height: 47px;
 }
 
 .primary:hover {
-  background: #075e3a;
+  background: var(--accent-strong);
 }
 
 .primary .icon {
