@@ -87,7 +87,7 @@ class ServeSettings(BaseModel):
             )
             if web_token == "":
                 raise ValueError("总览只读口令文件或 RUNBRIDGE_WEB_TOKEN 不能为空")
-        values = HubSettings(
+        return HubSettings(
             database_path=self.database_path,
             enrollment_token=token,
             hub_token=hub_token,
@@ -99,7 +99,6 @@ class ServeSettings(BaseModel):
             heartbeat_interval_seconds=self.heartbeat_interval_seconds,
             heartbeat_timeout_seconds=self.heartbeat_timeout_seconds,
             mcp_enabled=self.mcp_enabled,
+            mcp_allowed_hosts=self.mcp_allowed_hosts,
             mcp_allowed_origins=self.mcp_allowed_origins,
-        ).model_dump()
-        values["mcp_allowed_hosts"].extend(self.mcp_allowed_hosts)
-        return HubSettings.model_validate(values)
+        )

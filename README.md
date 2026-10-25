@@ -19,11 +19,11 @@ RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，�
 调用方 HTTP / Agent MCP → Hub 鉴权与路由 ⇄ Node → Python Playwright → 浏览器
 ```
 
-当前版本 **0.9.1**，兼容 Node **0.8.1**。提供项目自己的 Playwright 风格调用规则：33 项方法、27 个 MCP 工具。支持范围见[方法表](doc/reference/Playwright方法表.md)；官方 Playwright SDK 的直连接口已退役。
+当前版本 **0.9.2**，兼容 Node **0.8.1**。提供项目自己的 Playwright 风格调用规则：33 项方法、27 个 MCP 工具。支持范围见[方法表](doc/reference/Playwright方法表.md)；官方 Playwright SDK 的直连接口已退役。
 
 ## 快速部署
 
-在 **Hub 机器**上操作。前提是已有 Python **3.14.x**、全局 [uv](https://docs.astral.sh/uv/getting-started/installation/)，并从发布负责人取得 `runbridge_hub-0.9.1-py3-none-any.whl`，保存到 `~/Downloads/`。基础工具准备参考官网；源码构建见开发文档。
+在 **Hub 机器**上操作。前提是已有 Python **3.14.x**、全局 [uv](https://docs.astral.sh/uv/getting-started/installation/)，并从发布负责人取得 `runbridge_hub-0.9.2-py3-none-any.whl`，保存到 `~/Downloads/`。基础工具准备参考官网；源码构建见开发文档。
 
 创建独立部署目录、安装并分别生成登记和资源池申请凭据：
 
@@ -31,7 +31,7 @@ RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，�
 mkdir -p ~/runbridge-hub
 cd ~/runbridge-hub
 uv venv --python 3.14 .venv
-uv pip install --python .venv/bin/python ~/Downloads/runbridge_hub-0.9.1-py3-none-any.whl -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+uv pip install --python .venv/bin/python ~/Downloads/runbridge_hub-0.9.2-py3-none-any.whl -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 .venv/bin/runbridge-hub generate-token --output .runbridge/enrollment.token
 .venv/bin/runbridge-hub generate-token --output .runbridge/hub.token
 ```
@@ -59,7 +59,7 @@ curl --fail http://127.0.0.1:8787/health
 
 应返回 `{"status":"ok","protocol_version":2}`。将 **Hub 的实际可达基址**（如 `http://hub.example:8787`）和刚生成的 **enrollment.token 文件**私密交给 Node 维护者。独立的 **hub.token** 与 `public_url` 交给调用方，用于查询资源池及领取 Node；申请凭据不交给 Node 进程，也不能直接执行。Node 安装步骤在 Node 项目中；浏览器验证等 Node 接入后进行。
 
-需要 Agent/MCP 时，按[快速开始的 MCP 小节](doc/user-guide/快速开始.md#启用-mcp按需)安装 `[mcp]` 并启用。MCP 客户端在 Hub 本机时，无需配置 `mcp_allowed_hosts`。
+需要 Agent/MCP 时，按[快速开始的 MCP 小节](doc/user-guide/快速开始.md#启用-mcp按需)安装 `[mcp]` 并启用。`mcp_allowed_hosts` 默认不限制 Host，仅在需要限制入口地址时配置。
 
 启动成功后，点击日志中已附带只读口令的 `Dashboard URL` 即可查看节点总览，刷新页面也可直接进入。日志同时输出口令，支持手动输入；默认文件为数据库同目录的 `.runbridge/web.token`，与登记令牌分开使用。配置、开关及数据含义见[节点总览](doc/user-guide/节点总览.md)。
 

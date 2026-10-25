@@ -45,8 +45,7 @@ mcp_allowed_origins: [https://console.example]
     assert settings.database_path == directory / ".runbridge/hub.sqlite3"
     assert settings.heartbeat_interval_seconds == 10
     assert settings.heartbeat_timeout_seconds == 40
-    assert "localhost:*" in settings.mcp_allowed_hosts
-    assert "hub.example:9000" in settings.mcp_allowed_hosts
+    assert settings.mcp_allowed_hosts == ["hub.example:9000"]
     assert settings.mcp_allowed_origins == ["https://console.example"]
     assert settings.mcp_enabled is True
     assert run.call_args.kwargs["host"] == "0.0.0.0"
@@ -79,11 +78,23 @@ def test_cli_retains_defaults_and_repeated_hosts(monkeypatch):
     main()
     settings = create.call_args.kwargs["settings"]
     assert settings.database_path == Path(".runbridge/hub.sqlite3")
-    assert settings.mcp_allowed_hosts[-2:] == ["hub.test:8787", "hub.local:*"]
+    assert settings.mcp_allowed_hosts == ["hub.test:8787", "hub.local:*"]
     assert settings.heartbeat_interval_seconds == 30
     assert settings.heartbeat_timeout_seconds == 90
     assert run.call_args.kwargs["host"] == "127.0.0.1"
     assert run.call_args.kwargs["port"] == 8787
+
+
+@pytest.mark.parametrize(
+    "text", ["mcp_enabled: true\n", "mcp_enabled: true\nmcp_allowed_hosts: []\n"]
+)
+def test_missing_or_empty_mcp_hosts_does_not_add_implicit_hosts(
+    tmp_path, monkeypatch, text
+):
+    monkeypatch.setenv("RUNBRIDGE_ENROLLMENT_TOKEN", "x" * 64)
+    path = tmp_path / "hub.yaml"
+    path.write_text(text, encoding="utf-8")
+    assert ServeSettings.load(path=path).hub_settings().mcp_allowed_hosts == []
 
 
 @pytest.mark.parametrize(

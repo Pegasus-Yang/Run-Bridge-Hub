@@ -1,4 +1,4 @@
-# Hub 0.9.1；UTF-8 YAML，使用空格缩进。
+# Hub 0.9.2；UTF-8 YAML，使用空格缩进。
 # 启动：.venv/bin/runbridge-hub serve --settings hub.yaml
 # --settings 不能与其他启动参数混用。
 # 相对本地路径以本文件目录为准；不展开 ~、$HOME 或 shell 表达式。
@@ -25,9 +25,9 @@ grant_idle_timeout_seconds: 600  # 新租约的空闲策略快照，正整数；
 # heartbeat_interval_seconds: 30  # 默认 30 秒，必须大于 0。
 # heartbeat_timeout_seconds: 90  # 默认 90 秒，必须大于心跳间隔。
 # mcp_enabled: false  # 默认 false；Agent/MCP 需要 true 以及本环境的 [mcp] extra。
-# mcp_allowed_hosts:  # 默认 []，只追加；localhost、127.0.0.1、[::1] 含各端口已内置允许。
+# mcp_allowed_hosts:  # 默认 []，不限制 Host；填入非空列表后只允许所列地址。
 #   - "hub.example:8787"  # 远程 MCP URL 的主机名或 IP 加端口，不含协议和路径。
 #   - "hub.example:*"  # 可允许同一名称的任意端口；不能使用单独 * 或网段通配符。
-# 本机 MCP 使用 localhost/127.0.0.1 时无需上面的额外 Host。
+# 本机和远程 MCP 默认均无需配置；限制时不自动加入 localhost 等本机地址。
 # mcp_allowed_origins:  # 默认 []；不带 Origin 的普通 MCP 请求无需配置。
 #   - "https://console.example"  # 若请求携带 Origin，应填写实际协议、主机与端口，不含路径。

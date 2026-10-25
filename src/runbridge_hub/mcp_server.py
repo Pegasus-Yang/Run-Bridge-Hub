@@ -11,7 +11,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp_types import CallToolResult, ImageContent, TextContent, ToolAnnotations
 from pydantic import Field, SecretStr
 from starlette.datastructures import Headers
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 
 from runbridge_hub import __version__
 from runbridge_hub.browser import BrowserError
@@ -28,6 +28,22 @@ Lease = Annotated[float, Field(ge=1, le=3600)]
 HTTP_REQUEST_LIMIT = 8 * 1024 * 1024
 
 
+def header_allowed(*, value: str | None, allowed: list[str]) -> bool:
+    """按精确值或任意端口匹配 MCP 的 Host/Origin。
+
+    :param value: 请求头原值。
+    :param allowed: 允许值列表。
+    :returns: 是否匹配。
+    """
+    return value is not None and (
+        value in allowed
+        or any(
+            pattern.endswith(":*") and value.startswith(pattern[:-1])
+            for pattern in allowed
+        )
+    )
+
+
 def result(
     *, values: dict, error: bool = False, image: bytes | None = None
 ) -> CallToolResult:
@@ -40,15 +56,17 @@ def result(
 
 
 class BearerMiddleware:
-    def __init__(self, *, app, hub):
+    def __init__(self, *, app, hub, settings: HubSettings):
         self.app = app
         self.hub = hub
+        self.settings = settings
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
-        token = bearer_token(header=Headers(scope=scope).get("authorization"))
+        headers = Headers(scope=scope)
+        token = bearer_token(header=headers.get("authorization"))
         if token is not None and len(token) > 256:
             token = None
         try:
@@ -59,6 +77,21 @@ class BearerMiddleware:
                 content={"code": error.code},
                 headers={"WWW-Authenticate": "Bearer", "Cache-Control": "no-store"},
             )(scope, receive, send)
+            return
+        if self.settings.mcp_allowed_hosts and not header_allowed(
+            value=headers.get("host"), allowed=self.settings.mcp_allowed_hosts
+        ):
+            await Response(content="Invalid Host header", status_code=421)(
+                scope, receive, send
+            )
+            return
+        origin = headers.get("origin")
+        if origin and not header_allowed(
+            value=origin, allowed=self.settings.mcp_allowed_origins
+        ):
+            await Response(content="Invalid Origin header", status_code=403)(
+                scope, receive, send
+            )
             return
         context = REQUEST_TOKEN.set(SecretStr(token))
         try:
@@ -327,8 +360,8 @@ def build_mcp(*, hub, settings: HubSettings):
         stateless_http=True,
         max_request_body_size=HTTP_REQUEST_LIMIT,
         transport_security=TransportSecuritySettings(
-            allowed_hosts=settings.mcp_allowed_hosts,
-            allowed_origins=settings.mcp_allowed_origins,
+            # SDK 的统一开关不能独立放开 Host，头部规则由外层分别校验。
+            enable_dns_rebinding_protection=False,
         ),
     )
-    return server, BearerMiddleware(app=app, hub=hub)
+    return server, BearerMiddleware(app=app, hub=hub, settings=settings)

@@ -169,6 +169,80 @@ def test_mcp_host_and_origin_are_not_implicitly_trusted(mcp_client):
     assert mcp_client.get(url="/health").status_code == 200
 
 
+@pytest.mark.parametrize("hosts", [None, []])
+@pytest.mark.parametrize(
+    "host", ["192.168.20.1:8787", "hub.example:9000", "[2001:db8::1]:8787"]
+)
+def test_omitted_or_empty_host_list_allows_remote_mcp(tmp_path, hosts, host):
+    updates = {"mcp_enabled": True}
+    if hosts is not None:
+        updates["mcp_allowed_hosts"] = hosts
+    configuration = settings(tmp_path=tmp_path).model_copy(update=updates)
+    with TestClient(app=create_app(settings=configuration)) as client:
+        register(client=client)
+        access = grant(client=client)
+        response = rpc(client=client, token=access["access_token"], Host=host)
+        assert response.status_code == 200, response.text
+        assert len(response.json()["result"]["tools"]) == 27
+        assert rpc(client=client, token=HUB, Host=host).status_code == 401
+
+
+@pytest.mark.parametrize(
+    "host,expected",
+    [
+        ("hub.example:8787", 200),
+        ("node-gateway.example:9000", 200),
+        ("localhost:8787", 421),
+        ("192.168.20.1:8787", 421),
+        ("hub.example:9000", 421),
+    ],
+)
+def test_explicit_mcp_hosts_only_allow_configured_values(tmp_path, host, expected):
+    configuration = settings(tmp_path=tmp_path).model_copy(
+        update={
+            "mcp_enabled": True,
+            "mcp_allowed_hosts": ["hub.example:8787", "node-gateway.example:*"],
+        }
+    )
+    with TestClient(app=create_app(settings=configuration)) as client:
+        register(client=client)
+        access = grant(client=client)
+        response = rpc(client=client, token=access["access_token"], Host=host)
+        assert response.status_code == expected, response.text
+
+
+@pytest.mark.parametrize(
+    "origins,origin,expected",
+    [
+        ([], "https://untrusted.example", 403),
+        (["https://console.example:*"], "https://console.example:9000", 200),
+        (["https://console.example:*"], "https://untrusted.example:9000", 403),
+    ],
+)
+def test_unrestricted_hosts_preserve_origin_and_content_type_checks(
+    tmp_path, origins, origin, expected
+):
+    configuration = settings(tmp_path=tmp_path).model_copy(
+        update={
+            "mcp_enabled": True,
+            "mcp_allowed_hosts": [],
+            "mcp_allowed_origins": origins,
+        }
+    )
+    with TestClient(app=create_app(settings=configuration)) as client:
+        register(client=client)
+        access = grant(client=client)
+        response = rpc(
+            client=client, token=access["access_token"],
+            Host="192.168.20.1:8787", Origin=origin,
+        )
+        assert response.status_code == expected, response.text
+        assert rpc(
+            client=client, token=access["access_token"],
+            Host="192.168.20.1:8787", **{"Content-Type": "text/plain"},
+        ).status_code == 400
+
+
 def test_invalid_parameters_and_page_urls_do_not_execute(mcp_client):
     access = grant(client=mcp_client)
     for arguments in [

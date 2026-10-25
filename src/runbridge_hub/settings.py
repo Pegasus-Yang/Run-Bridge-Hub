@@ -21,7 +21,7 @@ class HubSettings(BaseModel):
     web_enabled: bool = True
     web_token: SecretStr | None = Field(default=None, min_length=32, max_length=256)
     mcp_enabled: bool = False
-    mcp_allowed_hosts: list[str] = Field(default_factory=lambda: ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*", "[::1]", "[::1]:*"])
+    mcp_allowed_hosts: list[str] = Field(default_factory=list)
     mcp_allowed_origins: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
@@ -42,6 +42,6 @@ class HubSettings(BaseModel):
                 raise ValueError("public_url 必须是无凭据、查询及片段的 HTTP(S) 基址")
             self.public_url = self.public_url.rstrip("/")
         if self.mcp_enabled:
-            if not self.mcp_allowed_hosts or "*" in self.mcp_allowed_hosts or "*" in self.mcp_allowed_origins:
-                raise ValueError("MCP Host 和 Origin 必须显式允许，不能使用全局通配符")
+            if "*" in self.mcp_allowed_hosts or "*" in self.mcp_allowed_origins:
+                raise ValueError("MCP Host 和 Origin 列表不支持全局通配符；Host 留空表示不限制")
         return self

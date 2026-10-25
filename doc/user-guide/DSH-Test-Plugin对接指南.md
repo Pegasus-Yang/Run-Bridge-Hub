@@ -1,6 +1,6 @@
 # DSH-Test-Plugin 对接指南
 
-适用于 Hub 0.9.1、Node 0.8.1 和 DSH-Test-Plugin 0.15.0。插件通过 Hub 的 MCP 在 Node 上执行浏览器测试，无需在 DSH 宿主安装远程浏览器或 Python Playwright。
+适用于 Hub 0.9.2、Node 0.8.1 和 DSH-Test-Plugin 0.15.0。插件通过 Hub 的 MCP 在 Node 上执行浏览器测试，无需在 DSH 宿主安装远程浏览器或 Python Playwright。
 
 推荐流程：**Hub 配置独立申请凭据 → Node 登记并上报能力 → 插件读取 Hub 认证文件、准备和审核计划 → 自动领取 Node → 整批执行 → 关闭浏览器并交还 Node → 封存报告**。Hub 不维护用户身份；持有申请凭据即可申请未占用的 Node，领取后的操作必须使用本次租约令牌。
 
@@ -8,7 +8,7 @@
 
 | 角色 | 准备工作 | 交付内容 |
 | --- | --- | --- |
-| Hub 部署者 | 安装0.9.1，启用MCP，配置实际Host、public_url与独立hub_token_file | 给Node维护者登记附件；给调用方Hub基址和独立申请凭据，两者分开 |
+| Hub 部署者 | 安装0.9.2，启用MCP，配置public_url与独立hub_token_file | 给Node维护者登记附件；给调用方Hub基址和独立申请凭据，两者分开 |
 | Node 维护者 | 安装0.8.1，配置tools.playwright的managed资源并保持在线，实际探测通过 | node_id、resource_id、模式及设备版本；不签发访问文件 |
 | DSH 使用者 | 在实际DSH宿主保存私有认证文件，安装0.15.0插件，在对应profile设置浏览器连接 | 配置、用例、预期、运行报告和清理结果 |
 
@@ -24,13 +24,11 @@ Hub启动配置示例（在Hub机器）：
 hub_token_file: .runbridge/hub.token
 public_url: http://hub.example:8787  # 改为实际可达基址，可含反向代理前缀。
 mcp_enabled: true
-mcp_allowed_hosts:
-  - "hub.example:8787"  # 实际MCP URL的Host，不填Node或DSH机器的IP。
 grant_max_lease_seconds: 86400
 grant_idle_timeout_seconds: 600
 ```
 
-修改后正常重启生效。hub.token是generate-token生成的32～256字符单行文本，与enrollment.token和Dashboard口令不同。Hub申请凭据不能直接调用MCP，Node进程也不需要它。完整部署、默认值及路径规则见[快速开始](快速开始.md)、[参数详解](../reference/参数详解.md)。
+修改后正常重启生效。`mcp_allowed_hosts` 省略或 `[]` 时允许所有 Host；需要限制时才填入实际 MCP URL 的 Host 列表。hub.token是generate-token生成的32～256字符单行文本，与enrollment.token和Dashboard口令不同。Hub申请凭据不能直接调用MCP，Node进程也不需要它。完整部署、默认值及路径规则见[快速开始](快速开始.md)、[参数详解](../reference/参数详解.md)。
 
 Node按其项目手册登记上线，通过Hub总览或资源池确认ONLINE、非stale、MANAGED_CHROMIUM资源READY/FREE。MCP browser_start当前只选择managed；borrowed Chrome通过项目HTTP使用。
 
@@ -150,7 +148,7 @@ Hub模式先从只读目录准备和审核计划，批准后才领取；纯API�
 | 执行/续租401 | 查看原租约的到期、空闲或释放原因；不换令牌继续本次已发生的动作 |
 | 领取响应未知/没有首次令牌 | 保留本批申请记录，等待原占用回收；不得自动生成第二份申请继续跑 |
 | LEASE_TOO_LONG | 降低本次Node租期或由Hub部署者调整上限；插件不硬编码一天 |
-| MCP421/403 | Hub核对实际Host/Origin；资源和会话还须属于原有效租约 |
+| MCP421/403 | 421核对已配置的非空Host列表；省略或[]不限制Host。403核对Origin及资源/会话归属 |
 | OUTCOME_UNKNOWN | 查原request_id与实际业务结果，禁止盲目重放提交、上传或点击 |
 | RELEASING / QUARANTINED | 用原令牌查原租约；清理未知交维护者按Hub离线核查流程处理，不修改历史UNKNOWN或抢占 |
 

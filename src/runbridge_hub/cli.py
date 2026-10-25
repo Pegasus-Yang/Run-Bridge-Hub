@@ -76,7 +76,7 @@ def main() -> None:
         "--mcp-allowed-host",
         dest="mcp_allowed_hosts",
         action="append",
-        help="额外允许的 MCP Host，可重复，端口可用 :*",
+        help="限制允许的 MCP Host，可重复，端口可用 :*；未配置时不限制 Host",
     )
     serve.add_argument(
         "--mcp-allowed-origin",

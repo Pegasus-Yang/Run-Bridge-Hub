@@ -373,11 +373,17 @@ document.querySelector('#file_sizes').textContent='FILES:'+JSON.stringify(files)
 
 
 @asynccontextmanager
-async def agent(*, runtime: Runtime, access: dict | None = None, mode: str = "auto"):
+async def agent(
+    *, runtime: Runtime, access: dict | None = None, mode: str = "auto",
+    http_host: str | None = None,
+):
     """官方 MCP SDK 通过 HTTP 访问，不导入 Hub 或 Node 内部实现。"""
     permission = access or runtime.access
+    headers = {"Authorization": f"Bearer {permission['access_token']}"}
+    if http_host is not None:
+        headers["Host"] = http_host
     async with httpx2.AsyncClient(
-        headers={"Authorization": f"Bearer {permission['access_token']}"},
+        headers=headers,
         timeout=60,
         trust_env=False,
     ) as http:
@@ -410,10 +416,13 @@ def evidence(*, name: str, facts: dict):
 
 
 @pytest.mark.parametrize("mode", ["auto", "legacy"])
+@pytest.mark.parametrize("http_host", [None, "192.168.20.1:8787"])
 @pytest.mark.asyncio
-async def test_mcp_authorize_start_operate_verify_and_release(runtime, website, mode):
+async def test_mcp_authorize_start_operate_verify_and_release(
+    runtime, website, mode, http_host
+):
     initial_records = len(website["records"])
-    async with agent(runtime=runtime, mode=mode) as client:
+    async with agent(runtime=runtime, mode=mode, http_host=http_host) as client:
         negotiated = client.protocol_version
         assert negotiated == ("2026-07-28" if mode == "auto" else "2025-11-25")
         tools = await client.list_tools()
@@ -564,10 +573,11 @@ async def test_mcp_authorize_start_operate_verify_and_release(runtime, website, 
     runtime.wait_free()
     runtime.check_exited(pids=pids)
     evidence(
-        name=f"mcp_form_{mode}",
+        name=f"mcp_form_{mode}_{http_host or 'default-host'}",
         facts={
             "protocol_version": negotiated,
-            "tools": 26,
+            "http_host": http_host,
+            "tools": len(tools.tools),
             "external_form_submissions": 1,
             "png_dimensions": [1280, 720],
             "cleanup": "COMPLETE",
