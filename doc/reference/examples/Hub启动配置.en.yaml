@@ -1,0 +1,33 @@
+# Hub 0.9.2; UTF-8 YAML with space indentation.
+# Start: .venv/bin/runbridge-hub serve --settings hub.yaml
+# Do not combine --settings with other startup options.
+# Relative local paths resolve from this file's directory; no ~ or $HOME expansion.
+config_version: 1  # Hub YAML format; only 1 is accepted, also the default.
+host: 0.0.0.0  # Default 127.0.0.1; allow remote Nodes in this example.
+# port: 8787  # Default 8787; normally 1-65535. Update handoff URLs if changed.
+# database_path: .runbridge/hub.sqlite3  # Default; created initially, retained afterward.
+enrollment_token_file: .runbridge/enrollment.token  # Original generate-token file for Node enrollment.
+hub_token_file: .runbridge/hub.token  # Separate generate-token file for client claims.
+public_url: http://hub.example:8787  # Replace with actual base URL; proxy prefixes are allowed.
+grant_max_lease_seconds: 86400  # Positive claim/renewal maximum; default one day.
+grant_idle_timeout_seconds: 600  # Positive idle policy for new leases; default ten minutes.
+# Omitted claim/renewal lease_seconds means min(3600, maximum); excessive explicit values fail.
+# Restart after policy changes. Existing expiry/idle snapshots are retained; renewal does not reset idle time.
+# Without hub_token_file use RUNBRIDGE_HUB_TOKEN; without either pool/claim APIs return 503.
+# Claims require public_url; it is never inferred from request Host.
+# web_enabled: true  # Default true; false disables dashboard page, assets, and API.
+# web_token_file: .runbridge/dashboard.token  # Separate single-line read-only token.
+# Without that file use RUNBRIDGE_WEB_TOKEN, otherwise generate/reuse web.token beside the database (600).
+# Logs include the read-only token and token-bearing Dashboard URL for direct entry and refresh.
+# Explicit missing/empty/invalid files fail. Disabled Web does not read or generate a dashboard token.
+# Without enrollment_token_file use RUNBRIDGE_ENROLLMENT_TOKEN; an explicit file takes precedence.
+# Invalid explicit enrollment files fail without environment fallback.
+# heartbeat_interval_seconds: 30  # Positive application heartbeat interval.
+# heartbeat_timeout_seconds: 90  # Must exceed heartbeat interval.
+# mcp_enabled: false  # Enable with true and the installed [mcp] extra.
+# mcp_allowed_hosts:  # Default []; no Host restriction. Nonempty permits only listed hosts.
+#   - "hub.example:8787"  # Actual MCP URL host/IP plus port, without scheme/path.
+#   - "hub.example:*"  # Any port for this host; standalone * or subnet wildcards are unsupported.
+# Local and remote clients need no Host list by default; nonempty lists add no implicit loopback hosts.
+# mcp_allowed_origins:  # Default []; clients without Origin need no setting.
+#   - "https://console.example"  # Actual scheme, host and port for supplied Origin, no path.

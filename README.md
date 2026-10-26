@@ -1,91 +1,132 @@
 # RunBridge Hub
 
-**通过 HTTP 或 MCP，使用远程设备上的浏览器。**
+**通过 HTTP / MCP，让程序和 Agent 使用远程设备上的浏览器。**
 
-RunBridge Hub 是 RunBridge 的服务端：接纳 Node，验证访问许可，分配浏览器会话，把结构化指令路由给 Node 并返回结果。浏览器在 Node 设备上运行；Hub 无需安装 Playwright、Node.js 或浏览器。
+简体中文 · [English](README.en.md) · [快速开始](#快速开始) · [完整文档](doc/README.md) · [更新日志](doc/project/版本发布记录.md) · [问题反馈](https://github.com/Pegasus-Yang/Run-Bridge-Hub/issues)
 
-[快速开始](doc/user-guide/快速开始.md) · [部署手册](doc/deployment/部署与运行.md) · [参数详解](doc/reference/参数详解.md) · [完整文档](doc/README.md) · [更新日志](doc/project/版本发布记录.md)
+[![Python 3.14](https://img.shields.io/badge/Python-3.14-3776AB?style=flat-square&logo=python&logoColor=white)](pyproject.toml) [![MIT](https://img.shields.io/badge/License-MIT-16a34a?style=flat-square)](LICENSE)
 
-## 能做什么
+RunBridge Hub 是 RunBridge 的服务端。它接纳浏览器设备上的 [RunBridge Node](https://github.com/Pegasus-Yang/Run-Bridge-Node)，统一分配设备使用权、管理浏览器会话并转发操作结果。调用方通过 HTTP 或 MCP 使用远程浏览器，无需直接连接 Node 的浏览器端口。
 
-- **统一入口**：HTTP 方法与 MCP 工具共用授权、会话和执行流程，适合程序调用及 Agent 接入。
-- **跨机器操作**：Node 主动连接 Hub；调用方不需要直接访问 Node 的浏览器端口。
-- **统一分配使用权**：持有 Hub 凭据即可领取空闲 Node，每个 Node 同时只有一份有效租约；支持续租、释放、到期和空闲回收。
-- **可查询的执行结果**：使用请求 ID 跟踪动作，重复请求去重；断线后可以查询原结果。
-- **浏览器画面**：接收 Node 的页面截图流，供调用方观察；浏览器采集仍在 Node 完成。
-- **节点总览**：默认提供同端口只读页面，查看真实连接、资源占用、支持能力、最近心跳和实测控制通道 RTT；支持筛选、搜索与节点详情，适配桌面和手机。
+适合自动化程序、Agent 工具接入，以及需要集中分配浏览器设备的测试团队。浏览器、Playwright 和页面对象留在 Node 设备，Hub 自身只需 Python 环境。
 
-```text
-调用方 HTTP / Agent MCP → Hub 鉴权与路由 ⇄ Node → Python Playwright → 浏览器
+## 功能亮点
+
+| 能力 | 可以做什么 |
+| --- | --- |
+| HTTP 与 MCP 统一入口 | 程序和 Agent 共用认证、会话与执行流程 |
+| 跨设备浏览器操作 | Node 主动连接 Hub，调用方经由统一入口使用设备 |
+| Node 独占租约 | 领取、续租和释放整个 Node，到期或闲置后回收，避免任务抢占同一设备 |
+| 可查询的执行结果 | 按请求 ID 去重并查询原结果，处理超时和断线，避免重复提交动作 |
+| 页面画面流 | 转发 Node 采集的同一页面画面，观察远程执行过程 |
+| 只读节点总览 | 搜索和筛选节点，查看连接、资源占用、支持能力、心跳与实测控制通道 RTT |
+
+## 实际效果
+
+节点总览将设备连接、资源占用和能力放在同一页面，支持桌面与手机。点击节点可查看详情；总览使用独立只读口令。
+
+![RunBridge Hub 节点总览：在线状态、资源占用、支持能力与实测 RTT](doc/design/assets/node-dashboard/天蓝主题桌面.jpg)
+
+截图来自本地验收场景，展示当时的数据。运行后的总览显示所连接 Hub 的实际状态；字段含义见[节点总览指南](doc/user-guide/节点总览.md)。
+
+## 工作方式
+
+```mermaid
+flowchart LR
+    Client["程序 / Agent"] <-->|"HTTP / MCP"| Hub["RunBridge Hub<br/>认证 · 租约 · 会话 · 路由"]
+    Hub <-->|"指令 / 结果 / 画面"| Node["RunBridge Node<br/>Python worker"]
+    Node -->|"Playwright"| Browser["Chromium / 已有 Chrome"]
+    classDef gateway fill:#e8f5fc,stroke:#027bb5,color:#12344a
+    class Hub gateway
 ```
 
-当前版本 **0.9.2**，兼容 Node **0.8.1**。提供项目自己的 Playwright 风格调用规则：33 项方法、27 个 MCP 工具。支持范围见[方法表](doc/reference/Playwright方法表.md)；官方 Playwright SDK 的直连接口已退役。
+Hub 与 Node 分别部署：Hub 提供服务入口，Node 在浏览器所在设备执行。两者的配置、身份与运行环境各自独立。
 
-## 快速部署
+## 快速开始
 
-在 **Hub 机器**上操作。前提是已有 Python **3.14.x**、全局 [uv](https://docs.astral.sh/uv/getting-started/installation/)，并从发布负责人取得 `runbridge_hub-0.9.2-py3-none-any.whl`，保存到 `~/Downloads/`。基础工具准备参考官网；源码构建见开发文档。
+### 1. 安装 Hub
 
-创建独立部署目录、安装并分别生成登记和资源池申请凭据：
+在 **Hub 机器**准备 Git、Python **3.14.x** 和 [uv](https://docs.astral.sh/uv/getting-started/installation/)。以下命令使用 macOS / Linux shell：
 
 ```bash
-mkdir -p ~/runbridge-hub
-cd ~/runbridge-hub
-uv venv --python 3.14 .venv
-uv pip install --python .venv/bin/python ~/Downloads/runbridge_hub-0.9.2-py3-none-any.whl -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+git clone https://github.com/Pegasus-Yang/Run-Bridge-Hub.git
+cd Run-Bridge-Hub
+uv sync --locked --no-dev -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 .venv/bin/runbridge-hub generate-token --output .runbridge/enrollment.token
 .venv/bin/runbridge-hub generate-token --output .runbridge/hub.token
 ```
 
-创建 `hub.yaml`。下面允许远程 Node 连接；端口、数据库和心跳采用默认值：
+`uv` 在仓库根目录创建 `.venv`。两份凭据分别供 **Node 登记**和**调用方领取 Node**使用。已有 wheel 的独立目录安装方法见[部署与运行](doc/deployment/部署与运行.md)。
+
+### 2. 保存配置并启动
+
+在仓库根目录创建 `hub.yaml`，将 `public_url` 换成 **Node 与调用方实际可达的 Hub 基址**：
 
 ```yaml
 host: 0.0.0.0
 enrollment_token_file: .runbridge/enrollment.token
 hub_token_file: .runbridge/hub.token
-public_url: http://hub.example:8787  # 改为 Node 和调用方实际可达的 Hub 基址。
+public_url: http://hub.example:8787
 ```
-
-启动，保留这个终端：
 
 ```bash
 .venv/bin/runbridge-hub serve --settings hub.yaml
 ```
 
-另开终端验证：
+保留此终端，另开终端检查：
 
 ```bash
 curl --fail http://127.0.0.1:8787/health
 ```
 
-应返回 `{"status":"ok","protocol_version":2}`。将 **Hub 的实际可达基址**（如 `http://hub.example:8787`）和刚生成的 **enrollment.token 文件**私密交给 Node 维护者。独立的 **hub.token** 与 `public_url` 交给调用方，用于查询资源池及领取 Node；申请凭据不交给 Node 进程，也不能直接执行。Node 安装步骤在 Node 项目中；浏览器验证等 Node 接入后进行。
+预期返回 `{"status":"ok","protocol_version":2}`。点击启动日志的 `Dashboard URL` 可打开节点总览；尚未登记设备时列表为空。凭据文件和包含只读口令的总览链接应妥善保管。
 
-需要 Agent/MCP 时，按[快速开始的 MCP 小节](doc/user-guide/快速开始.md#启用-mcp按需)安装 `[mcp]` 并启用。`mcp_allowed_hosts` 默认不限制 Host，仅在需要限制入口地址时配置。
+Agent/MCP 按需安装可选依赖：
 
-启动成功后，点击日志中已附带只读口令的 `Dashboard URL` 即可查看节点总览，刷新页面也可直接进入。日志同时输出口令，支持手动输入；默认文件为数据库同目录的 `.runbridge/web.token`，与登记令牌分开使用。配置、开关及数据含义见[节点总览](doc/user-guide/节点总览.md)。
+```bash
+uv sync --locked --no-dev --extra mcp -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+```
 
-## 验证一次浏览器操作
+在 `hub.yaml` 增加 `mcp_enabled: true` 后重启。Agent 使用 Streamable HTTP 连接实际 Hub 基址后的 `/mcp`；连接参数与调用步骤见 [MCP 接入](doc/user-guide/MCP浏览器接入.md)。
 
-调用方从 Hub 领取 Node 并保存 `access.json` 后，可用[标准库 HTTP 示例](doc/reference/examples/执行会话调用.py)完成“打开 Hub 健康页 → 读取页面 → 保存 PNG → 释放会话”。[快速开始](doc/user-guide/快速开始.md#验证一次完整调用node-接入后)使用本部署的健康页，不依赖外部网站；成功时截图显示健康检查 JSON，清理结果为 `COMPLETE`。
+### 3. 接入 Node，验证浏览器操作
 
-任务结束后还需[释放 Node 使用权](doc/reference/Node使用权租约接口.md)，关闭浏览器不会自动释放 Node。默认租期 3600 秒、空闲回收 600 秒，最大租期默认 86400 秒。
+将 Hub 基址与真实 `enrollment.token` 私密交给设备维护者，按 [Node 快速开始](https://github.com/Pegasus-Yang/Run-Bridge-Node#快速开始)上线设备。另向调用方提供独立 `hub.token`，按[调用方教程](doc/user-guide/调用方对接与使用.md)领取 Node，保存返回的 `.runbridge/access.json`。
 
-Agent 通过 Streamable HTTP 连接 `/mcp`，使用访问文件中的令牌；具体配置见 [MCP 浏览器接入](doc/user-guide/MCP浏览器接入.md)。
+在本仓库可运行标准库示例，打开网页、读取标题、保存 PNG、关闭会话并交还 Node：
 
-## 使用与维护
+```bash
+.venv/bin/python doc/reference/examples/执行会话调用.py --access-file .runbridge/access.json --resource-id chromium --url https://example.com --screenshot .runbridge/page.png
+.venv/bin/python doc/reference/examples/node_lease.py release --access-file .runbridge/access.json
+```
 
-| 要做的事 | 阅读文档 |
+资源 ID 使用 Node 实际上报的值，目标网页需由 **Node 设备**访问。核对截图内容、`cleanup=COMPLETE` 与租约 `RELEASED`。完整步骤与不依赖外部网站的示例见[快速开始](doc/user-guide/快速开始.md)。
+
+## 支持范围
+
+- 当前 Hub **0.9.2**，配套 Node **0.8.1**，需要 Python **3.14.x**；Hub 无需安装浏览器、Playwright 或 Node.js。
+- 提供 **33 项项目方法、27 个 MCP 工具**。调用方式借鉴 Playwright，具体支持以[方法表](doc/reference/Playwright方法表.md)为准；官方 SDK 直连、任意脚本和 SDK 回调不在当前范围内。
+- managed 浏览器支持 HTTP / MCP，borrowed Chrome 通过 HTTP 使用；页面画面用于观察，业务结果由调用方验证。
+- 浏览器会话与 Node 租约分别释放。关闭浏览器后，整批任务结束还需交还 Node；清理未知时保持隔离，见[租约接口](doc/reference/Node使用权租约接口.md)。
+
+## 文档与帮助
+
+| 从这里开始 | 内容 |
 | --- | --- |
-| 第一次部署、验证、处理常见错误 | [快速开始](doc/user-guide/快速开始.md) |
-| 配置长期运行、交付材料与备份 | [部署与运行](doc/deployment/部署与运行.md) |
-| 保存 YAML、查询默认值和适用场景 | [参数详解](doc/reference/参数详解.md)、[带注释 YAML](doc/reference/examples/Hub启动配置.yaml) |
-| 编写调用程序、理解对象和请求 ID | [调用方教程](doc/user-guide/调用方对接与使用.md)、[工具调用协议](doc/reference/工具调用协议.md) |
-| 配置 DSH-Test-Plugin，通过 Hub MCP 自动化测试 | [DSH-Test-Plugin 对接指南](doc/user-guide/DSH-Test-Plugin对接指南.md) |
-| 观察浏览器画面 | [画面流接入](doc/user-guide/浏览器画面流接入.md) |
-| 查看全部节点、占用、能力与延迟 | [节点总览](doc/user-guide/节点总览.md) |
-| 排查断线、许可、会话与升级问题 | [运行与排障](doc/deployment/运行与排障.md) |
+| [完整文档导航](doc/README.md) | 按部署者、调用方和维护者划分的阅读路线，含英文入口 |
+| [快速开始](doc/user-guide/快速开始.md) · [部署与运行](doc/deployment/部署与运行.md) | 安装、配置、启动、验证、交付和备份 |
+| [参数详解](doc/reference/参数详解.md) · [注释 YAML](doc/reference/examples/Hub启动配置.yaml) | 参数、默认值、路径规则与使用场景 |
+| [调用方教程](doc/user-guide/调用方对接与使用.md) · [租约接口](doc/reference/Node使用权租约接口.md) | 领取设备、操作页面、查询结果和交还资源 |
+| [MCP 接入](doc/user-guide/MCP浏览器接入.md) · [DSH 插件对接](doc/user-guide/DSH-Test-Plugin对接指南.md) | Agent 工具、插件配置与整批任务生命周期 |
+| [页面画面](doc/user-guide/浏览器画面流接入.md) · [节点总览](doc/user-guide/节点总览.md) | 观察页面和设备状态 |
+| [运行与排障](doc/deployment/运行与排障.md) | 常见错误、升级、清理未知和离线核查 |
 
-## 开发
+## 开发与贡献
 
-源码位于 `src/runbridge_hub/`，使用项目根目录 `.venv`。依赖同步、pytest、构建 wheel 和隔离联调步骤见[本地开发与联调](doc/development/本地开发与联调.md)。
+欢迎通过 [Issues](https://github.com/Pegasus-Yang/Run-Bridge-Hub/issues) 反馈或提交 Pull Request。请附上两端版本、运行环境、复现步骤和已隐藏秘密的错误信息。
 
-从[代码结构与执行流程](doc/architecture/代码结构与执行流程.md)了解实现，从[文档导航](doc/README.md)查阅当前架构、协议、设计过程和验收记录。报告问题时附上两端版本、已隐藏秘密的配置、错误码和复现步骤；不要提交令牌或私有身份文件。
+源码开发使用根目录 `.venv`，依赖同步、pytest 与隔离联调见[本地开发与联调](doc/development/本地开发与联调.md)；提交范围与验证要求见[贡献指南](CONTRIBUTING.md)。项目由 [Pegasus-Yang（天马）](https://github.com/Pegasus-Yang)维护。
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE)。随 Hub 分发的 [Phosphor Icons](https://github.com/phosphor-icons/core) 保留其[原始 MIT 许可证](src/runbridge_hub/web/icons/LICENSE)与版权声明，其他第三方依赖遵循各自的许可证。

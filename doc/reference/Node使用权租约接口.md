@@ -1,5 +1,7 @@
 # Node 使用权租约接口
 
+简体中文 · [English](Node使用权租约接口.en.md)
+
 适用版本：Hub 0.9.2、Node 0.8.1。
 
 Hub 不维护用户。`hub_token` 用于查看资源池和申请整个 Node；每次领取产生独立的 `access_token`，只有其持有者可以执行、续租和释放这份使用权。所有令牌放在 `Authorization: Bearer ...`，不得放在 URL。
@@ -18,7 +20,7 @@ Hub 不维护用户。`hub_token` 用于查看资源池和申请整个 Node；�
 {"request_id":"claim_unique_batch_id","lease_seconds":3600}
 ```
 
-`request_id` 必填，遵循现有 Identifier（1～128 位字母、数字、下划线、短横线）。`lease_seconds` 可省略，必须是正整数，默认 `min(3600, grant_max_lease_seconds)`；显式超限返回 422 `LEASE_TOO_LONG`。默认上限 86400 秒，默认空闲回收 600 秒，均由 Hub YAML 配置。
+`request_id` 必填，遵循现有 Identifier（1～128 个字符，以英文字母或数字开头，后续只含字母、数字、下划线、短横线）。`lease_seconds` 可省略，必须是正整数，默认 `min(3600, grant_max_lease_seconds)`；显式超限返回 422 `LEASE_TOO_LONG`。默认上限 86400 秒，默认空闲回收 600 秒，均由 Hub YAML 配置。
 
 首次成功返回 201：
 

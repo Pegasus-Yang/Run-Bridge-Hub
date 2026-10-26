@@ -1,5 +1,7 @@
 # DSH-Test-Plugin 对接指南
 
+简体中文 · [English](DSH-Test-Plugin对接指南.en.md)
+
 适用于 Hub 0.9.2、Node 0.8.1 和 DSH-Test-Plugin 0.15.0。插件通过 Hub 的 MCP 在 Node 上执行浏览器测试，无需在 DSH 宿主安装远程浏览器或 Python Playwright。
 
 推荐流程：**Hub 配置独立申请凭据 → Node 登记并上报能力 → 插件读取 Hub 认证文件、准备和审核计划 → 自动领取 Node → 整批执行 → 关闭浏览器并交还 Node → 封存报告**。Hub 不维护用户身份；持有申请凭据即可申请未占用的 Node，领取后的操作必须使用本次租约令牌。

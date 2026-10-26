@@ -1,5 +1,7 @@
 # Playwright 方法表
 
+简体中文 · [English](Playwright方法表.en.md)
+
 适用于工具 playwright API 1、执行协议 2。全部 33 项均为显式实现的项目方法，不承诺官方 SDK 的其他方法。返回均包在 `result.kind=json` 的 `value` 中，截图除外。
 
 每项均接受 timeout（毫秒），默认 10000，范围 1～30000，排队计入预算；列中只列其他参数。涉及定位的 target 使用 Page 引用加非空 locator，定位必须唯一。viewport 限制也适用于 new_context。
