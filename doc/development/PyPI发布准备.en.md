@@ -2,7 +2,7 @@
 
 [简体中文](PyPI发布准备.md) · English
 
-Current candidate: **0.9.3**, requiring Python **3.14.x**. This guide prepares reviewed source for PyPI. Local builds/checks, Git pushes, and actual uploads are separate actions. Keep artifacts local until publication is authorized.
+Current release: **0.9.3**, available on [PyPI](https://pypi.org/project/runbridge-hub/0.9.3/), requiring Python **3.14.x**. The wheel and source distribution match the GitHub Release digests. This guide covers builds, checks, Git pushes, authorized uploads, and remote verification. Keep future release artifacts local until publication is authorized.
 
 ## Distribution and entry points
 

@@ -37,11 +37,13 @@ Deploy Hub and Node separately: Hub provides the service entry, and Node execute
 
 ## Quick start
 
-Download wheels from [GitHub Releases](https://github.com/Pegasus-Yang/Run-Bridge-Hub/releases), then follow the [separate-directory installation guide](https://github.com/Pegasus-Yang/Run-Bridge-Hub/blob/main/doc/user-guide/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.en.md). Source and post-publication PyPI installation routes follow below.
+Hub **0.9.3** is available on [PyPI](https://pypi.org/project/runbridge-hub/0.9.3/). Install it with the commands below, or download wheels from [GitHub Releases](https://github.com/Pegasus-Yang/Run-Bridge-Hub/releases) and follow the [separate-directory installation guide](https://github.com/Pegasus-Yang/Run-Bridge-Hub/blob/main/doc/user-guide/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.en.md). A source installation route is also provided below.
 
-### Install from PyPI after this version is published
+### Install from PyPI
 
-Run in a new deployment directory with Python 3.14 and uv. Until the release is uploaded, use the source route below. With this installation, continue at step 2. HTTP-only users may omit `[mcp]`.
+Run in a new deployment directory with Python 3.14 and uv. With this installation, continue at step 2. HTTP-only users may omit `[mcp]`.
+
+Mirrors may lag behind the first release. If the Aliyun mirror below does not yet list this version, download its wheel from [PyPI files](https://pypi.org/project/runbridge-hub/0.9.3/#files) and follow the separate-directory installation guide.
 
 ```bash
 mkdir -p ~/runbridge-hub

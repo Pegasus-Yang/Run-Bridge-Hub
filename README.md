@@ -37,11 +37,13 @@ Hub 与 Node 分别部署：Hub 提供服务入口，Node 在浏览器所在设�
 
 ## 快速开始
 
-安装包可从 [GitHub Releases](https://github.com/Pegasus-Yang/Run-Bridge-Hub/releases) 下载，再按[独立目录安装指南](https://github.com/Pegasus-Yang/Run-Bridge-Hub/blob/main/doc/user-guide/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.md)部署。下方同时保留源码和对应版本上传后的 PyPI 安装方式。
+Hub **0.9.3** 已发布至 [PyPI](https://pypi.org/project/runbridge-hub/0.9.3/)，可按下方命令安装。也可从 [GitHub Releases](https://github.com/Pegasus-Yang/Run-Bridge-Hub/releases) 下载安装包，再按[独立目录安装指南](https://github.com/Pegasus-Yang/Run-Bridge-Hub/blob/main/doc/user-guide/%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B.md)部署，或使用源码安装路线。
 
-### 从 PyPI 安装（对应版本发布后）
+### 从 PyPI 安装
 
-准备 Python 3.14 与 uv，在新的部署目录执行；尚未上传时使用下方源码安装路线。选择本方式后直接继续第 2 步；仅使用 HTTP 时可去掉 `[mcp]`。
+准备 Python 3.14 与 uv，在新的部署目录执行。选择本方式后直接继续第 2 步；仅使用 HTTP 时可去掉 `[mcp]`。
+
+镜像同步可能晚于首次发布。若下方阿里云镜像尚未提供此版本，可从 [PyPI 文件列表](https://pypi.org/project/runbridge-hub/0.9.3/#files)下载 wheel，按独立目录安装指南安装。
 
 ```bash
 mkdir -p ~/runbridge-hub
