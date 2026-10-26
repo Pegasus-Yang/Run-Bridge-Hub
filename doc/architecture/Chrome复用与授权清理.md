@@ -1,6 +1,6 @@
 # 已有 Chrome 的授权与清理
 
-Hub 0.9.2 配合 Node 0.8.1，由 Node Python Playwright 连接所有者指定的回环 Browser CDP，使用 `connect_over_cdp(no_defaults=True)`，枚举原 context/page，而非新建上下文冒充登录复用。BROWSER_INSTANCE 明确授权整个实例；页面 URL 选择不是安全隔离。
+Hub 0.9.3 配合 Node 0.8.2，由 Node Python Playwright 连接所有者指定的回环 Browser CDP，使用 `connect_over_cdp(no_defaults=True)`，枚举原 context/page，而非新建上下文冒充登录复用。BROWSER_INSTANCE 明确授权整个实例；页面 URL 选择不是安全隔离。
 
 释放 borrowed 会话只断开项目持有的连接。原 Chrome、原页面、Cookie、localStorage 继续存在，已经发生的页面操作也保留。禁止关闭原 context；整个浏览器关闭走会话释放，不暴露 Browser.close 的远程 CDP 指令。调用方显式关闭所选 page 属于授权操作。
 

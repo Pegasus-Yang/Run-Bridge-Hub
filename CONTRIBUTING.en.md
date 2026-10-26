@@ -27,6 +27,8 @@ Check the [Node implementation](https://github.com/Pegasus-Yang/Run-Bridge-Node)
 
 Repository rules are in [AGENTS.md (Chinese)](AGENTS.md). The [development manual (Chinese)](doc/development/本地开发与联调.md) covers builds and isolated integration. User-facing runtime guides are indexed in [English documentation](doc/README.en.md).
 
+PyPI metadata, artifact selection, strict checks, and upload verification are covered in [release preparation](doc/development/PyPI发布准备.en.md).
+
 ## License
 
 Contributions are provided under the [MIT License](LICENSE). Identify the source of third-party code or assets and retain their license and copyright notices.

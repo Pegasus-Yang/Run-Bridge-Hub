@@ -23,3 +23,5 @@ README、LICENSE 与包元数据随代码推送；Description、Website 和 Topi
 - 贡献入口为根目录 [CONTRIBUTING.md](../../CONTRIBUTING.md)，运行与使用资料由[文档导航](../README.md)汇总。
 
 中英文用户文档分别由 `doc/README.md` 与 `doc/README.en.md` 导航；修改功能说明、命令或参数时同步两种语言。架构、设计及历史验收资料保留中文，并在英文导航中注明。
+
+PyPI 长描述使用 `README.en.md`。中英文首页使用完整 GitHub 文件地址和静态 SVG；发布前先同步仓库，再按 [PyPI 发布准备](../development/PyPI发布准备.md)核对公开文档与图片。

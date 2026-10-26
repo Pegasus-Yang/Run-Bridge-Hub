@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="title">
+<title id="title">RunBridge Hub overview</title>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#57606a"/></marker></defs>
+<rect width="1200" height="240" fill="#ffffff"/>
+<g font-family="Arial, Noto Sans, sans-serif" fill="#1f2328">
+<rect x="16" y="40" width="170" height="130" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="2"/>
+<text x="101.0" y="98.0" text-anchor="middle" font-size="22" font-weight="bold">Program /</text>
+<text x="101.0" y="126.0" text-anchor="middle" font-size="19">Agent</text>
+<rect x="300" y="40" width="250" height="130" rx="8" fill="#e8f5fc" stroke="#027bb5" stroke-width="2"/>
+<text x="425.0" y="84.0" text-anchor="middle" font-size="22" font-weight="bold">RunBridge Hub</text>
+<text x="425.0" y="112.0" text-anchor="middle" font-size="19" font-weight="normal">Auth · Leases</text>
+<text x="425.0" y="140.0" text-anchor="middle" font-size="19" font-weight="normal">Sessions · Routing</text>
+<rect x="680" y="40" width="195" height="130" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="2"/>
+<text x="777.5" y="98.0" text-anchor="middle" font-size="22" font-weight="bold">RunBridge Node</text>
+<text x="777.5" y="126.0" text-anchor="middle" font-size="19" font-weight="normal">Python worker</text>
+<rect x="1000" y="40" width="184" height="130" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="2"/>
+<text x="1092.0" y="98.0" text-anchor="middle" font-size="22" font-weight="bold">Chromium /</text>
+<text x="1092.0" y="126.0" text-anchor="middle" font-size="19" font-weight="normal">Existing Chrome</text>
+<path d="M192 105 H294" fill="none" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<text x="243" y="80" text-anchor="middle" font-size="18" font-weight="normal">HTTP / MCP</text>
+<path d="M556 105 H674" fill="none" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<text x="615" y="80" text-anchor="middle" font-size="18" font-weight="normal">WebSocket</text>
+<path d="M881 105 H994" fill="none" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="937" y="80" text-anchor="middle" font-size="18" font-weight="normal">Playwright</text>
+<text x="600" y="218" text-anchor="middle" font-size="18" font-weight="normal">Node initiates its connection to Hub; commands, results, and frames pass through Hub.</text>
+</g>
+</svg>

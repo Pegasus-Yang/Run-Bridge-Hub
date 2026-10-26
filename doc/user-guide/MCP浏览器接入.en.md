@@ -2,7 +2,7 @@
 
 [简体中文](MCP浏览器接入.md) · English
 
-Applies to **Hub 0.9.2 / Node 0.8.1**. On the agent/client machine, start after Hub enables `/mcp`, Node advertises a managed READY/FREE resource, and the client claims Node and saves its real access file. Borrowed resources use project HTTP. DSH users can follow the [plugin guide](DSH-Test-Plugin对接指南.en.md).
+Applies to **Hub 0.9.3 / Node 0.8.2**. On the agent/client machine, start after Hub enables `/mcp`, Node advertises a managed READY/FREE resource, and the client claims Node and saves its real access file. Borrowed resources use project HTTP. DSH users can follow the [plugin guide](DSH-Test-Plugin对接指南.en.md).
 
 ## Connection
 

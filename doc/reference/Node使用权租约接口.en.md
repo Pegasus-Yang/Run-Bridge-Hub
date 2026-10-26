@@ -2,7 +2,7 @@
 
 [简体中文](Node使用权租约接口.md) · English
 
-Applies to **Hub 0.9.2 / Node 0.8.1**. Hub has no user-account system. `hub_token` queries the pool and claims a whole Node; each claim issues an independent `access_token` for execution, renewal, and release. Put tokens in `Authorization: Bearer ...`, never a URL.
+Applies to **Hub 0.9.3 / Node 0.8.2**. Hub has no user-account system. `hub_token` queries the pool and claims a whole Node; each claim issues an independent `access_token` for execution, renewal, and release. Put tokens in `Authorization: Bearer ...`, never a URL.
 
 ## 1. Query before claiming
 

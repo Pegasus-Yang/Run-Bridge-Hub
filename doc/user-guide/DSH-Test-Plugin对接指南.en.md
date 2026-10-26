@@ -2,7 +2,7 @@
 
 [简体中文](DSH-Test-Plugin对接指南.md) · English
 
-Applies to **Hub 0.9.2, Node 0.8.1, and DSH-Test-Plugin 0.15.0**. The plugin uses Hub MCP to execute browser tests on Node. The DSH host needs neither the remote browser nor Python Playwright.
+Applies to **Hub 0.9.3, Node 0.8.2, and DSH-Test-Plugin 0.15.0**. The plugin uses Hub MCP to execute browser tests on Node. The DSH host needs neither the remote browser nor Python Playwright.
 
 Flow: configure Hub claim credentials → enroll Node and advertise capabilities → read private Hub authentication and prepare/review a plan → claim Node → execute the batch → close browsers and return Node → finalize the report. A Hub credential can claim an available Node; subsequent operations use that claim's token.
 
@@ -10,8 +10,8 @@ Flow: configure Hub claim credentials → enroll Node and advertise capabilities
 
 | Role | Preparation | Handoff |
 | --- | --- | --- |
-| Hub deployer | Install 0.9.2, enable MCP, configure `public_url` and independent `hub_token_file` | Enrollment attachment to Node; base URL and separate claim credential to clients |
-| Node maintainer | Install 0.8.1, keep a managed Playwright resource online, pass real browser probing | Node ID, resource ID, mode, and version; no client access-file issuance |
+| Hub deployer | Install 0.9.3, enable MCP, configure `public_url` and independent `hub_token_file` | Enrollment attachment to Node; base URL and separate claim credential to clients |
+| Node maintainer | Install 0.8.2, keep a managed Playwright resource online, pass real browser probing | Node ID, resource ID, mode, and version; no client access-file issuance |
 | DSH user | Install plugin 0.15.0, keep private credentials on the actual DSH host, configure the correct profile | Settings, cases, expectations, reports, and cleanup outcomes |
 
 On Hub, generate a separate claim file if one does not already exist:

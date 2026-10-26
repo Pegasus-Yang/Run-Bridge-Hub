@@ -2,7 +2,7 @@
 
 [简体中文](README.md) · English
 
-Applies to **Hub 0.9.2 / Node 0.8.1**:
+Applies to **Hub 0.9.3 / Node 0.8.2**:
 
 - [Annotated Hub YAML](Hub启动配置.en.yaml): defaults and scenarios for `serve --settings`.
 - [node_lease.py](node_lease.py): standard-library claim/status/release helper; reads private Hub authentication JSON and writes five-field access JSON.

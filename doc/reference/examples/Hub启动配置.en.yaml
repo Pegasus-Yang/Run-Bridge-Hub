@@ -1,4 +1,4 @@
-# Hub 0.9.2; UTF-8 YAML with space indentation.
+# Hub 0.9.3; UTF-8 YAML with space indentation.
 # Start: .venv/bin/runbridge-hub serve --settings hub.yaml
 # Do not combine --settings with other startup options.
 # Relative local paths resolve from this file's directory; no ~ or $HOME expansion.

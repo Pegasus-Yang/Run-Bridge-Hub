@@ -2,7 +2,7 @@
 
 简体中文 · [English](README.en.md)
 
-适用于 Hub 0.9.2 / Node 0.8.1：
+适用于 Hub 0.9.3 / Node 0.8.2：
 
 - [Hub启动配置.yaml](Hub启动配置.yaml)：带默认值和场景注释的服务端启动配置，使用 `serve --settings`。
 - [node_lease.py](node_lease.py)：标准库领取、查询、等待交还Node；读取私有Hub认证JSON，生成严格五字段访问JSON。
