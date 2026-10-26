@@ -1,8 +1,12 @@
 [project]
 name = "runbridge-hub"
 version = "0.9.2"
-description = "RunBridge 节点管理与连接网关"
+description = "RunBridge 远程浏览器网关：HTTP/MCP 接入、节点租约与会话路由"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "src/runbridge_hub/web/icons/LICENSE"]
+authors = [{ name = "Pegasus-Yang", email = "panesas2@gmail.com" }]
+keywords = ["runbridge", "browser-automation", "playwright", "mcp", "remote-browser"]
 requires-python = ">=3.14,<3.15"
 dependencies = [
     "aiosqlite>=0.21,<1",
@@ -13,6 +17,12 @@ dependencies = [
     "uvicorn>=0.35,<1",
     "websockets>=15,<18",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Pegasus-Yang/Run-Bridge-Hub"
+Documentation = "https://github.com/Pegasus-Yang/Run-Bridge-Hub/blob/main/doc/README.md"
+Repository = "https://github.com/Pegasus-Yang/Run-Bridge-Hub.git"
+Issues = "https://github.com/Pegasus-Yang/Run-Bridge-Hub/issues"
 
 [project.scripts]
 runbridge-hub = "runbridge_hub.cli:main"
