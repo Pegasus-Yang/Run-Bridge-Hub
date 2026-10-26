@@ -77,7 +77,7 @@ uv publish --dry-run --trusted-publishing never --keyring-provider disabled --pu
 uv publish --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
 
-预演成功不等于账号校验或上线成功；PyPI 同版本文件不能覆盖。已发布后发现问题时提升版本，不移动旧 tag 或改名重用旧文件。本仓库暂不配置自动上传工作流。
+预演成功不等于账号校验或上线成功；PyPI 同版本文件不能覆盖。已发布后发现问题时提升版本，不移动旧 tag 或改名重用旧文件。本仓库的 [GitHub Actions](GitHubActions与Release.md)仅验证与发布 GitHub Release，不自动上传 PyPI。
 
 ## 7. 上传后的成功标准
 

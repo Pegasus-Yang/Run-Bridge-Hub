@@ -77,7 +77,7 @@ Upload only after user authorization, project ownership confirmation, and digest
 uv publish --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
 
-Dry-run success is not account validation or publication. PyPI files cannot be overwritten; fix an uploaded release with a new version and tag. No automatic upload workflow is configured by this change.
+Dry-run success is not account validation or publication. PyPI files cannot be overwritten; fix an uploaded release with a new version and tag. The [GitHub Actions workflows](GitHubActions与Release.en.md) validate and publish GitHub Releases without uploading to PyPI.
 
 ## 7. Verify after upload
 

@@ -1,0 +1,82 @@
+name: Release
+run-name: Release ${{ inputs.tag || github.ref_name }}
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '已存在的发布标签，例如 v0.9.3；从 main 运行本工作流'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: 验证标签源码与安装包
+    uses: ./.github/workflows/validate.yml
+    with:
+      source_ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+      release_tag: ${{ inputs.tag || github.ref_name }}
+  publish:
+    name: 发布 GitHub Release
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      VERSION: ${{ needs.validate.outputs.version }}
+      SOURCE_COMMIT: ${{ needs.validate.outputs.source_commit }}
+      WHEEL: ${{ needs.validate.outputs.wheel }}
+      SDIST: ${{ needs.validate.outputs.sdist }}
+    steps:
+      - name: 下载本次验证通过的产物
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ needs.validate.outputs.artifact_name }}
+          path: dist
+      - name: 校验附件并拒绝覆盖已有 Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum --check SHA256SUMS)
+          actual_commit=$(gh api "repos/$GH_REPO/commits/$RELEASE_TAG" --jq .sha)
+          if [[ "$actual_commit" != "$SOURCE_COMMIT" ]]; then
+            echo "::error::远端标签提交与已验证源码不一致。"
+            exit 1
+          fi
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo '::error::该标签已有 Release；请检查现有附件，本工作流不会覆盖。'
+            exit 1
+          fi
+      - name: 上传草稿并回读核验后公开
+        shell: bash
+        run: |
+          set -euo pipefail
+          options=()
+          if [[ "$VERSION" =~ (a|b|rc)[0-9]+$ ]]; then
+            options+=(--prerelease)
+          fi
+          gh release create "$RELEASE_TAG" \
+            --verify-tag --draft "${options[@]}" \
+            --title "RunBridge Hub $VERSION" \
+            --notes-file dist/release-notes.md \
+            "dist/$WHEEL" "dist/$SDIST" dist/SHA256SUMS dist/release-manifest.json
+          downloaded="$RUNNER_TEMP/release-download"
+          mkdir -p "$downloaded"
+          gh release download "$RELEASE_TAG" --dir "$downloaded"
+          cmp dist/SHA256SUMS "$downloaded/SHA256SUMS"
+          (cd "$downloaded" && sha256sum --check SHA256SUMS)
+          gh release edit "$RELEASE_TAG" --draft=false
+          gh release view "$RELEASE_TAG" --json url --jq .url >> "$GITHUB_STEP_SUMMARY"

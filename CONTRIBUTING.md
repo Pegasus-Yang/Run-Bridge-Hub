@@ -25,6 +25,8 @@
 
 PyPI 元数据、分发范围、严格检查和上传后核验见 [PyPI 发布准备](doc/development/PyPI发布准备.md)。
 
+GitHub Actions 验证普通提交与 PR，发布标签触发安装包检查与 Release。范围及手动补发见 [CI 与发布](doc/development/GitHubActions与Release.md)。
+
 ## 授权
 
 提交到本项目的贡献按 [MIT License](LICENSE)提供。引入第三方代码或资源时，注明来源并保留其许可证和版权声明。

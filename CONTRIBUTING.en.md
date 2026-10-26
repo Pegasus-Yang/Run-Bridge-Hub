@@ -29,6 +29,8 @@ Repository rules are in [AGENTS.md (Chinese)](AGENTS.md). The [development manua
 
 PyPI metadata, artifact selection, strict checks, and upload verification are covered in [release preparation](doc/development/PyPI发布准备.en.md).
 
+GitHub Actions checks branch pushes and pull requests, and publishes validated distributions for release tags. See [CI and releases](doc/development/GitHubActions与Release.en.md) for scope and manual backfills.
+
 ## License
 
 Contributions are provided under the [MIT License](LICENSE). Identify the source of third-party code or assets and retain their license and copyright notices.

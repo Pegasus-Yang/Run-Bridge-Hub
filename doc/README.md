@@ -36,6 +36,7 @@
 
 | 阅读目的 | 文档 |
 | --- | --- |
+| 自动验证与 GitHub Release | [GitHub Actions](development/GitHubActions与Release.md) |
 | 准备 PyPI 分发 | [PyPI 发布准备](development/PyPI发布准备.md) |
 | 参与贡献与授权 | [贡献指南](../CONTRIBUTING.md)、[MIT License](../LICENSE) |
 | 本地开发、验证与打包 | [本地开发与联调](development/本地开发与联调.md)、[版本发布与本地打包](development/版本发布与本地打包.md) |

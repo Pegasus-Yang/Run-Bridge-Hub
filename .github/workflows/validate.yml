@@ -1,0 +1,171 @@
+name: Package validation
+
+on:
+  workflow_call:
+    inputs:
+      source_ref:
+        required: true
+        type: string
+      release_tag:
+        default: ''
+        type: string
+    outputs:
+      artifact_name:
+        value: ${{ jobs.validate.outputs.artifact_name }}
+      version:
+        value: ${{ jobs.validate.outputs.version }}
+      source_commit:
+        value: ${{ jobs.validate.outputs.source_commit }}
+      wheel:
+        value: ${{ jobs.validate.outputs.wheel }}
+      sdist:
+        value: ${{ jobs.validate.outputs.sdist }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      artifact_name: distribution-${{ github.run_id }}-${{ github.run_attempt }}
+      version: ${{ steps.metadata.outputs.version }}
+      source_commit: ${{ steps.metadata.outputs.source_commit }}
+      wheel: ${{ steps.metadata.outputs.wheel }}
+      sdist: ${{ steps.metadata.outputs.sdist }}
+    env:
+      PACKAGE: "runbridge_hub"
+      DISTRIBUTION: "runbridge-hub"
+      COMPONENT: "Hub"
+      INSTALL_EXTRAS: "mcp"
+      STARTUP_MODEL: "ServeSettings"
+      CLI_COMMAND: "serve"
+      RELEASE_TAG: "${{ inputs.release_tag }}"
+      CI_METADATA_PATH: "/tmp/runbridge-metadata-${{ github.run_id }}-${{ github.run_attempt }}.json"
+      WORKFLOW_REF: "${{ github.workflow_ref }}"
+      WORKFLOW_COMMIT: "${{ github.workflow_sha }}"
+      RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    steps:
+      - name: 检出待验证源码
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.source_ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: 准备 uv 与 Python 3.14
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: '0.13.5'
+          python-version: '3.14'
+          enable-cache: true
+      - name: 同步锁定的开发环境与 extras
+        run: uv sync --locked --all-extras --python 3.14 -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+      - name: 核对包版本与发布标签
+        id: metadata
+        shell: bash
+        run: |
+          .venv/bin/python - <<'PY'
+          import ast,json,os,re,subprocess,tomllib
+          from pathlib import Path
+          project=tomllib.loads(Path('pyproject.toml').read_text())['project']
+          name,version=project['name'],project['version']
+          assert name==os.environ['DISTRIBUTION']
+          assert re.fullmatch(r'\d+\.\d+\.\d+(?:(?:a|b|rc)\d+)?',version),version
+          tree=ast.parse(Path(f"src/{os.environ['PACKAGE']}/__init__.py").read_text())
+          versions=[ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='__version__' for t in n.targets)]
+          assert versions==[version],versions
+          lock=tomllib.loads(Path('uv.lock').read_text())
+          assert [p['version'] for p in lock['package'] if p['name']==name]==[version]
+          commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          tag=os.environ['RELEASE_TAG']
+          if tag:
+              assert tag==f'v{version}',f'Tag {tag} does not match version {version}'
+              target=subprocess.check_output(['git','rev-parse','--verify',f'refs/tags/{tag}^{{commit}}'],text=True).strip()
+              assert target==commit,'构建源码必须是指定标签提交'
+          data={'distribution':name,'package':os.environ['PACKAGE'],'version':version,'source_commit':commit,'release_tag':tag,'wheel':f'{name.replace("-","_")}-{version}-py3-none-any.whl','sdist':f'{name.replace("-","_")}-{version}.tar.gz'}
+          Path(os.environ['CI_METADATA_PATH']).write_text(json.dumps(data,indent=2))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+              for key,value in data.items():out.write(f'{key}={value}\n')
+          print(f'{name} {version}, source={commit}, release={tag or "validation only"}')
+          PY
+      - name: 运行非浏览器测试
+        run: .venv/bin/python -m pytest tests -q -m 'not browser'
+      - name: 从源码分发包构建 wheel
+        run: uv build --out-dir dist --no-sources -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+      - name: 严格检查元数据与长描述
+        env:
+          WHEEL: ${{ steps.metadata.outputs.wheel }}
+          SDIST: ${{ steps.metadata.outputs.sdist }}
+        run: uv tool run --from 'twine==7.0.0' --with 'readme-renderer[md]==46.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com twine check --strict "dist/$WHEEL" "dist/$SDIST"
+      - name: 核对内容并全新安装验证
+        shell: bash
+        run: |
+          .venv/bin/python - <<'PY'
+          import hashlib,json,os,subprocess,sys,tarfile,tomllib,zipfile
+          from email.parser import BytesParser
+          from pathlib import Path
+          root=Path.cwd();data=json.loads(Path(os.environ['CI_METADATA_PATH']).read_text())
+          wheel=root/'dist'/data['wheel'];sdist=root/'dist'/data['sdist'];package=data['package'];version=data['version']
+          project=tomllib.loads((root/'pyproject.toml').read_text())['project']
+          sources=subprocess.check_output(['git','ls-files','src'],text=True).splitlines()
+          with zipfile.ZipFile(wheel) as archive:
+              info=f'{package}-{version}.dist-info'
+              raw=archive.read(info+'/METADATA');metadata=BytesParser().parsebytes(raw)
+              assert metadata['Name']==data['distribution'] and metadata['Version']==version
+              assert metadata['License-Expression']=='MIT'
+              assert metadata['Description-Content-Type']=='text/markdown'
+              assert raw.decode().split('\n\n',1)[1].strip()==(root/'README.en.md').read_text().strip()
+              assert set(metadata.get_all('Provides-Extra'))==set(project['optional-dependencies'])
+              assert archive.read(info+'/licenses/LICENSE')==(root/'LICENSE').read_bytes()
+              for path in sources:assert archive.read(path.removeprefix('src/'))==(root/path).read_bytes(),path
+          with tarfile.open(sdist) as archive:
+              prefix=f'{package}-{version}/'
+              names={m.name.removeprefix(prefix):m for m in archive.getmembers() if m.isfile()}
+              assert set(sources)<=set(names)
+              assert not any(n.startswith(('local/','.venv/','.runbridge/','dist/','.git/')) for n in names)
+              metadata=BytesParser().parsebytes(archive.extractfile(names['PKG-INFO']).read())
+              assert metadata['Version']==version
+              for name,member in names.items():
+                  if name!='PKG-INFO':assert archive.extractfile(member).read()==(root/name).read_bytes(),name
+          # 使用全新环境安装实际 wheel，并在源码目录之外查询，避免 editable 导入遮蔽缺失文件。
+          check=Path(os.environ['RUNNER_TEMP'])/'runbridge-wheel-check';check.mkdir()
+          envpath=check/'.venv';python=envpath/'bin/python';cli=envpath/'bin'/data['distribution']
+          index=['-i','http://mirrors.aliyun.com/pypi/simple/','--trusted-host','mirrors.aliyun.com']
+          def run(args):subprocess.run(list(map(str,args)),cwd=check,check=True)
+          run(['uv','venv','--python','3.14',envpath])
+          run(['uv','pip','install','--python',python,wheel,*index])
+          probe=f"import importlib.metadata as m, importlib.util as u, {package} as p; assert p.__version__=={version!r}; assert m.version({data['distribution']!r})=={version!r}; assert 'site-packages' in p.__file__; print(p.__version__,p.__file__)"
+          run([python,'-I','-c',probe+"; assert not any(u.find_spec(x) for x in ['mcp','playwright','browscreen'])"])
+          run([cli,os.environ['CLI_COMMAND'],'--help'])
+          run(['uv','pip','install','--python',python,f"{wheel}[{os.environ['INSTALL_EXTRAS']}]",*index])
+          run([python,'-I','-c',probe])
+          run([cli,os.environ['CLI_COMMAND'],'--help'])
+          sample=root/'doc/reference/examples'/f"{os.environ['COMPONENT']}启动配置.en.yaml"
+          config=f"from pathlib import Path; from {package}.startup import {os.environ['STARTUP_MODEL']} as S; s=S.load(path=Path({str(sample)!r})); assert s.enrollment_token_file==Path({str(sample.parent/'.runbridge/enrollment.token')!r}); print('YAML paths verified')"
+          run([python,'-I','-c',config])
+          if package=='runbridge_hub':
+              run([python,'-I','-c',"import mcp; from importlib.resources import files; r=files('runbridge_hub')/'web'; assert all((r/p).is_file() for p in ['index.html','dashboard.css','dashboard.js','icons/LICENSE']); print('MCP and dashboard resources verified')"])
+          else:
+              run([python,'-I','-c',"import playwright,browscreen; print('Playwright and visual extras verified; no browser started')"])
+          manifest={**data,'workflow_ref':os.environ['WORKFLOW_REF'],'workflow_commit':os.environ['WORKFLOW_COMMIT'],'run_url':os.environ['RUN_URL'],'validation':'pytest -m not browser; Twine strict; fresh base/extra wheel install; CLI/config/resources'}
+          (root/'dist/release-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+          assets=[wheel,sdist,root/'dist/release-manifest.json']
+          (root/'dist/SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n' for p in assets))
+          changelog=(root/'doc/project/版本发布记录.md').read_text()
+          import re
+          match=re.search(r'^## '+re.escape(version)+r'[（(].*?(?=^## |\Z)',changelog,re.M|re.S)
+          changes='\n'.join(line for line in match.group(0).splitlines() if line.startswith('- ')) if match else ''
+          notes=f"# RunBridge {os.environ['COMPONENT']} {version}\n\n{changes}\n\n## 构建与下载\n\n- 源码提交：`{data['source_commit']}`，按原标签检出并构建。\n- 附件：`{data['wheel']}`、`{data['sdist']}`、`SHA256SUMS`、`release-manifest.json`。\n- 已验证非浏览器测试、Twine 严格检查、基础与 extras 安装、CLI、YAML 和运行资源；本次未执行真实浏览器业务验收。\n- 本工作流不上传 PyPI。\n\n[GitHub Actions 验证记录]({os.environ['RUN_URL']})\n"
+          (root/'dist/release-notes.md').write_text(notes)
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+              out.write(f"## {data['distribution']} {version}\n\nSource: `{data['source_commit']}`\n\n````text\n"+(root/'dist/SHA256SUMS').read_text()+"````\n\nOnly non-browser tests were selected. No PyPI upload.\n")
+          print('Verified wheel, source distribution, clean installation, config, and release files')
+          PY
+      - name: 保存已验证的构建产物
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: distribution-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
