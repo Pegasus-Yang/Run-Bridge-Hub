@@ -59,6 +59,23 @@ jobs:
           version: '0.13.5'
           python-version: '3.14'
           enable-cache: true
+      - name: 保留锁文件记录的包源
+        shell: bash
+        run: |
+          uv venv --python 3.14 .venv
+          .venv/bin/python - <<'PY'
+          import os,tomllib
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          lock=tomllib.loads(Path('uv.lock').read_text())
+          registries={p['source']['registry'] for p in lock['package'] if 'registry' in p['source']}
+          assert len(registries)==1,'当前 CI 预期锁文件记录单一包源'
+          index=registries.pop()
+          parsed=urlsplit(index)
+          assert parsed.scheme in {'http','https'} and parsed.hostname and not any(c.isspace() for c in index)
+          with open(os.environ['GITHUB_ENV'],'a') as output:output.write(f'UV_DEFAULT_INDEX={index}\n')
+          print(f'Preserve locked registry: {parsed.hostname}')
+          PY
       - name: 同步锁定的开发环境与 extras
         run: uv sync --locked --all-extras --python 3.14 -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
       - name: 核对包版本与发布标签

@@ -16,7 +16,7 @@ Definitions: [ci.yml](https://github.com/Pegasus-Yang/Run-Bridge-Hub/blob/main/.
 
 ## Checks and artifacts
 
-The runner uses Ubuntu 24.04, Python 3.14, and uv 0.13.5, with the root `.venv`, lockfile, all extras, and the project's Aliyun package index.
+The runner uses Ubuntu 24.04, Python 3.14, and uv 0.13.5, with the root `.venv`, lockfile, all extras, and the project's Aliyun installation arguments. Before strict `--locked` synchronization, the workflow restores the default registry recorded in `uv.lock` (the current tags use Tsinghua). This accounts for the author's local `UV_DEFAULT_INDEX` override without rewriting historical lockfiles or changing dependency versions.
 
 1. Match project metadata, package `__version__`, and the lockfile. A release tag must be `v` plus the package version, and its commit must match the checked-out source.
 2. Run `pytest tests -q -m 'not browser'`. Real browser tests require a dedicated environment and explicit opt-in; this workflow does not claim that acceptance.
