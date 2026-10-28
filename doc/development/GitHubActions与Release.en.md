@@ -4,6 +4,8 @@
 
 These workflows validate packages and publish GitHub Releases. PyPI is a separate destination: this configuration does not upload to PyPI or read a PyPI publishing token.
 
+For the complete sequence, artifact reuse, English metadata, and troubleshooting, see the [publishing workflow](发布流程与注意事项.en.md).
+
 ## Triggers
 
 | Event | Workflow | Result |

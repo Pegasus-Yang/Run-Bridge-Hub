@@ -4,6 +4,8 @@
 
 当前发行版本为 **0.9.3**，已发布至 [PyPI](https://pypi.org/project/runbridge-hub/0.9.3/)，Python 要求为 **3.14.x**。wheel 和源码包与 GitHub Release 的文件摘要一致。本手册说明构建、检查、Git 推送、授权上传与上传后核验；用户尚未授权后续发布时，完成本地检查并保留产物。
 
+完整顺序、复用发行文件、英文元数据与常见问题见[发布流程与注意事项](发布流程与注意事项.md)。
+
 ## 包名与入口
 
 | 项目 | 值 |
@@ -38,7 +40,7 @@ uv build --out-dir dist --no-sources -i http://mirrors.aliyun.com/pypi/simple/ -
 ## 3. 严格检查 PyPI 元数据与长描述
 
 ```bash
-uv tool run --from 'twine==7.0.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com twine check --strict dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
+uv tool run --from 'twine==7.0.0' --with 'readme-renderer[md]==46.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com twine check --strict dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
 
 两份文件均应通过。Twine 是独立检查工具，不加入本包的运行依赖。还需检查包内版本、`Requires-Python`、MIT 声明、可选依赖、入口和 Hub 的 HTML/CSS/JS、图标及第三方许可证。严格检查不证明外部链接已公开或账号有上传权限。
@@ -68,13 +70,19 @@ uv pip install --python "$rb_release_check/.venv/bin/python" "dist/runbridge_hub
 预演命令不上传文件，也不需要读取真实令牌：
 
 ```bash
-uv publish --dry-run --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
+env -u UV_PUBLISH_TOKEN -u UV_PUBLISH_USERNAME -u UV_PUBLISH_PASSWORD \
+  -u UV_PUBLISH_URL -u UV_PUBLISH_CHECK_URL -u UV_PUBLISH_INDEX \
+  uv publish --no-config --dry-run --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
+
+下面命令只清理发布子进程中其他仓库的发布配置，不修改父 shell。uv 读取 `UV_PUBLISH_TOKEN`，不会自动读取 `PYPI_TOKEN`。若现有令牌变量名是 `PYPI_TOKEN`，可在正式上传命令前加 `UV_PUBLISH_TOKEN="${PYPI_TOKEN:?请先在环境中配置 PYPI_TOKEN}"`，仅为本次进程映射；不要回显令牌或开启 shell 跟踪。
 
 正式上传只在取得用户授权、确认项目归属与文件摘要之后执行。操作者在发布进程环境配置 `UV_PUBLISH_TOKEN`，不把令牌写入命令参数、仓库或报告。PyPI 上传地址与阿里云下载镜像不是同一个入口。手动令牌发布使用：
 
 ```bash
-uv publish --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
+env -u UV_PUBLISH_USERNAME -u UV_PUBLISH_PASSWORD \
+  -u UV_PUBLISH_URL -u UV_PUBLISH_CHECK_URL -u UV_PUBLISH_INDEX \
+  uv publish --no-config --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
 
 预演成功不等于账号校验或上线成功；PyPI 同版本文件不能覆盖。已发布后发现问题时提升版本，不移动旧 tag 或改名重用旧文件。本仓库的 [GitHub Actions](GitHubActions与Release.md)仅验证与发布 GitHub Release，不自动上传 PyPI。

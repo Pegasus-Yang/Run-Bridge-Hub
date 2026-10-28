@@ -36,6 +36,7 @@
 
 | 阅读目的 | 文档 |
 | --- | --- |
+| 按顺序发布并排查常见问题 | [发布流程与注意事项](development/发布流程与注意事项.md) |
 | 自动验证与 GitHub Release | [GitHub Actions](development/GitHubActions与Release.md) |
 | 准备 PyPI 分发 | [PyPI 发布准备](development/PyPI发布准备.md) |
 | 参与贡献与授权 | [贡献指南](../CONTRIBUTING.md)、[MIT License](../LICENSE) |

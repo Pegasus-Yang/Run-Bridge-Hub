@@ -4,6 +4,8 @@
 
 Current release: **0.9.3**, available on [PyPI](https://pypi.org/project/runbridge-hub/0.9.3/), requiring Python **3.14.x**. The wheel and source distribution match the GitHub Release digests. This guide covers builds, checks, Git pushes, authorized uploads, and remote verification. Keep future release artifacts local until publication is authorized.
 
+For the complete sequence, artifact reuse, English metadata, and troubleshooting, see the [publishing workflow](发布流程与注意事项.en.md).
+
 ## Distribution and entry points
 
 | Item | Value |
@@ -38,7 +40,7 @@ Retain older `dist/` artifacts. Use the two exact filenames above, not `dist/*`.
 ## 3. Check metadata and rendered description
 
 ```bash
-uv tool run --from 'twine==7.0.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com twine check --strict dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
+uv tool run --from 'twine==7.0.0' --with 'readme-renderer[md]==46.0' -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com twine check --strict dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
 
 Both must pass. Twine is an isolated checking tool, not a runtime dependency. Also check versions, Requires-Python, MIT declarations, optional dependencies, entry points, and Hub HTML/CSS/JS, icons, and third-party license. Strict validation does not prove public link availability or upload permission.
@@ -68,13 +70,19 @@ Before upload, synchronize GitHub commits/tags with authorization. Verify public
 This dry run uploads nothing and needs no real token:
 
 ```bash
-uv publish --dry-run --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
+env -u UV_PUBLISH_TOKEN -u UV_PUBLISH_USERNAME -u UV_PUBLISH_PASSWORD \
+  -u UV_PUBLISH_URL -u UV_PUBLISH_CHECK_URL -u UV_PUBLISH_INDEX \
+  uv publish --no-config --dry-run --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
+
+The commands below remove publishing settings inherited from other registries only in the child process; they do not change the parent shell. uv reads `UV_PUBLISH_TOKEN`, not `PYPI_TOKEN`. If the existing token is named `PYPI_TOKEN`, prefix the upload command with `UV_PUBLISH_TOKEN="${PYPI_TOKEN:?Configure PYPI_TOKEN in the environment}"` to map it for that process only. Do not print the value or enable shell tracing.
 
 Upload only after user authorization, project ownership confirmation, and digest review. Configure `UV_PUBLISH_TOKEN` in the publishing process environment, never as a literal argument or in source/reports. The PyPI upload endpoint differs from the Aliyun download mirror. Manual token publication uses:
 
 ```bash
-uv publish --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
+env -u UV_PUBLISH_USERNAME -u UV_PUBLISH_PASSWORD \
+  -u UV_PUBLISH_URL -u UV_PUBLISH_CHECK_URL -u UV_PUBLISH_INDEX \
+  uv publish --no-config --trusted-publishing never --keyring-provider disabled --publish-url https://upload.pypi.org/legacy/ --check-url https://pypi.org/simple/ dist/runbridge_hub-0.9.3-py3-none-any.whl dist/runbridge_hub-0.9.3.tar.gz
 ```
 
 Dry-run success is not account validation or publication. PyPI files cannot be overwritten; fix an uploaded release with a new version and tag. The [GitHub Actions workflows](GitHubActions与Release.en.md) validate and publish GitHub Releases without uploading to PyPI.

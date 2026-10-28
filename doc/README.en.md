@@ -36,6 +36,7 @@ Each guide links to its Chinese counterpart. Dashboard labels, some CLI output, 
 
 | Goal | Resource |
 | --- | --- |
+| Follow the complete publishing workflow and pitfalls | [Release workflow](development/发布流程与注意事项.en.md) |
 | Validate and publish GitHub Releases | [GitHub Actions](development/GitHubActions与Release.en.md) |
 | Prepare a PyPI distribution | [PyPI release preparation](development/PyPI发布准备.en.md) |
 | Contribute and understand licensing | [Contributing](../CONTRIBUTING.en.md), [MIT License](../LICENSE) |
